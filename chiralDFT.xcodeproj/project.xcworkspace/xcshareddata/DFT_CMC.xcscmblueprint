@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "6b16cdc6-82e1-4888-8410-75914ea2ecf7++505",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "6b16cdc6-82e1-4888-8410-75914ea2ecf7++505" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "6b16cdc6-82e1-4888-8410-75914ea2ecf7++505" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D94B1D89-BD28-49FA-B3E8-367FB40D11EC",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "6b16cdc6-82e1-4888-8410-75914ea2ecf7++505" : "distruc-mtortora-chiraldft\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "DFT_CMC",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "DFT_CMC.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "svn+ssh:\/\/svn.code.sf.net\/p\/distruc\/mtortora-chiraldft",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "6b16cdc6-82e1-4888-8410-75914ea2ecf7++505"
+    }
+  ]
+}

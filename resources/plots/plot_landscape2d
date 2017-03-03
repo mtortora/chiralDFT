@@ -1,0 +1,35 @@
+#!/usr/local/bin/gnuplot -c
+
+if (ARGC != 2) {
+    print "\033[1;31mUsage is ", ARG0, " landscape pitch\033[0m"
+    exit
+}
+
+landscape_file = ARG1
+pitch_file     = ARG2
+
+stats landscape_file u 1:2 nooutput
+
+minX = STATS_min_x
+minY = STATS_min_y
+
+maxX = STATS_max_x
+maxY = STATS_max_y
+
+stats landscape_file u 3 nooutput
+
+minZ = STATS_min
+maxZ = STATS_max
+
+set xrange [minX:maxX]
+set yrange [minY:maxY]
+
+set cbrange[minZ:maxZ]
+
+set key off
+set pm3d map
+set style line 1 lc rgb "white" lt 2
+
+splot landscape_file u 1:2:3 w pm3d, pitch_file u 1:2:$0 ls 1 lw 2 w l
+
+pause -1

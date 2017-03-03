@@ -1,0 +1,38 @@
+#!/usr/local/bin/gnuplot -c
+
+if (ARGC != 1) {
+    print "\033[1;31mUsage is ", ARG0, " wireframe\033[0m"
+    exit
+}
+
+set object 1 rect from screen 0, 0, 0 to screen 1, 1, 0 behind
+set object 1 rect fc  rgb "white" fillstyle solid 1.0  border -1
+set view equal xyz
+set xyplane 0
+
+unset xtics
+unset ytics
+unset ztics
+
+unset border
+unset key
+unset colorbox
+
+set palette rgbformulae 8, 9, 7
+set style fill transparent solid 0.5 border
+set pm3d depthorder hidden3d linecolor rgb "#a0a0f0" linewidth 0.5
+
+file_wire = ARG1
+stats file_wire u 3 nooutput
+
+N_POINTS = STATS_records
+
+set xrange[STATS_min:STATS_max]
+set yrange[STATS_min:STATS_max]
+set zrange[STATS_min:STATS_max]
+
+set title sprintf("%i-point wireframe", N_POINTS)
+
+splot file_wire w pm3d
+
+pause -1

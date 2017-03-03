@@ -1,0 +1,486 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9C512E1E1C22B91B0099AE31 /* OdfOptimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */; };
+		9C512E1F1C22B91B0099AE31 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E151C22B91B0099AE31 /* main.cpp */; };
+		9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */; };
+		9C512E2B1C22C1450099AE31 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C512E2A1C22C1450099AE31 /* libmpi.dylib */; };
+		9C53C3161C41809D002CE4D0 /* BentCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08561C3AA0B00020EBAB /* BentCore.cpp */; };
+		9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08571C3AA0B00020EBAB /* Helix.cpp */; };
+		9CA2FA571C3F7D6E00062002 /* TwistedCuboid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */; };
+		9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */; };
+		9CFA13201C25AFCE00FA22D1 /* SimManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */; };
+		B70E9E021CCA5DC4008A770B /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B70E9E011CCA5DC4008A770B /* libRAPID.a */; };
+		B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B714FE051E5C8809009C274C /* TwistedPentagon.cpp */; };
+		B733A8201D40C46C001575D7 /* BTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B733A81F1D40C46C001575D7 /* BTree.cpp */; };
+		B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */; };
+		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
+		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
+		B7FE4D621DE84C98005AD9E2 /* PatchyRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		9C512DF21C22B8090099AE31 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		9C0D08561C3AA0B00020EBAB /* BentCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BentCore.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C0D08571C3AA0B00020EBAB /* Helix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Helix.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedCuboid.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C0D085D1C3AA0BE0020EBAB /* BentCore.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BentCore.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C0D085E1C3AA0BE0020EBAB /* Helix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Helix.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C0D085F1C3AA0BE0020EBAB /* TwistedCuboid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedCuboid.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C19E7F51CA1B8260006F51A /* landscape.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape.py; sourceTree = "<group>"; usesTabs = 1; };
+		9C19E7F61CA1B8260006F51A /* plot_landscape2d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape2d; sourceTree = "<group>"; };
+		9C19E7F71CA1B8260006F51A /* plot_landscape3d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape3d; sourceTree = "<group>"; };
+		9C19E7F91CA1B8300006F51A /* post_process.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = post_process.py; sourceTree = "<group>"; usesTabs = 1; wrapsLines = 1; };
+		9C19E7FA1CA1B8300006F51A /* pre_process.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = pre_process.py; sourceTree = "<group>"; usesTabs = 1; };
+		9C29FD8A1CB5A42600A2248A /* display_traj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_traj; sourceTree = "<group>"; };
+		9C3EFD861CAB971600AA832F /* conf2chimera.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = conf2chimera.py; sourceTree = "<group>"; usesTabs = 1; };
+		9C512DF41C22B8090099AE31 /* chiralDFT */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chiralDFT; sourceTree = BUILT_PRODUCTS_DIR; };
+		9C512E031C22B91B0099AE31 /* OdfOptimiser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OdfOptimiser.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E041C22B91B0099AE31 /* globals.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = globals.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E051C22B91B0099AE31 /* Legendre.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Legendre.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E061C22B91B0099AE31 /* MCIntegrator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MCIntegrator.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E0D1C22B91B0099AE31 /* arcus_b.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = arcus_b.sh; sourceTree = "<group>"; };
+		9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OdfOptimiser.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E151C22B91B0099AE31 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCIntegrator.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9C512E2A1C22C1450099AE31 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
+		9C512E2C1C22C14F0099AE31 /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = /usr/local/lib/libmpi_cxx.dylib; sourceTree = "<absolute>"; };
+		9C8497061C22F06C000D61DC /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; usesTabs = 1; };
+		9C85585F1C4066E500FADF19 /* archer.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = archer.sh; sourceTree = "<group>"; };
+		9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = conf_generator.py; sourceTree = "<group>"; usesTabs = 1; };
+		9CB457EA1C27A0F500323F66 /* SimManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SimManager.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9CC252C61C7DD0B6000A2685 /* DNADuplex.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DNADuplex.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DNADuplex.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		9CF9AA671CB0AA260061836F /* prune_surfaces.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = prune_surfaces.py; sourceTree = "<group>"; };
+		9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimManager.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B70E9DFF1CCA58F8008A770B /* display_mesh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_mesh; sourceTree = "<group>"; };
+		B70E9E001CCA58F8008A770B /* display_wireframe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_wireframe; sourceTree = "<group>"; };
+		B70E9E011CCA5DC4008A770B /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
+		B714FE051E5C8809009C274C /* TwistedPentagon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedPentagon.cpp; sourceTree = "<group>"; };
+		B714FE071E5C8814009C274C /* TwistedPentagon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedPentagon.hpp; sourceTree = "<group>"; };
+		B733A81D1D3FB5D4001575D7 /* aggregate.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = aggregate.py; sourceTree = "<group>"; };
+		B733A81F1D40C46C001575D7 /* BTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BTree.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B733A8211D40C47A001575D7 /* BTree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BTree.hpp; path = include/BTree.hpp; sourceTree = SOURCE_ROOT; usesTabs = 0; };
+		B7379D3F1D4271B400AE6AC8 /* BNode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BNode.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B794CCF81E5F992500DEAE25 /* build_hierarchy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = build_hierarchy.py; sourceTree = "<group>"; };
+		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
+		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7F693DE1D4715E7007E6CBD /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7F693E01D4715F3007E6CBD /* Utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InteractionFactory.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InteractionFactory.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchyRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PatchyRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9C512DF11C22B8090099AE31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9C512E2B1C22C1450099AE31 /* libmpi.dylib in Frameworks */,
+				B70E9E021CCA5DC4008A770B /* libRAPID.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9C0AA75F1CAAF89F0018D180 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				B794CCF81E5F992500DEAE25 /* build_hierarchy.py */,
+				9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */,
+				9C3EFD861CAB971600AA832F /* conf2chimera.py */,
+				B70E9DFF1CCA58F8008A770B /* display_mesh */,
+				9C29FD8A1CB5A42600A2248A /* display_traj */,
+				B70E9E001CCA58F8008A770B /* display_wireframe */,
+				9CF9AA671CB0AA260061836F /* prune_surfaces.py */,
+			);
+			path = utils;
+			sourceTree = "<group>";
+		};
+		9C0D08551C3AA0B00020EBAB /* Particles */ = {
+			isa = PBXGroup;
+			children = (
+				9C0D08561C3AA0B00020EBAB /* BentCore.cpp */,
+				9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */,
+				9C0D08571C3AA0B00020EBAB /* Helix.cpp */,
+				B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */,
+				B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */,
+				9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */,
+				B714FE051E5C8809009C274C /* TwistedPentagon.cpp */,
+			);
+			path = Particles;
+			sourceTree = "<group>";
+		};
+		9C0D085C1C3AA0BE0020EBAB /* Particles */ = {
+			isa = PBXGroup;
+			children = (
+				9C0D085D1C3AA0BE0020EBAB /* BentCore.hpp */,
+				9CC252C61C7DD0B6000A2685 /* DNADuplex.hpp */,
+				9C0D085E1C3AA0BE0020EBAB /* Helix.hpp */,
+				B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */,
+				B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */,
+				9C0D085F1C3AA0BE0020EBAB /* TwistedCuboid.hpp */,
+				B714FE071E5C8814009C274C /* TwistedPentagon.hpp */,
+			);
+			path = Particles;
+			sourceTree = "<group>";
+		};
+		9C19E7F21CA1B8260006F51A /* plots */ = {
+			isa = PBXGroup;
+			children = (
+				9C19E7F51CA1B8260006F51A /* landscape.py */,
+				B7DD70461DB9271B00CF9EAC /* landscape_slice.py */,
+				9C19E7F61CA1B8260006F51A /* plot_landscape2d */,
+				9C19E7F71CA1B8260006F51A /* plot_landscape3d */,
+			);
+			path = plots;
+			sourceTree = "<group>";
+		};
+		9C19E7F81CA1B8300006F51A /* processing */ = {
+			isa = PBXGroup;
+			children = (
+				B733A81D1D3FB5D4001575D7 /* aggregate.py */,
+				9C19E7F91CA1B8300006F51A /* post_process.py */,
+				9C19E7FA1CA1B8300006F51A /* pre_process.py */,
+			);
+			path = processing;
+			sourceTree = "<group>";
+		};
+		9C512DEB1C22B8090099AE31 = {
+			isa = PBXGroup;
+			children = (
+				9C8497061C22F06C000D61DC /* makefile */,
+				9C512DFE1C22B91B0099AE31 /* include */,
+				9C512E111C22B91B0099AE31 /* src */,
+				9C512E0C1C22B91B0099AE31 /* resources */,
+				9C512DF51C22B8090099AE31 /* Products */,
+				9C512E291C22BC0B0099AE31 /* lib */,
+			);
+			sourceTree = "<group>";
+		};
+		9C512DF51C22B8090099AE31 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9C512DF41C22B8090099AE31 /* chiralDFT */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9C512DFE1C22B91B0099AE31 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */,
+				B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */,
+				B7379D3F1D4271B400AE6AC8 /* BNode.hpp */,
+				B733A8211D40C47A001575D7 /* BTree.hpp */,
+				9C512E041C22B91B0099AE31 /* globals.hpp */,
+				B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */,
+				9C512E051C22B91B0099AE31 /* Legendre.hpp */,
+				9C512E061C22B91B0099AE31 /* MCIntegrator.hpp */,
+				9C512E031C22B91B0099AE31 /* OdfOptimiser.hpp */,
+				9CB457EA1C27A0F500323F66 /* SimManager.hpp */,
+				B7F693E01D4715F3007E6CBD /* Utils.hpp */,
+				9C0D085C1C3AA0BE0020EBAB /* Particles */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		9C512E0C1C22B91B0099AE31 /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				9C85585F1C4066E500FADF19 /* archer.sh */,
+				9C512E0D1C22B91B0099AE31 /* arcus_b.sh */,
+				9C19E7F21CA1B8260006F51A /* plots */,
+				9C19E7F81CA1B8300006F51A /* processing */,
+				9C0AA75F1CAAF89F0018D180 /* utils */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+		9C512E111C22B91B0099AE31 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B733A81F1D40C46C001575D7 /* BTree.cpp */,
+				B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */,
+				9C512E151C22B91B0099AE31 /* main.cpp */,
+				9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */,
+				9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */,
+				9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */,
+				B7F693DE1D4715E7007E6CBD /* Utils.cpp */,
+				9C0D08551C3AA0B00020EBAB /* Particles */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		9C512E291C22BC0B0099AE31 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				9C512E2C1C22C14F0099AE31 /* libmpi_cxx.dylib */,
+				9C512E2A1C22C1450099AE31 /* libmpi.dylib */,
+				B70E9E011CCA5DC4008A770B /* libRAPID.a */,
+			);
+			name = lib;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9C512DF31C22B8090099AE31 /* chiralDFT */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9C512DFB1C22B8090099AE31 /* Build configuration list for PBXNativeTarget "chiralDFT" */;
+			buildPhases = (
+				9C512DF01C22B8090099AE31 /* Sources */,
+				9C512DF11C22B8090099AE31 /* Frameworks */,
+				9C512DF21C22B8090099AE31 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = chiralDFT;
+			productName = MPI_CMC_v3;
+			productReference = 9C512DF41C22B8090099AE31 /* chiralDFT */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9C512DEC1C22B8090099AE31 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = "Maxime Tortora";
+				TargetAttributes = {
+					9C512DF31C22B8090099AE31 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = 9C512DEF1C22B8090099AE31 /* Build configuration list for PBXProject "chiralDFT" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 9C512DEB1C22B8090099AE31;
+			productRefGroup = 9C512DF51C22B8090099AE31 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9C512DF31C22B8090099AE31 /* chiralDFT */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9C512DF01C22B8090099AE31 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */,
+				B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */,
+				9C53C3161C41809D002CE4D0 /* BentCore.cpp in Sources */,
+				9CA2FA571C3F7D6E00062002 /* TwistedCuboid.cpp in Sources */,
+				9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */,
+				9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */,
+				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
+				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,
+				B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */,
+				B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */,
+				9C512E1F1C22B91B0099AE31 /* main.cpp in Sources */,
+				B7FE4D621DE84C98005AD9E2 /* PatchyRod.cpp in Sources */,
+				9CFA13201C25AFCE00FA22D1 /* SimManager.cpp in Sources */,
+				9C512E1E1C22B91B0099AE31 /* OdfOptimiser.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9C512DF91C22B8090099AE31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		9C512DFA1C22B8090099AE31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		9C512DFC1C22B8090099AE31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					$SRCROOT/include,
+					$SRCROOT/lib,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					$SRCROOT/lib,
+					"$(PROJECT_DIR)/lib",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D__DPATH__=$SRCROOT/data",
+					"-D__VERSION_MAJOR__=2",
+					"-D__VERSION_MINOR__=2",
+					"-D__XCODE__",
+				);
+				PRODUCT_NAME = chiralDFT;
+			};
+			name = Debug;
+		};
+		9C512DFD1C22B8090099AE31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					$SRCROOT/include,
+					$SRCROOT/lib,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					$SRCROOT/lib,
+					"$(PROJECT_DIR)/lib",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-D__DPATH__=$SRCROOT/data",
+					"-D__VERSION_MAJOR__=2",
+					"-D__VERSION_MINOR__=2",
+					"-D__XCODE__",
+				);
+				PRODUCT_NAME = chiralDFT;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9C512DEF1C22B8090099AE31 /* Build configuration list for PBXProject "chiralDFT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C512DF91C22B8090099AE31 /* Debug */,
+				9C512DFA1C22B8090099AE31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9C512DFB1C22B8090099AE31 /* Build configuration list for PBXNativeTarget "chiralDFT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C512DFC1C22B8090099AE31 /* Debug */,
+				9C512DFD1C22B8090099AE31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9C512DEC1C22B8090099AE31 /* Project object */;
+}

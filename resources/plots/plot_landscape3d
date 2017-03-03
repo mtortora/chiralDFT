@@ -1,0 +1,22 @@
+#!/usr/local/bin/gnuplot -c
+
+if (ARGC != 1) {
+    print "\033[1;31mUsage is ", ARG0, " landscape\033[0m"
+    exit
+}
+
+landscape_file = ARG1
+
+stats landscape_file u 1:2 nooutput
+
+minX = STATS_min_x
+minY = STATS_min_y
+maxX = STATS_max_x
+maxY = STATS_max_y
+
+set xrange[minX:maxX]
+set yrange[minY:maxY]
+
+splot landscape_file u 1:2:3 w pm3d
+
+pause -1

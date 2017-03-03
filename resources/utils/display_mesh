@@ -1,0 +1,33 @@
+#!/usr/local/bin/gnuplot -c
+
+if (ARGC != 1) {
+    print "\033[1;31mUsage is ", ARG0, " mesh\033[0m"
+    exit
+}
+
+set object 1 rect from screen 0, 0, 0 to screen 1, 1, 0 behind
+set object 1 rect fc  rgb "white" fillstyle solid 1.0  border -1
+set view equal xyz
+set xyplane 0
+
+unset xtics
+unset ytics
+unset ztics
+
+unset border
+unset key
+
+file_mesh = ARG1
+stats file_mesh u 3 nooutput
+
+N_TRI    = STATS_blocks - 1
+
+set xrange[STATS_min:STATS_max]
+set yrange[STATS_min:STATS_max]
+set zrange[STATS_min:STATS_max]
+
+set title sprintf("%i-triangle mesh", N_TRI)
+
+splot file_mesh w l lc rgb "#a0a0f0" lw 0.5
+
+pause -1

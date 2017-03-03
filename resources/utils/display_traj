@@ -1,0 +1,42 @@
+#!/usr/local/bin/gnuplot -c
+
+if (ARGC != 1) {
+    print "\033[1;31mUsage is ", ARG0, " trajectory\033[0m"
+    exit
+}
+
+set view equal xyz
+set xyplane 0
+
+file_traj = ARG1
+
+stats file_traj u 3 nooutput
+
+N_CONF = STATS_blocks - 1
+N_REC  = STATS_records
+N_NUCL = N_REC / (2*N_CONF)
+
+idx_c  = 0
+idx_s  = 1
+
+mint   = STATS_min
+maxt   = STATS_max
+
+set xrange[mint:maxt]
+set yrange[mint:maxt]
+set zrange[mint:maxt]
+
+splot file_traj i idx_c every ::idx_s w l title "backbone"
+
+while (idx_c < N_CONF) {
+    stats file_traj index idx_c u 3
+
+    set title sprintf("Configuration %i of %i", idx_c+1, N_CONF)
+
+    replot
+
+    idx_c = idx_c+1
+    idx_s = 0
+
+    pause -1
+}
