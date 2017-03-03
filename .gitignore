@@ -1,0 +1,13 @@
+# XCode
+chiralDFT.xcodeproj/project.xcworkspace/
+chiralDFT.xcodeproj/xcuserdata/
+
+# Generated files
+bin/
+data/
+build/
+lib/libRAPID.a
+lib/rapid2/RAPID.o
+lib/rapid2/build.o
+lib/rapid2/collide.o
+lib/rapid2/overlap.o
