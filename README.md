@@ -6,7 +6,7 @@ It includes a high-performance and versatile implementation of the algorithm int
 
 An implementation of the [RAPID](http://dx.doi.org/10.1145/237170.237244) collision detection library, developed by Manocha et al., is also provided for efficient overlap queries between sets of complex triangle meshes in hard-body simulations.
 
-It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex particle models interacting through finite-range potentials.
+It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex particle models.
 
 
 
