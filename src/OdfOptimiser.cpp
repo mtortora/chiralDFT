@@ -382,25 +382,24 @@ void OdfOptimiser<ParticleType>::ODFGrid(const MatrixXd& E_in, ArrayXd* P_out, A
     ArrayXd  Mu_loc(N_STEPS_ETA);
     ArrayXd  F_loc (N_STEPS_ETA);
     ArrayXd  S_loc (N_STEPS_ETA);
-    ArrayXd  S_tmp (N_STEPS_THETA);
     
     MatrixXd Psi_grd(N_STEPS_THETA, N_STEPS_ETA);
     
     for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
     {
-        double   eta    = this->Eta_grid(idx_eta);
+        double   eta         = this->Eta_grid(idx_eta);
         
-        ArrayXd  Psi    = SequentialOptimiser(eta, E_in, mode);
-        Vector2d Thermo = ODFThermo(eta, Psi, E_in, mode);
+        ArrayXd  Psi         = SequentialOptimiser(eta, E_in, mode);
+        Vector2d Thermo      = ODFThermo(eta, Psi, E_in, mode);
         
         // Equilibrium pressure, chemical potential & free energy
-        P_loc(idx_eta)  = Thermo(0);
-        Mu_loc(idx_eta) = Thermo(1);
-        F_loc(idx_eta)  = FreeEnergy(eta, Psi, E_in, mode);
+        P_loc(idx_eta)       = Thermo(0);
+        Mu_loc(idx_eta)      = Thermo(1);
+        F_loc(idx_eta)       = FreeEnergy(eta, Psi, E_in, mode);
         
         // Nematic order parameter & density-dependent ODF
-        S_tmp  = (3.*SQR(cos(Theta_grid)) - 1.) / 2.;
-        S_tmp *= SQR(2.*PI)*D_THETA * sin(Theta_grid) * Psi;
+        ArrayXd S_tmp        = (3.*SQR(cos(Theta_grid)) - 1.) / 2.;
+        S_tmp               *= SQR(2.*PI)*D_THETA * sin(Theta_grid) * Psi;
         
         S_loc(idx_eta)       = S_tmp.sum();
         Psi_grd.col(idx_eta) = Psi;

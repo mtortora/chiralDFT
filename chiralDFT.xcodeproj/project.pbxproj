@@ -61,7 +61,6 @@
 		9C512E151C22B91B0099AE31 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCIntegrator.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E2A1C22C1450099AE31 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
-		9C512E2C1C22C14F0099AE31 /* libmpi_cxx.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi_cxx.dylib; path = /usr/local/lib/libmpi_cxx.dylib; sourceTree = "<absolute>"; };
 		9C8497061C22F06C000D61DC /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9C85585F1C4066E500FADF19 /* archer.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = archer.sh; sourceTree = "<group>"; };
 		9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = conf_generator.py; sourceTree = "<group>"; usesTabs = 1; };
@@ -238,7 +237,6 @@
 		9C512E291C22BC0B0099AE31 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				9C512E2C1C22C14F0099AE31 /* libmpi_cxx.dylib */,
 				9C512E2A1C22C1450099AE31 /* libmpi.dylib */,
 				B70E9E011CCA5DC4008A770B /* libRAPID.a */,
 			);

@@ -70,6 +70,7 @@ nrun: cleandat all
 # Distributed run
 submit: cleandat all
 	@qsub $(TARGETDIR)/arcus_b.sh
+#	@qsub $(TARGETDIR)/archer.sh
 
 # Copy scripts from resources directory to target directory, substituting file paths
 resources: directories
@@ -78,6 +79,7 @@ resources: directories
 # Make directories
 directories: FORCE
 	@echo -e "\033[1;37m*****************\033[0m"
+	@mkdir -p $(DATDIR)
 	@mkdir -p $(BUILDDIR)
 	@mkdir -p $(TARGETDIR)
 
