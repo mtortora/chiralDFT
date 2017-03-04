@@ -45,6 +45,7 @@ TwistedPentagon::TwistedPentagon()
 	V0           = SQR(L_PNT_)*L_Z_ * 5./4. * tan(54. * PI/180.);
 	V_EFF        = V0;
 	
+	// Allocate RAPID mesh
 	Mesh         = new RAPID_model;
 }
 

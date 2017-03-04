@@ -118,8 +118,8 @@ if os.path.isdir(path_data):
 	if os.path.isfile(path_ref):
 		with open(path_ref, mode="r") as file_ref:
 			V0   = float(file_ref.readline().split()[2])
-			Veff = V0
-		excluded_ref = np.genfromtxt(path_ref, skip_header=1)
+			Veff = float(file_ref.readline().split()[2])
+		excluded_ref = np.genfromtxt(path_ref, skip_header=2)
 
 		if   len(excluded_ref) == param_dict["N_STEPS_THETA"]: mode = "odf_full"
 		elif len(excluded_ref) == param_dict["N_L"]:           mode = "odf_legendre"
