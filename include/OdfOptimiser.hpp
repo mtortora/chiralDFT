@@ -27,7 +27,7 @@ public:
     void EnergyGrid(const Eigen::MatrixXd&, Eigen::ArrayXd*, int);
     void ODFGrid(const Eigen::MatrixXd&,
                  Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*,
-                 Eigen::MatrixXd*, int);
+                 Eigen::ArrayXXd*, int);
 };
 
 #endif

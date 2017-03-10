@@ -21,7 +21,7 @@ TARGET      := chiraldft
 
 # Version control
 VSN_MAJ     := 3
-VSN_MIN     := 2
+VSN_MIN     := 3
 
 # Directories - sources, includes, objects, binaries, data and resources
 SRCDIR      := src
@@ -65,7 +65,7 @@ run: cleandat all
 
 # Background run
 nrun: cleandat all
-	@nohup mpirun -np 8 $(TARGETDIR)/$(TARGET) > $(TARGETDIR)/log.$(DATEXT)&
+	@nohup mpirun -np 8 $(TARGETDIR)/$(TARGET) > $(DATDIR)/log.$(DATEXT)&
 
 # Distributed run
 submit: cleandat all
@@ -91,7 +91,7 @@ clean:
 # Clean data
 cleandat:
 	@echo -e "\033[1;31mCleaning data files...\033[0m"
-	@$(RM) -f *.$(DATEXT) $(DATDIR)/*.$(DATEXT) $(DATDIR)/*.$(PRCEXT) $(TARGETDIR)/*.$(DATEXT)
+	@$(RM) -f *.$(DATEXT) $(DATDIR)/*.$(DATEXT) $(DATDIR)/*.$(PRCEXT) $(DATDIR)/*.ply $(TARGETDIR)/*.$(DATEXT)
 
 # Full clean, data, objects and binaries
 cleaner: cleandat clean cleanlib

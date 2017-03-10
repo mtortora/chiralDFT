@@ -82,7 +82,7 @@ DNADuplex::DNADuplex()
             OFFSET_       = (PREFACTOR_    / EXCL_S1_);
             DH_OFFSET_    = (DH_PREFACTOR_ / R_STAR_) * exp(MINUS_KAPPA_*R_STAR_);
             
-            R_CUT_        = 10. * LAMBDA_;
+            R_CUT_        = 5. * LAMBDA_;
         }
         
         else throw std::runtime_error("Unsupported electrostatics model for DNA");

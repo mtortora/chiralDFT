@@ -25,7 +25,7 @@ TwistedCuboid::TwistedCuboid()
 
     // Cuboid parameters
     N_X_         = 10;
-    N_Y_         = 10;
+    N_Y_         = 20;
     N_Z_         = 100;
 
     L_X_         = 1.  * SIGMA_R;
@@ -69,18 +69,18 @@ void TwistedCuboid::Build(int mpi_rank)
     ArrayXd   Alpha_grid = VectorXd::LinSpaced(N_Z_,  0.,      TWIST_);
 
     // Generate helical backbone
-    Backbone.row(0) = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
-    Backbone.row(1) = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
-    Backbone.row(2) = Z_grid;
+    Backbone.row(0)      = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
+    Backbone.row(1)      = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
+    Backbone.row(2)      = Z_grid;
     
     // Generate first edges
-    Edge_x.row(0) = X_grid;
-    Edge_x.row(1) = VectorXd::Constant(N_X_, -L_Y_/2.);
-    Edge_x.row(2) = VectorXd::Constant(N_X_, -L_Z_/2.);
+    Edge_x.row(0)        = X_grid;
+    Edge_x.row(1)        = VectorXd::Constant(N_X_, -L_Y_/2.);
+    Edge_x.row(2)        = VectorXd::Constant(N_X_, -L_Z_/2.);
 
-    Edge_y.row(0) = VectorXd::Constant(N_Y_, -L_X_/2.);
-    Edge_y.row(1) = Y_grid;
-    Edge_y.row(2) = VectorXd::Constant(N_Y_, -L_Z_/2.);
+    Edge_y.row(0)        = VectorXd::Constant(N_Y_, -L_X_/2.);
+    Edge_y.row(1)        = Y_grid;
+    Edge_y.row(2)        = VectorXd::Constant(N_Y_, -L_Z_/2.);
 
     // Generate transversal faces
     for ( uint idx_f = 0; idx_f < 2; ++idx_f )
@@ -140,6 +140,8 @@ void TwistedCuboid::Build(int mpi_rank)
     // Build the RAPID_model mesh for RAPID collision detection
     if ( USE_RAPID )
     {
+        uint num_tri;
+
         BHull       = BHierarchy;
         
         // Bounding volume parameters
@@ -150,7 +152,9 @@ void TwistedCuboid::Build(int mpi_rank)
         BHull->l_ch = BHull->l_zh;
         BHull->l_rc = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
         
-        Tesselate(Wireframe, mpi_rank);
+        Tesselate(Wireframe, &num_tri);
+        
+        if ( mpi_rank == MPI_MASTER ) SaveMesh(Wireframe, num_tri);
     }
 
     // Build bounding volume hierarchy
@@ -168,7 +172,7 @@ void TwistedCuboid::Build(int mpi_rank)
 // ============================
 /* Wireframe triangulation for RAPID interference tests */
 // ============================
-void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint mpi_rank)
+void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
 {
     uint   ctr_tri(0);
 
@@ -176,53 +180,32 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint mpi_rank)
     double p2[3];
     double p3[3];
     double p4[3];
-
-    std::string DATA_PATH;
-    
-    // Redirect slave thread output to /dev/null
-    if ( mpi_rank == MPI_MASTER ) DATA_PATH = __DATA_PATH;
-    else                          DATA_PATH = "/dev/null";
-    
-    // Tesselated mesh file can be displayed by the resources/utils/display_mesh script
-    std::ofstream file_mesh(DATA_PATH + "/mesh.out");
     
     Mesh->BeginModel();
 
     // Tesselate (XZ) faces
-    for ( uint idx_f = 0; idx_f < 2; ++idx_f )
+    for ( uint idx_fy = 0; idx_fy < 2; ++idx_fy )
     {
         for ( uint idx_z = 0; idx_z < N_Z_-1; ++idx_z )
         {
             for ( uint idx_x = 0; idx_x < N_X_-1; ++idx_x )
             {
-                p1[0] = Wireframe(0, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
-                p1[1] = Wireframe(1, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
-                p1[2] = Wireframe(2, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
+                p1[0] = Wireframe(0, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
+                p1[1] = Wireframe(1, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
+                p1[2] = Wireframe(2, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
                 
-                p2[0] = Wireframe(0, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
-                p2[1] = Wireframe(1, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
-                p2[2] = Wireframe(2, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
+                p2[0] = Wireframe(0, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
+                p2[1] = Wireframe(1, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
+                p2[2] = Wireframe(2, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
             
-                p3[0] = Wireframe(0, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
-                p3[1] = Wireframe(1, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
-                p3[2] = Wireframe(2, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
+                p3[0] = Wireframe(0, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
+                p3[1] = Wireframe(1, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
+                p3[2] = Wireframe(2, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
                 
-                p4[0] = Wireframe(0, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
-                p4[1] = Wireframe(1, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
-                p4[2] = Wireframe(2, idx_f * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
+                p4[0] = Wireframe(0, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
+                p4[1] = Wireframe(1, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
+                p4[2] = Wireframe(2, idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
                 
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << std::endl << std::endl;
-                
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << std::endl << std::endl;
-
                 Mesh->AddTri(p1, p2, p3, ctr_tri);
                 Mesh->AddTri(p4, p2, p3, ctr_tri+1);
                 
@@ -232,39 +215,27 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint mpi_rank)
     }
 
     // Tesselate (YZ) faces
-    for ( uint idx_f = 0; idx_f < 2; ++idx_f )
+    for ( uint idx_fx = 0; idx_fx < 2; ++idx_fx )
     {
         for ( uint idx_z = 0; idx_z < N_Z_-1; ++idx_z )
         {
             for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
             {
-                p1[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
-                p1[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
-                p1[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
+                p1[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
+                p1[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
+                p1[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
                 
-                p2[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
-                p2[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
-                p2[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
+                p2[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
+                p2[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
+                p2[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
                 
-                p3[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
-                p3[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
-                p3[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
+                p3[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
+                p3[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
+                p3[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
                 
-                p4[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
-                p4[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
-                p4[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_f * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
-                
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << std::endl << std::endl;
-                
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << std::endl << std::endl;
+                p4[0] = Wireframe(0, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
+                p4[1] = Wireframe(1, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
+                p4[2] = Wireframe(2, 2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
                 
                 Mesh->AddTri(p1, p2, p3, ctr_tri);
                 Mesh->AddTri(p4, p2, p3, ctr_tri+1);
@@ -275,39 +246,27 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint mpi_rank)
     }
 
     // Tesselate (XY) faces
-    for ( uint idx_f = 0; idx_f < 2; ++idx_f )
+    for ( uint idx_fz = 0; idx_fz < 2; ++idx_fz )
     {
         for ( uint idx_x = 0; idx_x < N_X_-1; ++idx_x )
         {
             for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
             {
-                p1[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
-                p1[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
-                p1[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
+                p1[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
+                p1[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
+                p1[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
                 
-                p2[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
-                p2[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
-                p2[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
+                p2[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
+                p2[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
+                p2[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
                 
-                p3[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
-                p3[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
-                p3[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
+                p3[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
+                p3[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
+                p3[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
                 
-                p4[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
-                p4[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
-                p4[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
-                
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p1[0] << " " << p1[1] << " " << p1[2] << std::endl;
-                file_mesh << std::endl << std::endl;
-                
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << p2[0] << " " << p2[1] << " " << p2[2] << std::endl;
-                file_mesh << p3[0] << " " << p3[1] << " " << p3[2] << std::endl;
-                file_mesh << p4[0] << " " << p4[1] << " " << p4[2] << std::endl;
-                file_mesh << std::endl << std::endl;
+                p4[0] = Wireframe(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
+                p4[1] = Wireframe(1, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
+                p4[2] = Wireframe(2, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
                 
                 Mesh->AddTri(p1, p2, p3, ctr_tri);
                 Mesh->AddTri(p4, p2, p3, ctr_tri+1);
@@ -318,9 +277,10 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint mpi_rank)
     }
 
     Mesh->EndModel();
-    file_mesh.close();
     
     if ( id_ == 1 ) LogTxt("Running with %d-triangle tesselated mesh", ctr_tri);
+    
+    *num_tri = ctr_tri;
 }
 
 // ============================
@@ -331,14 +291,14 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
     std::string   DATA_PATH = __DATA_PATH;
     std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
     
-    // Save xz-faces
-    for ( uint idx_fx = 0; idx_fx < 2; ++idx_fx )
+    // Save (XZ) faces
+    for ( uint idx_fy = 0; idx_fy < 2; ++idx_fy )
     {
         for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
         {
             for ( uint idx_x = 0; idx_x < N_X_; ++idx_x )
             {
-                uint idx        = idx_fx*N_X_*N_Z_ + idx_z*N_X_ + idx_x;
+                uint idx        = idx_fy*N_X_*N_Z_ + idx_z*N_X_ + idx_x;
                 Vector3d Vertex = Wireframe.col(idx);
                 
                 file_wireframe << Vertex.adjoint() << std::endl;
@@ -350,14 +310,14 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
         file_wireframe << std::endl;
     }
     
-    // Save yz-faces
-    for ( uint idx_fy = 0; idx_fy < 2; ++idx_fy )
+    // Save (YZ) faces
+    for ( uint idx_fx = 0; idx_fx < 2; ++idx_fx )
     {
         for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
         {
             for ( uint idx_y = 0; idx_y < N_Y_; ++idx_y )
             {
-                uint idx        = 2*N_X_*N_Z_ + idx_fy*N_Y_*N_Z_ + idx_z*N_Y_ + idx_y;
+                uint idx        = 2*N_X_*N_Z_ + idx_fx*N_Y_*N_Z_ + idx_z*N_Y_ + idx_y;
                 Vector3d Vertex = Wireframe.col(idx);
                 
                 file_wireframe << Vertex.adjoint() << std::endl;
@@ -369,7 +329,7 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
         file_wireframe << std::endl;
     }
     
-    // Save xy-faces
+    // Save (XY) faces
     for ( uint idx_fz = 0; idx_fz < 2; ++idx_fz )
     {
         for ( uint idx_x = 0; idx_x < N_X_; ++idx_x )
@@ -389,4 +349,100 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
     }
     
     file_wireframe.close();
+}
+
+// ============================
+/* Save mesh to PLY file */
+// ============================
+void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
+{
+    uint ctr_tri(0);
+    
+    std::string   DATA_PATH = __DATA_PATH;
+    std::ofstream file_mesh(DATA_PATH + "/mesh.ply");
+    
+    file_mesh << "ply" << std::endl;
+    file_mesh << "format ascii 1.0" << std::endl;
+    
+    // Vertex and face formatting
+    file_mesh << "element vertex "  << 2*num_tri << std::endl;
+    file_mesh << "property float x" << std::endl;
+    file_mesh << "property float y" << std::endl;
+    file_mesh << "property float z" << std::endl;
+    
+    file_mesh << "element face "  << num_tri << std::endl;
+    file_mesh << "property list uchar int vertex_index" << std::endl;
+    
+    file_mesh << "end_header" << std::endl;
+    
+    // Build (XZ) vertex list
+    for ( uint idx_fy = 0; idx_fy < 2; ++idx_fy )
+    {
+        for ( uint idx_z = 0; idx_z < N_Z_-1; ++idx_z )
+        {
+            for ( uint idx_x = 0; idx_x < N_X_-1; ++idx_x )
+            {
+                Vector3d Vtx1 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
+                Vector3d Vtx2 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
+                Vector3d Vtx3 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
+                Vector3d Vtx4 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
+
+                file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
+                file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
+                file_mesh << Vtx3(0) << " " << Vtx3(1) << " " << Vtx3(2) << std::endl;
+                file_mesh << Vtx4(0) << " " << Vtx4(1) << " " << Vtx4(2) << std::endl;
+            }
+        }
+    }
+
+    // Build (YZ) vertex list
+    for ( uint idx_fx = 0; idx_fx < 2; ++idx_fx )
+    {
+        for ( uint idx_z = 0; idx_z < N_Z_-1; ++idx_z )
+        {
+            for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
+            {
+                Vector3d Vtx1 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
+                Vector3d Vtx2 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
+                Vector3d Vtx3 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
+                Vector3d Vtx4 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
+                
+                file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
+                file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
+                file_mesh << Vtx3(0) << " " << Vtx3(1) << " " << Vtx3(2) << std::endl;
+                file_mesh << Vtx4(0) << " " << Vtx4(1) << " " << Vtx4(2) << std::endl;
+            }
+        }
+    }
+    
+    // Build (XY) vertex list
+    for ( uint idx_fz = 0; idx_fz < 2; ++idx_fz )
+    {
+        for ( uint idx_x = 0; idx_x < N_X_-1; ++idx_x )
+        {
+            for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
+            {
+                Vector3d Vtx1 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
+                Vector3d Vtx2 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
+                Vector3d Vtx3 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
+                Vector3d Vtx4 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
+                
+                file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
+                file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
+                file_mesh << Vtx3(0) << " " << Vtx3(1) << " " << Vtx3(2) << std::endl;
+                file_mesh << Vtx4(0) << " " << Vtx4(1) << " " << Vtx4(2) << std::endl;
+            }
+        }
+    }
+    
+    // Build face list
+    while ( ctr_tri < num_tri )
+    {
+        file_mesh << 3 << " " << 2*ctr_tri   << " " << 2*ctr_tri+1 << " " << 2*ctr_tri+2 << std::endl;
+        file_mesh << 3 << " " << 2*ctr_tri+3 << " " << 2*ctr_tri+1 << " " << 2*ctr_tri+2 << std::endl;
+        
+        ctr_tri += 2;
+    }
+    
+    file_mesh.close();
 }

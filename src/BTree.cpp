@@ -172,11 +172,11 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     Node->l_rc            = r_max + range/2.;
     Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min) / 2.;
 
-    // Box center in the parent frame
+    // Box center expressed in parent frame
     Node->Center_p       << (x_max+x_min)/2., (y_max+y_min)/2., (z_max+z_min)/2.;
     Node->Center_p        = Node->Orientation_p * Node->Center_p + Center_of_mass;
     
-    // Vertices in the node frame
+    // Vertices expressed in child frame
     MatrixXd Vertices_new = Node->Orientation_p.transpose() * Vertices_in;
 
     nodes_built++;

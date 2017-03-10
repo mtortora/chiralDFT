@@ -69,7 +69,6 @@
 		9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DNADuplex.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9CF9AA671CB0AA260061836F /* prune_surfaces.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = prune_surfaces.py; sourceTree = "<group>"; };
 		9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimManager.cpp; sourceTree = "<group>"; usesTabs = 0; };
-		B70E9DFF1CCA58F8008A770B /* display_mesh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_mesh; sourceTree = "<group>"; };
 		B70E9E001CCA58F8008A770B /* display_wireframe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_wireframe; sourceTree = "<group>"; };
 		B70E9E011CCA5DC4008A770B /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
 		B714FE051E5C8809009C274C /* TwistedPentagon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedPentagon.cpp; sourceTree = "<group>"; };
@@ -111,7 +110,6 @@
 				B794CCF81E5F992500DEAE25 /* build_hierarchy.py */,
 				9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */,
 				9C3EFD861CAB971600AA832F /* conf2chimera.py */,
-				B70E9DFF1CCA58F8008A770B /* display_mesh */,
 				9C29FD8A1CB5A42600A2248A /* display_traj */,
 				B70E9E001CCA58F8008A770B /* display_wireframe */,
 				9CF9AA671CB0AA260061836F /* prune_surfaces.py */,

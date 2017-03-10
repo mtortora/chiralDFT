@@ -20,6 +20,7 @@ private:
     double P_BCK_;
     
     void SaveWireframe(const Eigen::Matrix3Xd&);
+    void SaveMesh     (const Eigen::Matrix3Xd&, uint);
     
 protected:
     double R_THRESHOLD_;
@@ -30,7 +31,7 @@ public:
     RAPID_model* Mesh;
 
     void Build(int) override;
-    void Tesselate(const Eigen::Matrix3Xd&, uint);
+    void Tesselate(const Eigen::Matrix3Xd&, uint*);
 
 #if (USE_RAPID)
     void Parse(std::mt19937_64&) override {}

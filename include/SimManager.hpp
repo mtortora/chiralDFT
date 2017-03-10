@@ -24,6 +24,9 @@ private:
 public:
     SimManager(int, int);
     
+    Eigen::ArrayXd  V_r;
+    Eigen::ArrayXd  V_l;
+
     Eigen::ArrayXd  Qp_min;
     Eigen::ArrayXd  Qp_inf;
     Eigen::ArrayXd  Qp_sup;
@@ -37,11 +40,6 @@ public:
     Eigen::ArrayXd  P_res;
     Eigen::ArrayXd  Mu_res;
     Eigen::ArrayXd  S_res;
-    Eigen::ArrayXd  V_res;
-    
-    Eigen::ArrayXd  Kt;
-    Eigen::ArrayXd  Kt_inf;
-    Eigen::ArrayXd  Kt_sup;
     
     Eigen::ArrayXd  K1;
     Eigen::ArrayXd  K1_inf;
@@ -55,7 +53,9 @@ public:
     Eigen::ArrayXd  K3_inf;
     Eigen::ArrayXd  K3_sup;
     
-    Eigen::ArrayXd  F_res;
+    Eigen::ArrayXd  Kt;
+    Eigen::ArrayXd  Kt_inf;
+    Eigen::ArrayXd  Kt_sup;
 
     Eigen::MatrixXd E_ref;
     Eigen::MatrixXd F_lnd;

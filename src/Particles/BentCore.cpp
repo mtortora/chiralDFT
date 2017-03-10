@@ -27,7 +27,7 @@ BentCore::BentCore()
     N_S_        = 11;
     N_RES_      = 20;
     
-    R_HARD_     = 1.   * SIGMA_R;
+    D_HARD_     = 1.   * SIGMA_R;
     L_CTR_      = 10.  * SIGMA_R;
     CHI_        = 130. * PI/180.;
     
@@ -40,11 +40,11 @@ BentCore::BentCore()
     L_Y_        = 0.;
     L_Z_        = 2.*R_BTC_ * sin(GAMMA_);
     
-    R_INTEG     = 2.*R_BTC_ * sqrt(SQR(sin(GAMMA_)/GAMMA_) - sin(2.*GAMMA_)/GAMMA_ + 1.) + R_HARD_;
+    R_INTEG     = 2.*R_BTC_ * sqrt(SQR(sin(GAMMA_)/GAMMA_) - sin(2.*GAMMA_)/GAMMA_ + 1.) + D_HARD_;
     V_INTEG     = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
     
-    V0          = PI/6.*CUB(R_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/R_HARD_ - CUB(d_cc/R_HARD_)));
-    V_EFF       = PI/6.*CUB(R_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/R_HARD_ - CUB(d_cc/R_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*R_HARD_))) * asin(d_cc/(2.*R_HARD_))));
+    V0          = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)));
+    V_EFF       = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*D_HARD_))) * asin(d_cc/(2.*D_HARD_))));
 }
 
 // ============================
@@ -90,16 +90,16 @@ void BentCore::Build(int mpi_rank)
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi = Phi_grid(idx_phi);
-                uint   idx = idx_theta*N_RES_ + idx_phi;
+                double phi         = Phi_grid(idx_phi);
+                uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += R_HARD_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += R_HARD_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += R_HARD_/2. * cos(theta);
+                Wireframe(0, idx) += D_HARD_/2. * sin(theta)*cos(phi);
+                Wireframe(1, idx) += D_HARD_/2. * sin(theta)*sin(phi);
+                Wireframe(2, idx) += D_HARD_/2. * cos(theta);
                 
-                file_wireframe << Wireframe.col(idx).adjoint() << std::endl;
+                file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }
             
             file_wireframe << std::endl;
@@ -117,7 +117,7 @@ void BentCore::Build(int mpi_rank)
     BHierarchy->AllocateForest(1);
     
     BTree* Tree = &BHierarchy->Forest[0];
-    BHierarchy->RecursiveBuild(Tree, Backbone_, R_HARD_);
+    BHierarchy->RecursiveBuild(Tree, Backbone_, D_HARD_);
     
     if ( id_ == 1 ) BHierarchy->PrintBuildInfo();
 

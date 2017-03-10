@@ -19,7 +19,7 @@ private:
     double L_Z_;
     
 protected:
-    double R_HARD_;
+    double D_HARD_;
     
 public:
     BentCore();

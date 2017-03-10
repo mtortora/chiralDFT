@@ -133,13 +133,13 @@ void OdfOptimiser<ParticleType>::BinodalAnalysis(const MatrixXd& E_in, int mode)
         binodal_nem = Binodals(1);
         
         LogCya("Relaxed Newton-Raphson method converged in %u steps", ctr_nr);
-        LogTxt("I/N coexistence range: [%.4f%%, %.4f%%]", binodal_iso, binodal_nem);
+        LogTxt("I/N coexistence range: [%.4f%%, %.4f%%]", 100.*binodal_iso, 100.*binodal_nem);
         
         eta_min = binodal_nem;
     }
     
     else {LogRed("Unable to work out I/N spinodals");}
-    LogTxt("Simulation range: [%.4f%%, %.4f%%]", eta_min, eta_max);
+    LogTxt("Simulation range: [%.4f%%, %.4f%%]", 100.*eta_min, 100.*eta_max);
     
     this->Eta_grid = ArrayXd::LinSpaced(N_STEPS_ETA, eta_min, eta_max);
 }
@@ -373,7 +373,7 @@ void OdfOptimiser<ParticleType>::EnergyGrid(const MatrixXd& E_in, ArrayXd* F_out
 // ============================
 template<class ParticleType>
 void OdfOptimiser<ParticleType>::ODFGrid(const MatrixXd& E_in, ArrayXd* P_out, ArrayXd* Mu_out,
-                                         ArrayXd* F_out, ArrayXd* S_out, MatrixXd* Psi_out, int mode)
+                                         ArrayXd* F_out, ArrayXd* S_out, ArrayXXd* Psi_out, int mode)
 {
     LogTxt("------------");
     LogGre("Computing equilibrium ODFs and nematic order parameters...");
@@ -383,7 +383,7 @@ void OdfOptimiser<ParticleType>::ODFGrid(const MatrixXd& E_in, ArrayXd* P_out, A
     ArrayXd  F_loc (N_STEPS_ETA);
     ArrayXd  S_loc (N_STEPS_ETA);
     
-    MatrixXd Psi_grd(N_STEPS_THETA, N_STEPS_ETA);
+    ArrayXXd Psi_grd(N_STEPS_ETA, N_STEPS_THETA);
     
     for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
     {
@@ -398,11 +398,11 @@ void OdfOptimiser<ParticleType>::ODFGrid(const MatrixXd& E_in, ArrayXd* P_out, A
         F_loc(idx_eta)       = FreeEnergy(eta, Psi, E_in, mode);
         
         // Nematic order parameter & density-dependent ODF
-        ArrayXd S_tmp        = (3.*SQR(cos(Theta_grid)) - 1.) / 2.;
-        S_tmp               *= SQR(2.*PI)*D_THETA * sin(Theta_grid) * Psi;
+        ArrayXd S_dummy      = (3.*SQR(cos(Theta_grid)) - 1.) / 2.;
+        S_dummy             *= SQR(2.*PI)*D_THETA * sin(Theta_grid) * Psi;
         
-        S_loc(idx_eta)       = S_tmp.sum();
-        Psi_grd.col(idx_eta) = Psi;
+        S_loc(idx_eta)       = S_dummy.sum();
+        Psi_grd.row(idx_eta) = Psi;
     }
     
     *P_out   = P_loc;

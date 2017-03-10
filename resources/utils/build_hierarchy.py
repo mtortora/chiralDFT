@@ -8,31 +8,57 @@ import numpy as np
 
 
 # Input/output
-if len(sys.argv) != 5:
-	print("\033[1;31mUsage is %s trajectory topology idx_conf num_box\033[0m" % sys.argv[0])
+if len(sys.argv) != 6:
+	print("\033[1;31mUsage is %s trajectory topology idx_conf num_box c_salt\033[0m" % sys.argv[0])
 	sys.exit()
 
+path_conf    = os.path.splitext(sys.argv[1])[0] + ".cnf"
+path_box     = os.path.splitext(sys.argv[1])[0] + ".cmm"
+
+path_traj    = sys.argv[1]
+path_top     = sys.argv[2]
+
+file_traj    = open(path_traj, mode="r")
+file_top     = open(path_top,  mode="r")
+file_conf    = open(path_conf, mode="w")
+file_output  = open(path_box,  mode="w")
+
+idx_conf     = int(sys.argv[3])
+num_box      = int(sys.argv[4])
+
+C_SALT       = float(sys.argv[5])
+
+T_ABS        = 300.
+EPS_WATER    = 80.
 
 POS_MM_BACK1 = -0.3400
 POS_MM_BACK2 = 0.3408
 POS_BACK     = -0.4
 POS_BASE     = 0.4
 
-padding      = 0.
-radius       = 0.1
+n_star       = 3.
 
+lambda_      = 0.002334412 * np.sqrt(T_ABS) * np.sqrt(EPS_WATER) / np.sqrt(C_SALT)
+
+print("Debye length: %f nm at T = %f K" % (lambda_/1.1739845, T_ABS))
+
+padding      = 3. * lambda_
+#padding      = lambda_ * 2. * n_star**2/(n_star+1.)
+
+radius       = 0.1
 color        = 'r="0.2734" g="0.5078" b="0.7031"'
 
 
+# Principal component analysis (PCA) of n x 3 matrix points_in
 def PCA(points_in):
-	# Translate center-of-mass back to the origin
 	points_out  = np.asarray(points_in)
 	cm          = np.mean(points_out, axis=0)
 	
+	# Translate center-of-mass to the origin
 	points_out -= cm
 	points_out  = points_out.T
 	
-	# Perform Principal Component Analysis of the configuration by singular-value decomposition
+	# Perform PCA of the configuration by singular-value decomposition
 	P, D, Q     = np.linalg.svd(points_out)
 	
 	# P is the rotation matrix expressing the covariance matrix eigenvectors in the reference frame
@@ -44,21 +70,7 @@ def PCA(points_in):
 	return cm, rot, points_out
 
 
-path_conf    = os.path.splitext(sys.argv[1])[0] + ".cnf"
-path_box     = os.path.splitext(sys.argv[1])[0] + ".cmm"
-
-path_traj    = sys.argv[1]
-path_top     = sys.argv[2]
-
-
-file_traj    = open(path_traj, mode="r")
-file_top     = open(path_top,  mode="r")
-file_conf    = open(path_conf, mode="w")
-file_output  = open(path_box,  mode="w")
-
-idx_conf     = int(sys.argv[3])
-num_box      = int(sys.argv[4])
-
+# Parse trajectory file
 conf_counter = 0
 
 file_top.readline()
@@ -113,6 +125,7 @@ if conf_counter < idx_conf:
 	sys.exit()
 
 
+# Draw bounding boxes
 cm, rot, points = PCA(cm_pos)
 
 boxes           = np.zeros([num_box, 3, 8])
@@ -123,6 +136,7 @@ file_output.write('<marker_set name="marker set 1">\n')
 for idx_box, box in enumerate(boxes):
 	vtx_box = []
 
+	# Attribute points to boxes non-recursively
 	for point in points.T:
 		if subdiv[idx_box] <= point[2] <= subdiv[idx_box+1]: vtx_box.append(point)
 
@@ -168,6 +182,7 @@ for idx_box, box in enumerate(boxes):
 	box       = np.dot(rot_box, box) + cm_box[:, np.newaxis]
 	box       = np.dot(rot,     box) #+ cm    [:, np.newaxis]
 
+	# Points to be linked by box edges
 	links     = [[0,1], [1,2], [2,3], [3,0], [4,5], [5,6], [6,7], [7,4], [0,4], [1,5], [2,6], [3,7]]
 
 	for idx_marker, marker in enumerate(box.T):

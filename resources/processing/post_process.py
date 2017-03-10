@@ -95,8 +95,8 @@ if os.path.isdir(path_data):
 
 		K.append(data_res)
 			 
-	k2, kt     = K
-	q          = kt/k2
+	k2, kt      = K
+	q           = kt/k2
 	
 	q_ave       = np.mean(q, axis=1)
 	q_min       = np.min (q, axis=1)
@@ -187,10 +187,19 @@ def ODFOnsagerOptimiser(E):
 	S_res      = np.zeros(n_steps_eta)
 	P_res      = np.zeros(n_steps_eta)
 	F_tot      = np.zeros(n_steps_eta)
+	D_f        = np.zeros(n_steps_eta)
 	
-	path_p      = path_data + '/p.res'
-	path_s      = path_data + '/order_param.res'
-	path_psi    = path_data + '/psi.res'
+	v_r        = np.genfromtxt(path_data + '/vr.out')[:, 1]
+	v_l        = np.genfromtxt(path_data + '/vl.out')[:, 1]
+
+	path_p     = path_data + '/p.res'
+	path_psi   = path_data + '/psi.res'
+	path_f     = path_data + '/delta_f.res'
+	path_s     = path_data + '/order_param.res'
+
+	# Average over symmetrical component of the chiral potential
+	d_v        = ((v_r - v_l) - (v_r - v_l)[::-1]) / 2.
+	d_v[theta_grid > np.pi/2.] = d_v[theta_grid < np.pi/2.][::-1]
 	
 	with  open(path_psi, mode="wb") as file_psi:
 		for idx_eta, eta in enumerate(eta_grid):
@@ -233,6 +242,12 @@ def ODFOnsagerOptimiser(E):
 			s_tmp         *= (2*np.pi)**2 * d_theta * np.sin(theta_grid) * psi
 			
 			S_res[idx_eta] = s_tmp.sum()
+			
+			# Thermodynamically-averaged potential
+			d_tmp          = -n_dens * d_v
+			d_tmp         *= (2*np.pi)**2 * d_theta * np.sin(theta_grid) * psi
+			
+			D_f[idx_eta]   = d_tmp.sum()
 
 			# Save ODF
 			data_odf       = np.zeros([len(theta_grid), 3])
@@ -244,23 +259,26 @@ def ODFOnsagerOptimiser(E):
 			np.savetxt(file_psi, data_odf)
 			file_psi.write(bytes('\n', "UTF-8"))
 
-	data_p      = np.zeros([n_steps_eta, 2])
-	data_p[:,0] = eta_grid
-	data_p[:,1] = P_res
+	data_p       = np.zeros([n_steps_eta, 2])
+	data_p[:, 0] = eta_grid
+	data_p[:, 1] = P_res
 	
-	data_s      = np.zeros([n_steps_eta, 2])
-	data_s[:,0] = eta_grid
-	data_s[:,1] = S_res
-	
-	path_p      = path_data + '/p.res'
-	path_s      = path_data + '/order_param.res'
-	
+	data_s       = np.zeros([n_steps_eta, 2])
+	data_s[:, 0] = eta_grid
+	data_s[:, 1] = S_res
+
+	data_f       = np.zeros([n_steps_eta, 2])
+	data_f[:, 0] = eta_grid
+	data_f[:, 1] = D_f
+
 	np.savetxt(path_p, data_p)
 	np.savetxt(path_s, data_s)
+	np.savetxt(path_f, data_f)
 
 	print("\033[1;32mODFs printed to '%s'\033[0m" % path_psi)
-	print("\033[1;32mOsmotic pressure printed to '%s'\033[0m" % path_p)
 	print("\033[1;32mOrder parameter printed to '%s'\033[0m" % path_s)
+	print("\033[1;32mOsmotic pressure printed to '%s'\033[0m" % path_p)
+	print("\033[1;32mAveraged chiral potential printed to '%s'\033[0m" % path_f)
 	
 	return F_tot,
 
@@ -333,11 +351,11 @@ def ODFLegendreOptimiser(data_q, reference_run):
 				S_res[idx_eta] = s_tmp.sum()
 
 		if reference_run:
-			data_res      = np.zeros([n_steps_eta, 2])
-			data_res[:,0] = eta_grid
-			data_res[:,1] = S_res
+			data_res       = np.zeros([n_steps_eta, 2])
+			data_res[:, 0] = eta_grid
+			data_res[:, 1] = S_res
 
-			path_order    = path_data + '/order_param.res'
+			path_order     = path_data + '/order_param.res'
 			np.savetxt(path_order, data_res)
 
 			print("\033[1;32mOrder parameter printed to '%s'\033[0m" % path_order)
@@ -374,67 +392,67 @@ if param_dict["MODE"] == 0:
 		
 		F_tot[idx_q,...] = ODFLegendreOptimiser(data_q, False)
 
-	F_res             = np.mean(F_tot, axis=1)
+	F_res              = np.mean(F_tot, axis=1)
 
-	idx_min           = np.argmin(F_tot, axis=0)
-	q_eq              = q_grid[idx_min]
+	idx_min            = np.argmin(F_tot, axis=0)
+	q_eq               = q_grid[idx_min]
 
 	# Work out K constants as successive differentials of the free energy
-	dq                = np.diff(q_grid)[0]
+	dq                 = np.diff(q_grid)[0]
 
-	Kt                = np.diff(F_tot, axis=0, n=1) / dq
-	K2                = np.diff(F_tot, axis=0, n=2) / dq**2
+	Kt                 = np.diff(F_tot, axis=0, n=1) / dq
+	K2                 = np.diff(F_tot, axis=0, n=2) / dq**2
 
 	# Average Kt, K2 over all q's
-	Kt                = np.mean(Kt, axis=0)
-	K2                = np.mean(K2, axis=0)
+	Kt                 = np.mean(Kt, axis=0)
+	K2                 = np.mean(K2, axis=0)
 
-	q_res             = np.mean(q_eq, axis=0)
-	q_inf             = np.min (q_eq, axis=0)
-	q_sup             = np.max (q_eq, axis=0)
+	q_res              = np.mean(q_eq, axis=0)
+	q_inf              = np.min (q_eq, axis=0)
+	q_sup              = np.max (q_eq, axis=0)
 
-	Kt_res            = np.mean(Kt, axis=0)
-	Kt_inf            = np.min (Kt, axis=0)
-	Kt_sup            = np.max (Kt, axis=0)
+	Kt_res             = np.mean(Kt, axis=0)
+	Kt_inf             = np.min (Kt, axis=0)
+	Kt_sup             = np.max (Kt, axis=0)
 
-	K2_res            = np.mean(K2, axis=0)
-	K2_inf            = np.min (K2, axis=0)
-	K2_sup            = np.max (K2, axis=0)
+	K2_res             = np.mean(K2, axis=0)
+	K2_inf             = np.min (K2, axis=0)
+	K2_sup             = np.max (K2, axis=0)
 
 	# Format data for 3d visualisation
-	X, Y              = np.meshgrid(eta_grid, q_grid)
-	Z                 = F_res - F_ref
+	X, Y               = np.meshgrid(eta_grid, q_grid)
+	Z                  = F_res - F_ref
 
-	data_f_res        = np.zeros([n_steps_eta, n_steps_q, 3])
-	data_q_res        = np.zeros([n_steps_eta, 4])
+	data_f_res         = np.zeros([n_steps_eta, n_steps_q, 3])
+	data_q_res         = np.zeros([n_steps_eta, 4])
 
-	data_kt_res       = np.zeros([n_steps_eta, 4])
-	data_k2_res       = np.zeros([n_steps_eta, 4])
+	data_kt_res        = np.zeros([n_steps_eta, 4])
+	data_k2_res        = np.zeros([n_steps_eta, 4])
 
-	data_f_res[...,0] = X.T
-	data_f_res[...,1] = Y.T
-	data_f_res[...,2] = Z.T
+	data_f_res[..., 0] = X.T
+	data_f_res[..., 1] = Y.T
+	data_f_res[..., 2] = Z.T
 
-	data_q_res[:,0]   = eta_grid
-	data_q_res[:,1]   = q_res
-	data_q_res[:,2]   = q_inf
-	data_q_res[:,3]   = q_sup
+	data_q_res[:, 0]   = eta_grid
+	data_q_res[:, 1]   = q_res
+	data_q_res[:, 2]   = q_inf
+	data_q_res[:, 3]   = q_sup
 
-	data_kt_res[:,0]  = eta_grid
-	data_kt_res[:,1]  = Kt_res
-	data_kt_res[:,2]  = Kt_inf
-	data_kt_res[:,3]  = Kt_sup
+	data_kt_res[:, 0]  = eta_grid
+	data_kt_res[:, 1]  = Kt_res
+	data_kt_res[:, 2]  = Kt_inf
+	data_kt_res[:, 3]  = Kt_sup
 
-	data_k2_res[:,0]  = eta_grid
-	data_k2_res[:,1]  = K2_res
-	data_k2_res[:,2]  = K2_inf
-	data_k2_res[:,3]  = K2_sup
+	data_k2_res[:, 0]  = eta_grid
+	data_k2_res[:, 1]  = K2_res
+	data_k2_res[:, 2]  = K2_inf
+	data_k2_res[:, 3]  = K2_sup
 
-	path_landscape    = path_data + '/energy_landscape.res'
-	path_q            = path_data + '/qmin.res'
+	path_landscape     = path_data + '/energy_landscape.res'
+	path_q             = path_data + '/qmin.res'
 
-	path_kt           = path_data + '/kt.res'
-	path_k2           = path_data + '/k2.res'
+	path_kt            = path_data + '/kt.res'
+	path_k2            = path_data + '/k2.res'
 
 	with open(path_landscape, mode="wb") as file_landscape:
 		for data_slice in data_f_res:

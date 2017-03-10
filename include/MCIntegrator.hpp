@@ -29,6 +29,8 @@ private:
     Eigen::ArrayXd  Y_grid_;
     Eigen::ArrayXd  Z_grid_;
 
+    Eigen::ArrayXd Theta_grid_;
+    
     Eigen::ArrayXi  Exc_grid_;
 
     std::mt19937_64 rng_engine_;
@@ -50,11 +52,11 @@ public:
     Eigen::ArrayXd Eta_grid;
 
     void MCInit(int, int, int);
-    void FullIntegrator(Eigen::MatrixXd*);
-    void LegendreIntegrator(double, Eigen::MatrixXd*);
-    void FrankIntegrator(const Eigen::MatrixXd&,
-                         Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*,
-                         Eigen::ArrayXd*);
+    void FullIntegrator    (Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    void LegendreIntegrator(Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    void LegendreIntegrator(Eigen::MatrixXd*, double);
+    void FrankIntegrator(const Eigen::ArrayXXd&,
+                         Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
 };
 
 #endif

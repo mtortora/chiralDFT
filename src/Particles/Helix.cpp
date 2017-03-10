@@ -27,7 +27,7 @@ Helix::Helix()
     N_S_        = 500;
     N_RES_      = 20;
     
-    R_HARD_     = 3.3   * SIGMA_R;
+    D_HARD_     = 6.6   * SIGMA_R;
     L_CTR_      = 880.  * SIGMA_R;
     
     R_HLX_      = 146.  * SIGMA_R;
@@ -39,11 +39,11 @@ Helix::Helix()
     
     double d_cc = sqrt(SQR(2.*R_HLX_*sin(PI/P_HLX_ * L_Z_/(N_S_-1.))) + SQR(L_Z_/(N_S_-1.)));
     
-    R_INTEG     = sqrt(SQR(L_Z_+R_HARD_) + SQR(2.*R_HLX_+R_HARD_));
+    R_INTEG     = sqrt(SQR(L_Z_+D_HARD_) + SQR(2.*R_HLX_+D_HARD_));
     V_INTEG     = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
     
-    V0          = PI/6.*CUB(R_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/R_HARD_ - CUB(d_cc/R_HARD_)));
-    V_EFF       = PI/6.*CUB(R_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/R_HARD_ - CUB(d_cc/R_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*R_HARD_))) * asin(d_cc/(2.*R_HARD_))));
+    V0          = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)));
+    V_EFF       = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*D_HARD_))) * asin(d_cc/(2.*D_HARD_))));
 }
 
 // ============================
@@ -89,16 +89,16 @@ void Helix::Build(int mpi_rank)
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi = Phi_grid(idx_phi);
-                uint   idx = idx_theta*N_RES_ + idx_phi;
+                double phi         = Phi_grid(idx_phi);
+                uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += R_HARD_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += R_HARD_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += R_HARD_/2. * cos(theta);
+                Wireframe(0, idx) += D_HARD_/2. * sin(theta)*cos(phi);
+                Wireframe(1, idx) += D_HARD_/2. * sin(theta)*sin(phi);
+                Wireframe(2, idx) += D_HARD_/2. * cos(theta);
                 
-                file_wireframe << Wireframe.col(idx).adjoint() << std::endl;
+                file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }
             
             file_wireframe << std::endl;
@@ -116,7 +116,7 @@ void Helix::Build(int mpi_rank)
     BHierarchy->AllocateForest(1);
     
     BTree* Tree = &BHierarchy->Forest[0];
-    BHierarchy->RecursiveBuild(Tree, Backbone_, R_HARD_);
+    BHierarchy->RecursiveBuild(Tree, Backbone_, D_HARD_);
     
     if ( id_ == 1 ) BHierarchy->PrintBuildInfo();
     

@@ -180,38 +180,53 @@ double InteractionFactory<PatchyRod>::MayerInteraction(const Vector3d& R_cm,
 {
     double energy(0.);
     
-    if ( USE_DH )
+    // Backbone-backbone WCA repulsion
+    MatrixXd Backbone1 = Particle1->Orientation * Particle1->Backbone;
+    MatrixXd Backbone2 = Particle2->Orientation * Particle2->Backbone;
+    
+    for ( uint idx_vtx1 = 0; idx_vtx1 < Backbone1.cols() && energy < E_CUT_; ++idx_vtx1 )
     {
-        // Assume pairwise-additivity for site-site electrostatic interactions
-        MatrixXd Patches1 = Particle1->Orientation * Particle1->Patches;
-        MatrixXd Patches2 = Particle2->Orientation * Particle2->Patches;
-        
-        for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < E_CUT_; ++idx_vtx1 )
+        for ( uint idx_vtx2 = 0; idx_vtx2 < Backbone2.cols() && energy < E_CUT_; ++idx_vtx2 )
         {
-            for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < E_CUT_; ++idx_vtx2 )
-            {
-                Vector3d R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
-                double   norm  = R_sep.norm();
-                
-                energy        += DebyeHuckel_(norm);
-            }
+            Vector3d R_sep = R_cm + Backbone2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
+            double   norm  = R_sep.norm();
+            
+            energy        += RepulsiveWCA_(norm);
         }
     }
     
     if ( energy < E_CUT_ )
     {
-        // Backbone-backbone WCA repulsion
-        MatrixXd Backbone1 = Particle1->Orientation * Particle1->Backbone;
-        MatrixXd Backbone2 = Particle2->Orientation * Particle2->Backbone;
+        MatrixXd Patches1 = Particle1->Orientation * Particle1->Patches;
+        MatrixXd Patches2 = Particle2->Orientation * Particle2->Patches;
         
-        for ( uint idx_vtx1 = 0; idx_vtx1 < Backbone1.cols() && energy < E_CUT_; ++idx_vtx1 )
+        if ( USE_DH )
         {
-            for ( uint idx_vtx2 = 0; idx_vtx2 < Backbone2.cols() && energy < E_CUT_; ++idx_vtx2 )
+            // Assume pairwise-additivity for site-site electrostatic interactions
+            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < E_CUT_; ++idx_vtx1 )
             {
-                Vector3d R_sep = R_cm + Backbone2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
-                double   norm  = R_sep.norm();
-                
-                energy        += RepulsiveWCA_(norm);
+                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < E_CUT_; ++idx_vtx2 )
+                {
+                    Vector3d R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
+                    double   norm  = R_sep.norm();
+                    
+                    energy        += DebyeHuckel_(norm);
+                }
+            }
+        }
+        
+        else
+        {
+            // Hard spherical thread of radius SIGMA_R
+            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < E_CUT_; ++idx_vtx1 )
+            {
+                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < E_CUT_; ++idx_vtx2 )
+                {
+                    Vector3d R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
+                    double   norm  = R_sep.norm();
+                    
+                    if ( norm < SIGMA_R ) return 1.;
+                }
             }
         }
     }

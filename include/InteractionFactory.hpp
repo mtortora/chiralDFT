@@ -22,7 +22,7 @@ struct InteractionFactory<BentCore>: public BaseInteraction<InteractionFactory<B
 {
     double MayerInteraction(const Eigen::Vector3d&, BentCore*, BentCore*);
     
-    inline double PairInteraction(double r) {return (r < R_HARD_);}
+    inline double PairInteraction(double r) {return (r < D_HARD_);}
 };
 
 
@@ -54,7 +54,7 @@ struct InteractionFactory<Helix>: public BaseInteraction<InteractionFactory<Heli
 {
     double MayerInteraction(const Eigen::Vector3d&, Helix*, Helix*);
     
-    inline double PairInteraction(double r) {return (r < R_HARD_);}
+    inline double PairInteraction(double r) {return (r < D_HARD_);}
 };
 
 

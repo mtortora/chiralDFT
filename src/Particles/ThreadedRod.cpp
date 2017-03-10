@@ -19,7 +19,7 @@ using namespace Eigen;
 ThreadedRod::ThreadedRod()
 {
     // Bounding tree properties
-    BHierarchy->SetTreeProperties(0);
+    BHierarchy->SetTreeProperties(2);
 
     N_DELTA_L = 2;
 
@@ -29,13 +29,11 @@ ThreadedRod::ThreadedRod()
     
     D_HARD_   = 10. * SIGMA_R;
 
-    L_Z_      = 20. * D_HARD_;
-    P_PATCH_  = 20. * D_HARD_;
+    L_Z_      = 10. * D_HARD_;
+    P_PATCH_  = 10. * D_HARD_;
     
     V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
     V_EFF     = V0;
-
-    R_CUT_    = 0.;
     
     // Debye-Huckel parameters
     if ( USE_DH )
@@ -50,9 +48,9 @@ ThreadedRod::ThreadedRod()
         
         else if ( MODE_DH == DH_LAGERWALL )
         {
-            double z_s    = 1000.;
-            double eta_c  = 0.05;
-            double l_bjer = 0.7;
+            double z_s    = 15. * (double)N_PATCH_;
+            double eta_c  = 0.19;
+            double l_bjer = 0.07 * D_HARD_;
             
             double rho_c  = eta_c / V0;
             double c_dens = z_s / (double)N_PATCH_;
@@ -63,7 +61,7 @@ ThreadedRod::ThreadedRod()
         
         else throw std::runtime_error("Unsupported electrostatics model for threaded rods");
         
-        R_CUT_ = 10. / -MINUS_KAPPA_;
+        R_CUT_ = 5. / -MINUS_KAPPA_;
         E_CUT_ = 20.;
     }
     
@@ -101,7 +99,7 @@ void ThreadedRod::Build(int mpi_rank)
     for ( uint idx_center = 0; idx_center < N_PATCH_; ++idx_center )
     {
         Patches.col(idx_center) -= Center_of_mass;
-        Center                     = Patches.col(idx_center);
+        Center                   = Patches.col(idx_center);
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
@@ -118,7 +116,7 @@ void ThreadedRod::Build(int mpi_rank)
                 Wireframe(1, idx) += R_CUT_/2. * sin(theta)*sin(phi);
                 Wireframe(2, idx) += R_CUT_/2. * cos(theta);
                 
-                file_wireframe << Wireframe.col(idx).adjoint() << std::endl;
+                file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }
             
             file_wireframe << std::endl;
@@ -138,14 +136,14 @@ void ThreadedRod::Build(int mpi_rank)
         
         for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
         {
-            double phi = Phi_grid(idx_phi);
+            double phi             = Phi_grid(idx_phi);
             
             Wireframe.col(idx_phi) = Center;
             
             Wireframe(0, idx_phi) += D_HARD_/2. * cos(phi);
             Wireframe(1, idx_phi) += D_HARD_/2. * sin(phi);
             
-            file_wireframe << Wireframe.col(idx_phi).adjoint() << std::endl;
+            file_wireframe        << Wireframe.col(idx_phi).adjoint() << std::endl;
         }
 
         file_wireframe << std::endl;
@@ -164,16 +162,16 @@ void ThreadedRod::Build(int mpi_rank)
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi = Phi_grid(idx_phi);
-                uint   idx = idx_theta*N_RES_ + idx_phi;
+                double phi          = Phi_grid(idx_phi);
+                uint   idx          = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) << 0., 0., L_Z_/2. - idx_cap*L_Z_;
                 
-                Wireframe(0, idx) += D_HARD_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += D_HARD_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += D_HARD_/2. * cos(theta);
+                Wireframe(0, idx)  += D_HARD_/2. * sin(theta)*cos(phi);
+                Wireframe(1, idx)  += D_HARD_/2. * sin(theta)*sin(phi);
+                Wireframe(2, idx)  += D_HARD_/2. * cos(theta);
                 
-                file_wireframe << Wireframe.col(idx).adjoint() << std::endl;
+                file_wireframe     << Wireframe.col(idx).adjoint() << std::endl;
             }
             
             file_wireframe << std::endl;
