@@ -341,8 +341,8 @@ void MCIntegrator<ParticleType>::FullIntegrator(MatrixXd* E_out, ArrayXd* V_r, A
         }
     }
     
-    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_;
-    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_;
+    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
 
     *E_out = E_loc * IManager.V_INTEG/N_PER_PROC_ / SQR(D_THETA);
 }
@@ -401,8 +401,8 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, ArrayXd* V_
         }
     }
     
-    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_;
-    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_;
+    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
     
     *E_out = E_loc * IManager.V_INTEG/N_PER_PROC_;
 }

@@ -187,19 +187,10 @@ def ODFOnsagerOptimiser(E):
 	S_res      = np.zeros(n_steps_eta)
 	P_res      = np.zeros(n_steps_eta)
 	F_tot      = np.zeros(n_steps_eta)
-	D_f        = np.zeros(n_steps_eta)
-	
-	v_r        = np.genfromtxt(path_data + '/vr.out')[:, 1]
-	v_l        = np.genfromtxt(path_data + '/vl.out')[:, 1]
 
 	path_p     = path_data + '/p.res'
 	path_psi   = path_data + '/psi.res'
-	path_f     = path_data + '/delta_f.res'
 	path_s     = path_data + '/order_param.res'
-
-	# Average over symmetrical component of the chiral potential
-	d_v        = ((v_r - v_l) - (v_r - v_l)[::-1]) / 2.
-	d_v[theta_grid > np.pi/2.] = d_v[theta_grid < np.pi/2.][::-1]
 	
 	with  open(path_psi, mode="wb") as file_psi:
 		for idx_eta, eta in enumerate(eta_grid):
@@ -211,12 +202,12 @@ def ODFOnsagerOptimiser(E):
 			
 			# ODF self-consistent solver
 			for idx_iter in range(n_steps_max):
-				psi_tmp = psi.copy()
+				psi_dummy = psi.copy()
 				
-				psi     = np.exp(-g_pl * n_dens/(2*np.pi)**2 * ((E + E.T)/2. * np.sin(theta_grid) * psi_tmp).sum(axis=1) * d_theta)
-				psi    /= (2*np.pi)**2 * d_theta * (psi * np.sin(theta_grid)).sum()
+				psi       = np.exp(-g_pl * n_dens/(2*np.pi)**2 * ((E + E.T)/2. * np.sin(theta_grid) * psi_dummy).sum(axis=1) * d_theta)
+				psi      /= (2*np.pi)**2 * d_theta * (psi * np.sin(theta_grid)).sum()
 				
-				if np.max(np.abs(psi - psi_tmp)) < tol_odf:
+				if np.max(np.abs(psi - psi_dummy)) < tol_odf:
 					converged = True
 					break
 		
@@ -242,12 +233,6 @@ def ODFOnsagerOptimiser(E):
 			s_tmp         *= (2*np.pi)**2 * d_theta * np.sin(theta_grid) * psi
 			
 			S_res[idx_eta] = s_tmp.sum()
-			
-			# Thermodynamically-averaged potential
-			d_tmp          = -n_dens * d_v
-			d_tmp         *= (2*np.pi)**2 * d_theta * np.sin(theta_grid) * psi
-			
-			D_f[idx_eta]   = d_tmp.sum()
 
 			# Save ODF
 			data_odf       = np.zeros([len(theta_grid), 3])
@@ -267,18 +252,12 @@ def ODFOnsagerOptimiser(E):
 	data_s[:, 0] = eta_grid
 	data_s[:, 1] = S_res
 
-	data_f       = np.zeros([n_steps_eta, 2])
-	data_f[:, 0] = eta_grid
-	data_f[:, 1] = D_f
-
 	np.savetxt(path_p, data_p)
 	np.savetxt(path_s, data_s)
-	np.savetxt(path_f, data_f)
 
 	print("\033[1;32mODFs printed to '%s'\033[0m" % path_psi)
 	print("\033[1;32mOrder parameter printed to '%s'\033[0m" % path_s)
 	print("\033[1;32mOsmotic pressure printed to '%s'\033[0m" % path_p)
-	print("\033[1;32mAveraged chiral potential printed to '%s'\033[0m" % path_f)
 	
 	return F_tot,
 

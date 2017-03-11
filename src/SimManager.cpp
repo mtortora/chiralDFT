@@ -102,8 +102,6 @@ void SimManager::InitRun(int mode)
     {
         LogTxt("************");
         LogBlu("Reference perturbative run");
-
-        ArrayXXd Psi_grd;
         
         // Work-out second-virial coefficients by distributed Monte-Carlo integration
         if      ( mode == ODF_FULL  )    SimHandler.FullIntegrator    (&E_ref, &V_r, &V_l);
@@ -336,9 +334,9 @@ void SimManager::Save()
         std::ofstream file_exc(data_path_ + "/excluded_matrix.out");
         std::ofstream file_ord(data_path_ + "/order_param.out");
         std::ofstream file_dv (data_path_ + "/delta_v.out");
+        std::ofstream file_df (data_path_ + "/delta_f.out");
         std::ofstream file_per(data_path_ + "/q_pert.out");
-        std::ofstream file_vr (data_path_ + "/vr.out");
-        std::ofstream file_vl (data_path_ + "/vl.out");
+        std::ofstream file_psi(data_path_ + "/psi.out");
         std::ofstream file_k1 (data_path_ + "/k1.out");
         std::ofstream file_k2 (data_path_ + "/k2.out");
         std::ofstream file_k3 (data_path_ + "/k3.out");
@@ -352,22 +350,31 @@ void SimManager::Save()
 
         file_exc << E_ref;
         
-        // Angle-dependant excluded volumes
-        ArrayXd V_nrm  = (V_r - V_l) / (V_r + V_l);
+        // Angle-dependant excluded volume, assuming head-tail particle symmetry
+        ArrayXd V_chi  = ((V_r - V_l) - (V_r - V_l).reverse()) / 2.;
+        ArrayXd V_nrm  = V_chi / (V_r + V_l);
+
+        ArrayXd V_ave  = V_chi;
+        V_ave.tail(N_STEPS_THETA/2) = V_ave.head(N_STEPS_THETA/2).reverse();
+        
+        // Thermodynamically-averaged excluded volume
+        ArrayXd N_grid = SimHandler.Eta_grid * CUB(SimHandler.IManager.SIGMA_R)/SimHandler.IManager.V0;
+        ArrayXd F_chi  = (Psi_grd.rowwise() * (V_ave * sin(SimHandler.Theta_grid)).transpose()).rowwise().sum();
+        
+        F_chi         *= -N_grid * 4.*SQR(PI) * D_THETA;
 
         for ( uint idx_theta = 0; idx_theta < N_STEPS_THETA; ++idx_theta )
         {
             double theta = SimHandler.Theta_grid(idx_theta);
             
-            file_dv << theta << ' ' << V_nrm(idx_theta) << std::endl;
-
-            file_vr << theta << ' ' << V_r  (idx_theta) << std::endl;
-            file_vl << theta << ' ' << V_l  (idx_theta) << std::endl;
+            file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta) << std::endl;
         }
         
         for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
         {
             double eta = SimHandler.Eta_grid(idx_eta);
+            
+            file_df  << eta << ' ' << F_chi (idx_eta) << std::endl;
             
             // Torque field, elastic constants and equilibrium pitch from perturbation theory
             file_k1  << eta << ' ' << K1    (idx_eta) << ' ' << K1_inf(idx_eta) << ' ' << K1_sup(idx_eta) << std::endl;
@@ -381,6 +388,16 @@ void SimManager::Save()
             file_ord << eta << ' ' << S_res (idx_eta) << std::endl;
             file_mu  << eta << ' ' << Mu_res(idx_eta) << std::endl;
             file_p   << eta << ' ' << P_res (idx_eta) << std::endl;
+            
+            // Save ODFs
+            for ( uint idx_theta = 0; idx_theta < N_STEPS_THETA; ++idx_theta )
+            {
+                double theta = SimHandler.Theta_grid(idx_theta);
+                
+                file_psi << eta << ' ' << theta << ' ' << Psi_grd(idx_eta, idx_theta) << std::endl;
+            }
+            
+            file_psi << std::endl;
         }
         
         if ( MODE == MODE_FULL )
@@ -393,6 +410,8 @@ void SimManager::Save()
             {
                 double eta = SimHandler.Eta_grid(idx_eta);
                 
+                file_min  << eta << ' ' << Q_min(idx_eta) << ' ' << Q_inf(idx_eta) << ' '<< Q_sup(idx_eta) << std::endl;
+
                 for ( uint idx_q = 0; idx_q < N_STEPS_Q; ++idx_q )
                 {
                     double q_macro = SimHandler.Q_grid(idx_q);
@@ -402,7 +421,6 @@ void SimManager::Save()
                 }
                 
                 file_lnd << std::endl;
-                file_min << eta << ' ' << Q_min(idx_eta) << ' ' << Q_inf(idx_eta) << ' '<< Q_sup(idx_eta) << std::endl;
             }
             
             file_lnd.close();
@@ -412,9 +430,9 @@ void SimManager::Save()
         file_exc.close();
         file_ord.close();
         file_dv .close();
+        file_df .close();
         file_per.close();
-        file_vr .close();
-        file_vl .close();
+        file_psi.close();
         file_k1 .close();
         file_k2 .close();
         file_k3 .close();

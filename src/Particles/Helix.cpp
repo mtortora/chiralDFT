@@ -33,8 +33,6 @@ Helix::Helix()
     R_HLX_      = 146.  * SIGMA_R;
     P_HLX_      = 2800. * SIGMA_R;
     
-    L_X_        = 2.*R_HLX_;
-    L_Y_        = 2.*R_HLX_;
     L_Z_        = L_CTR_ / sqrt(1. + SQR(2.*PI * R_HLX_/P_HLX_));
     
     double d_cc = sqrt(SQR(2.*R_HLX_*sin(PI/P_HLX_ * L_Z_/(N_S_-1.))) + SQR(L_Z_/(N_S_-1.)));

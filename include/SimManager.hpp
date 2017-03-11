@@ -57,6 +57,8 @@ public:
     Eigen::ArrayXd  Kt_inf;
     Eigen::ArrayXd  Kt_sup;
 
+    Eigen::ArrayXXd Psi_grd;
+
     Eigen::MatrixXd E_ref;
     Eigen::MatrixXd F_lnd;
     

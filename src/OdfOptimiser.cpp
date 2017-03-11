@@ -206,7 +206,9 @@ ArrayXd OdfOptimiser<ParticleType>::SequentialOptimiser(double eta, const Matrix
             }
         }
         
-        // Renormalisation & convergence check
+        // Renormalisation & convergence check, enforcing head-tail symmetry
+        Psi           = (Psi + Psi.reverse()) / 2.;
+        
         ArrayXd Dummy = Psi * sin(Theta_grid);
         Psi          /= SQR(2.*PI)*D_THETA * Dummy.sum();
         

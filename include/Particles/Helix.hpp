@@ -13,8 +13,6 @@ private:
     double L_CTR_;
     double R_HLX_;
     double P_HLX_;
-    double L_X_;
-    double L_Y_;
     double L_Z_;
     
 protected:
