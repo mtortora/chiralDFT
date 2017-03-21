@@ -96,8 +96,8 @@ if display_boxes:
 else:
 	radial_norms = np.linalg.norm((wire_ref-center)[:,:2], axis=1)
 	
-	l_rc         = np.max(radial_norms)
-	r_axis       = atom_radius + l_rc
+	l_cr         = np.max(radial_norms)
+	r_axis       = atom_radius + l_cr
 
 
 # Process wireframes as collections of base_atoms

@@ -169,7 +169,7 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     // Bounding spherocylinder dimensions
     double r_max          = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
     
-    Node->l_rc            = r_max + range/2.;
+    Node->l_cr            = r_max + range/2.;
     Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min) / 2.;
 
     // Box center expressed in parent frame

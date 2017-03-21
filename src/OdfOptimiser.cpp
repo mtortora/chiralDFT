@@ -133,13 +133,13 @@ void OdfOptimiser<ParticleType>::BinodalAnalysis(const MatrixXd& E_in, int mode)
         binodal_nem = Binodals(1);
         
         LogCya("Relaxed Newton-Raphson method converged in %u steps", ctr_nr);
-        LogTxt("I/N coexistence range: [%.4f%%, %.4f%%]", 100.*binodal_iso, 100.*binodal_nem);
+        LogTxt("I/N coexistence range: [%.2f%%, %.2f%%]", 100.*binodal_iso, 100.*binodal_nem);
         
         eta_min = binodal_nem;
     }
     
     else {LogRed("Unable to work out I/N spinodals");}
-    LogTxt("Simulation range: [%.4f%%, %.4f%%]", 100.*eta_min, 100.*eta_max);
+    LogTxt("Simulation range: [%.2f%%, %.2f%%]", 100.*eta_min, 100.*eta_max);
     
     this->Eta_grid = ArrayXd::LinSpaced(N_STEPS_ETA, eta_min, eta_max);
 }

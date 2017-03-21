@@ -50,7 +50,7 @@ PatchyRod::PatchyRod()
         BHierarchy->l_zh = (L_Z_    + R_CUT_) / 2.;
         
         BHierarchy->l_ch = (SIGMA_R + L_Z_)   / 2.;
-        BHierarchy->l_rc = (SIGMA_R + R_CUT_) / 2.;
+        BHierarchy->l_cr = (SIGMA_R + R_CUT_) / 2.;
     }
     
     else
@@ -63,10 +63,10 @@ PatchyRod::PatchyRod()
         BHierarchy->l_zh = (R_WCA_ + L_Z_)    / 2.;
         
         BHierarchy->l_ch =  L_Z_              / 2.;
-        BHierarchy->l_rc = (R_WCA_ + SIGMA_R) / 2.;
+        BHierarchy->l_cr = (R_WCA_ + SIGMA_R) / 2.;
     }
     
-    R_INTEG = 2. * (BHierarchy->l_ch + BHierarchy->l_rc);
+    R_INTEG = 2. * (BHierarchy->l_ch + BHierarchy->l_cr);
     V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
 }
 

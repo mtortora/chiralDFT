@@ -29,7 +29,7 @@ private:
     Eigen::ArrayXd  Y_grid_;
     Eigen::ArrayXd  Z_grid_;
 
-    Eigen::ArrayXd Theta_grid_;
+    Eigen::ArrayXd  Theta_grid_;
     
     Eigen::ArrayXi  Exc_grid_;
 

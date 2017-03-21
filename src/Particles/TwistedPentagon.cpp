@@ -120,7 +120,7 @@ void TwistedPentagon::Build(int mpi_rank)
 		BHull->l_zh = L_Z_ / 2.;
 		
 		BHull->l_ch = BHull->l_zh;
-		BHull->l_rc = R_BCK_ + R_PNT_;
+		BHull->l_cr = R_BCK_ + R_PNT_;
 		
 		Tesselate(Wireframe, &num_tri);
 		

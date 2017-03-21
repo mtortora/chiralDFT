@@ -41,7 +41,7 @@ struct BNode
 
     // SC dimensions
     double l_ch;
-    double l_rc;
+    double l_cr;
 
     // 3d properties - Center_p_ and Orientation_p_ are expressed in the parent frame
     Eigen::Vector3d Axis;
@@ -63,7 +63,7 @@ struct BNode
         l_zh        = Node.l_zh;
         
         l_ch        = Node.l_ch;
-        l_rc        = Node.l_rc;
+        l_cr        = Node.l_cr;
         
         Center      = Node.Center;
         Orientation = Node.Orientation;

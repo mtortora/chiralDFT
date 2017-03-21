@@ -351,10 +351,10 @@ void SimManager::Save()
         file_exc << E_ref;
         
         // Angle-dependant excluded volume, assuming head-tail particle symmetry
-        ArrayXd V_chi  = ((V_r - V_l) - (V_r - V_l).reverse()) / 2.;
-        ArrayXd V_nrm  = V_chi / (V_r + V_l);
+        ArrayXd V_chi  = V_r - V_l;
+        ArrayXd V_ave  = (V_chi - V_chi.reverse()) / 2.;
 
-        ArrayXd V_ave  = V_chi;
+        ArrayXd V_nrm  = V_ave / (V_r + V_l);
         V_ave.tail(N_STEPS_THETA/2) = V_ave.head(N_STEPS_THETA/2).reverse();
         
         // Thermodynamically-averaged excluded volume

@@ -150,7 +150,7 @@ void TwistedCuboid::Build(int mpi_rank)
         BHull->l_zh = L_Z_ / 2.;
         
         BHull->l_ch = BHull->l_zh;
-        BHull->l_rc = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        BHull->l_cr = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
         
         Tesselate(Wireframe, &num_tri);
         

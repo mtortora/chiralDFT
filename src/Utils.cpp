@@ -39,7 +39,7 @@ bool Utils::OverlapBoundSC(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
     double rEo2  = Node2->Axis.dot(R_sep);;
     double o1Eo2 = Node1->Axis.dot(Node2->Axis);
     
-    double rsqr  = SQR(Node1->l_rc + Node2->l_rc);
+    double rsqr  = SQR(Node1->l_cr + Node2->l_cr);
     double cc    = 1. - SQR(o1Eo2);
     
     /* VEGA ET AL., A FAST ALGORITHM TO EVALUATE THE SHORTEST DISTANCE BETWEEN RODS */

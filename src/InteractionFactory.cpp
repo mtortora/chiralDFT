@@ -248,28 +248,10 @@ double InteractionFactory<PatchyRod>::MayerInteraction(const Vector3d& R_cm,
 double InteractionFactory<ThreadedRod>::MayerInteraction(const Vector3d& R_cm,
                                                          ThreadedRod* Particle1, ThreadedRod* Particle2)
 {
+    if ( !USE_DH ) return 1.;
+    
     double energy(0.);
-    
-    // Check backbones for hard overlap
-    BNode Child1;
-    BNode Child2;
-    
-    Child1.l_rc   = D_HARD_/2.;
-    Child2.l_rc   = D_HARD_/2.;
-    
-    Child1.l_ch   = L_Z_/2.;
-    Child2.l_ch   = L_Z_/2.;
-    
-    Child1.Axis   = Particle1->Axis;
-    Child2.Axis   = Particle2->Axis;
-    
-    Child1.Center = Vector3d::Zero();
-    Child2.Center = Vector3d::Zero();
-
-    // Hard spherocylinder backbone
-    if ( Utils::OverlapBoundSC(R_cm, &Child1, &Child2) ) return 1.;
-    
-    if ( USE_DH ) RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, E_CUT_);
+    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, E_CUT_);
     
     return 1. - exp(-energy);
 }

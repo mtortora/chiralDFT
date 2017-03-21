@@ -29,7 +29,7 @@ r_max        = np.max(norms)
 r_integ      = 2 * r_max
 
 radial_norms = np.linalg.norm(data_wire[:2,:], axis=0)
-l_rc         = np.max(radial_norms)
+l_cr         = np.max(radial_norms)
 
 l_z          = np.max(data_wire[2,:]) - np.min(data_wire[2,:])
 l_zh         = l_z / 2.
@@ -65,7 +65,7 @@ def rotation_matrix(axis, angle):
 
 # Semi-oriented bounding box overlap test
 def overlap_box(r_sep_box, axis1, axis2):
-	dim_box = np.array([l_rc, l_rc, l_bnd_zh])
+	dim_box = np.array([l_cr, l_cr, l_bnd_zh])
 	
 	cos_t   = np.dot(axis1, axis2)
 	sin_t   = np.sqrt(1 - cos_t**2)

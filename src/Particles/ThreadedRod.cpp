@@ -27,9 +27,9 @@ ThreadedRod::ThreadedRod()
     N_PATCH_  = 17;
     N_RES_    = 15;
     
-    D_HARD_   = 10. * SIGMA_R;
+    D_HARD_   = 1. * SIGMA_R;
 
-    L_Z_      = 10. * D_HARD_;
+    L_Z_      = 12. * D_HARD_;
     P_PATCH_  = 10. * D_HARD_;
     
     V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
@@ -64,6 +64,8 @@ ThreadedRod::ThreadedRod()
         R_CUT_ = 5. / -MINUS_KAPPA_;
         E_CUT_ = 20.;
     }
+    
+    else R_CUT_ = 0.;
     
     R_INTEG = L_Z_ + R_CUT_ + D_HARD_;
     V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
@@ -195,11 +197,11 @@ void ThreadedRod::Build(int mpi_rank)
     
     else
     {
-        BHierarchy->l_xh = D_HARD_ / 2.;
-        BHierarchy->l_yh = D_HARD_ / 2.;
-        BHierarchy->l_zh = L_Z_    / 2.;
+        BHierarchy->l_xh =  D_HARD_ / 2.;
+        BHierarchy->l_yh =  D_HARD_ / 2.;
+        BHierarchy->l_zh = (L_Z_+D_HARD_) / 2.;
         
         BHierarchy->l_ch = L_Z_    / 2.;
-        BHierarchy->l_rc = D_HARD_ / 2.;
+        BHierarchy->l_cr = D_HARD_ / 2.;
     }
 }
