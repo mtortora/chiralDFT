@@ -35,11 +35,11 @@
 // ============================
 
 // Maximum number of Monte-Carlo steps for excluded volume integration
-#define N_MC          5E13
+#define N_MC          1E14
 
 // Soft interaction parameters - only relevant for the DNADuplex template
 #define T_ABS         293.16
-#define C_SALT        0.5
+#define C_SALT        0.26
 
 // Set maximum range of concentrations to be simulated
 #define ETA_MIN       0.01

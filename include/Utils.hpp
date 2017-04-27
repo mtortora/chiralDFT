@@ -13,7 +13,7 @@ namespace Utils
     
     Eigen::Matrix3d PCA(const Eigen::Matrix3Xd&);
 
-    void Load(const std::string&, Eigen::Matrix3Xd*, uint*);
+    void Load(const std::string&, Eigen::Matrix3Xd*, Eigen::ArrayXi*);
 }
 
 #endif

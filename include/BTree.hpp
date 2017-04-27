@@ -17,6 +17,8 @@ struct BTree: public BNode
     // Build counters
     uint nodes_built;
     uint leaves_built;
+    
+    uint vert_alloced;
     uint nodes_alloced;
     uint trees_alloced;
 
@@ -55,21 +57,13 @@ struct BTree: public BNode
         max_depth     = max_depth_;
     }
     
-    // Initialise child nodes
-    inline void Split(BNode* Parent)
-    {
-        *Parent->NodeI           = *Parent;
-        *Parent->NodeS           = *Parent;
-        
-        Parent->NodeI->idx_depth = Parent->idx_depth + 1;
-        Parent->NodeS->idx_depth = Parent->idx_depth + 1;
-    }
-    
+    // Build log
     inline void PrintBuildInfo()
     {
         LogTxt("Root nodes successfully allocated: %d", trees_alloced);
         LogTxt("Maximum children nodes allocated: %d", nodes_alloced);
         LogGre("Built %d total bounding structures, inc. %d leaf nodes", nodes_built, leaves_built);
+        LogGre("Total number of vertices enclosed: %d", vert_alloced);
     }
 };
 

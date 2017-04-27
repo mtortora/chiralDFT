@@ -20,7 +20,7 @@ using namespace Eigen;
 DNADuplex::DNADuplex()
 {
     // Bounding tree properties
-    BHierarchy->SetTreeProperties(4);
+    BHierarchy->SetTreeProperties(11);
     
     N_DELTA_L       = 2;
     
@@ -58,7 +58,6 @@ DNADuplex::DNADuplex()
     // Debye-Huckel parameters
     if ( USE_DH )
     {
-        // Debye length
         LAMBDA_      = 0.002334412 * sqrt(T_ABS) * sqrt(EPSILON_WATER_) / sqrt(C_SALT);
         MINUS_KAPPA_ = -1. / LAMBDA_;
         
@@ -101,30 +100,34 @@ void DNADuplex::Build(int mpi_rank)
     uint      N_CONF;
     uint      N_NUCL;
     
+    ArrayXi   Sizes;
     Matrix3Xd Backbones;
 
     // Load configurations from trajectory files on master thread
     if ( mpi_rank == MPI_MASTER )
     {
-        uint n_vertices;
-        
         std::string DATA_PATH   = __DATA_PATH;
         std::string filename_in = DATA_PATH + "/trajectory.in";
         
-        Utils::Load(filename_in, &Backbones, &n_vertices);
+        Utils::Load(filename_in, &Backbones, &Sizes);
         
-        if ( n_vertices == 0 ) throw std::runtime_error("Unreadable DNA input file");
+        if ( Backbones.size() == 0 ) throw std::runtime_error("Unreadable DNA input file");
         
-        N_CONF = Backbones.cols() / n_vertices;
-        N_NUCL = n_vertices;
+        N_CONF = Sizes.size();
+        N_NUCL = Sizes.sum();        
     }
     
     // Broadcast data to slave threads
     MPI_Bcast(&N_CONF, 1, MPI_UNSIGNED, MPI_MASTER, MPI_COMM_WORLD);
     MPI_Bcast(&N_NUCL, 1, MPI_UNSIGNED, MPI_MASTER, MPI_COMM_WORLD);
 
-    if ( mpi_rank != MPI_MASTER ) Backbones.resize(3, N_CONF*N_NUCL);
+    if ( mpi_rank != MPI_MASTER )
+    {
+        Sizes.resize(N_CONF);
+        Backbones.resize(3, N_NUCL);
+    }
     
+    MPI_Bcast(Sizes.data(),     Sizes.size(),     MPI_INT,    MPI_MASTER, MPI_COMM_WORLD);
     MPI_Bcast(Backbones.data(), Backbones.size(), MPI_DOUBLE, MPI_MASTER, MPI_COMM_WORLD);
     
     // Build bounding volume hierarchy
@@ -132,8 +135,10 @@ void DNADuplex::Build(int mpi_rank)
     
     for ( uint idx_conf = 0; idx_conf < N_CONF; ++idx_conf )
     {
-        BTree* Tree        = &BHierarchy->Forest[idx_conf];
-        Matrix3Xd Vertices = Matrix3Xd::Map(Backbones.data() + 3 * idx_conf*N_NUCL, 3, N_NUCL);
+        int       n_nucl   = Sizes(idx_conf);
+        
+        BTree*    Tree     = &BHierarchy->Forest[idx_conf];
+        Matrix3Xd Vertices = Matrix3Xd::Map(Backbones.data() + 3 * BHierarchy->vert_alloced, 3, n_nucl);
         
         BHierarchy->RecursiveBuild(Tree, Vertices, R_CUT_);
     }
@@ -162,6 +167,6 @@ void DNADuplex::Build(int mpi_rank)
     R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
     V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
     
-    V0      = N_NUCL * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
+    V0      = ((float)N_NUCL) / ((float)N_CONF) * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
     V_EFF   = V0;
 }

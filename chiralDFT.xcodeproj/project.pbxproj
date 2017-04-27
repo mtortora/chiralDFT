@@ -80,7 +80,9 @@
 		B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B76EEC141E9D24A90044E99B /* thomas.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = thomas.sh; sourceTree = "<group>"; };
 		B794CCF81E5F992500DEAE25 /* build_hierarchy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = build_hierarchy.py; sourceTree = "<group>"; };
+		B7BB8D781EAE568B00294673 /* savitsky_golay.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = savitsky_golay.py; sourceTree = "<group>"; };
 		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
 		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693DE1D4715E7007E6CBD /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; usesTabs = 0; };
@@ -162,6 +164,7 @@
 				B733A81D1D3FB5D4001575D7 /* aggregate.py */,
 				9C19E7F91CA1B8300006F51A /* post_process.py */,
 				9C19E7FA1CA1B8300006F51A /* pre_process.py */,
+				B7BB8D781EAE568B00294673 /* savitsky_golay.py */,
 			);
 			path = processing;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 			children = (
 				9C85585F1C4066E500FADF19 /* archer.sh */,
 				9C512E0D1C22B91B0099AE31 /* arcus_b.sh */,
+				B76EEC141E9D24A90044E99B /* thomas.sh */,
 				9C19E7F21CA1B8260006F51A /* plots */,
 				9C19E7F81CA1B8300006F51A /* processing */,
 				9C0AA75F1CAAF89F0018D180 /* utils */,

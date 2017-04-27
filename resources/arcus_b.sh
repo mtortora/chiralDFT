@@ -13,4 +13,4 @@ module load mvapich2/2.1.0__gcc-4.9.2
 
 . enable_arcus-b_mpi.sh
 
-mpirun $MPI_HOSTS TARGETPATH/TARGET &> DATPATH/$SLURM_JOB_ID.out
+mpirun $MPI_HOSTS TARGETPATH/TARGET > DATPATH/$SLURM_JOB_ID.out

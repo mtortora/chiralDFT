@@ -71,6 +71,16 @@ struct BNode
         return *this;
     }
     
+    // Initialise child nodes
+    inline void Split()
+    {
+        *NodeI           = *this;
+        *NodeS           = *this;
+        
+        NodeI->idx_depth = idx_depth + 1;
+        NodeS->idx_depth = idx_depth + 1;
+    }
+    
     // Align child frame with parent
     inline void RotateFrame(const BNode* Parent)
     {

@@ -25,9 +25,11 @@ BTree::BTree()
     nodes_built   = 0;
     leaves_built  = 0;
     
+    vert_alloced  = 0;
     nodes_alloced = 0;
     trees_alloced = 0;
     
+    // Set reference configurations aligned with nematic director
     Axis          = Vector3d::UnitZ();
     
     Center        = Vector3d::Zero();
@@ -48,7 +50,7 @@ void BTree::RecursiveAllocate(BNode* Node)
         Node->NodeI = &Tree[nodes_alloced++];
         Node->NodeS = &Tree[nodes_alloced++];
 
-        Split(Node);
+        Node->Split();
 
         if ( (Node->NodeI->idx_depth < max_depth) && (Node->NodeS->idx_depth < max_depth) )
         {
@@ -85,6 +87,7 @@ void BTree::AllocateLeaf(BNode* Node, const Eigen::Matrix3Xd& Vertices_)
     if ( !Node->Vertices ) throw std::runtime_error("Vertex memory allocation failed");
     
     *Node->Vertices = Vertices_;
+    vert_alloced   += Vertices_.cols();
     
     leaves_built++;
 }
@@ -170,7 +173,7 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     double r_max          = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
     
     Node->l_cr            = r_max + range/2.;
-    Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min) / 2.;
+    Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min)/2.;
 
     // Box center expressed in parent frame
     Node->Center_p       << (x_max+x_min)/2., (y_max+y_min)/2., (z_max+z_min)/2.;

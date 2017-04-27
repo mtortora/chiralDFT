@@ -19,31 +19,43 @@ using namespace Eigen;
 TwistedCuboid::TwistedCuboid()
 {
     // Bounding tree properties
-    BHierarchy->SetTreeProperties(10, 5);
+    BHierarchy->SetTreeProperties(14, 4);
 
     N_DELTA_L    = 2;
 
     // Cuboid parameters
     N_X_         = 10;
-    N_Y_         = 20;
-    N_Z_         = 100;
+    N_Y_         = 10;
+    N_Z_         = 1000;
 
-    L_X_         = 1.  * SIGMA_R;
-    L_Y_         = 2.  * SIGMA_R;
-    L_Z_         = 20. * SIGMA_R;
-
+    L_X_         = 1.   * SIGMA_R;
+    L_Y_         = 1.   * SIGMA_R;
+    L_Z_         = 100. * SIGMA_R;
+    
+    double alpha = 0.5;
+    
     // Helical backbone parameters
     R_BCK_       = 0.  * SIGMA_R;
     P_BCK_       = 40. * SIGMA_R;
     
-    TWIST_       = 1.*PI;
+    // Thread angle in radians
+    double mu    = 80. * PI/180.;
+    TWIST_       = 2. * L_Z_ / (sqrt(SQR(L_X_)+SQR(L_Y_)) * tan(mu));
 
-    R_THRESHOLD_ = sqrt(SQR(L_X_/(N_X_-1.)) + SQR(L_Y_/(N_Y_-1.)) + SQR(L_Z_/(N_Z_-1.)))/2.;
-    R_INTEG      = sqrt(SQR(L_X_+R_BCK_) + SQR(L_Y_+R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
-    V_INTEG      = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
-    
     V0           = L_X_*L_Y_*L_Z_;
     V_EFF        = V0;
+    
+    R_THRESHOLD_ = (1.+alpha) * fmin(L_X_/((double)N_X_), fmin(L_Y_/((double)N_Y_), L_Z_/((double)N_Z_)));
+
+    #if (!USE_RAPID)
+    // Rescale cuboid dimensions to account for finite HS radii
+    L_X_        *= (1. - (1.+alpha)/((double)N_X_));
+    L_Y_        *= (1. - (1.+alpha)/((double)N_Y_));
+    L_Z_        *= (1. - (1.+alpha)/((double)N_Z_));
+    #endif
+    
+    R_INTEG      = sqrt(SQR(L_X_+R_BCK_) + SQR(L_Y_+R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
+    V_INTEG      = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
     
     // Allocate RAPID mesh
     Mesh         = new RAPID_model;

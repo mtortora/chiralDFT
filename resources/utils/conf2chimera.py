@@ -50,8 +50,8 @@ base_atom   = "H"
 atom_color  = "0.2734,0.5078,0.7031"
 atom_alpha  = 0.2
 
-vdw_radius  = 0.5
-ball_scale  = 0.25
+vdw_radius  = 0.15
+ball_scale  = 0.5
 atom_radius = vdw_radius*ball_scale
 
 n_atoms     = len(wire_ref)

@@ -226,52 +226,59 @@ Matrix3d Utils::PCA(const Matrix3Xd& Vertices_in)
 // ============================
 /* Configuration file reader with Eigen format conversion */
 // ============================
-void Utils::Load(const std::string& filename, Matrix3Xd* Vertices, uint* particle_size)
+void Utils::Load(const std::string& filename, Matrix3Xd* Vertices, ArrayXi* Sizes)
 {
     double coeff;
     
-    bool   is_first_conf(true);
+    bool   is_first_line(false);
     
     // Size counters
-    uint   rows(0);
-    uint   cols(0);
+    int    rows  (0);
+    int    cols  (0);
+    int    rows_t(0);
     
     std::string   line;
     std::ifstream input_file(filename);
     
     if ( !input_file.good() ) throw std::runtime_error("Couldn't open input file " + filename);
     
-    // Store unkown number of coefficients into a std::vector container
-    std::vector<double> buffer;
+    // Store unkown number of configurations into std::vector containers
+    std::vector<double> data_buffer;
+    std::vector<int>    size_buffer;
     
     while ( std::getline(input_file, line) )
     {
         if ( !line.empty() )
         {
+            is_first_line = true;
+            
             std::istringstream stream(line);
             rows += 1;
             
             while ( stream >> coeff )
             {
                 if ( rows == 1 ) cols += 1;
-                buffer.push_back(coeff);
+                data_buffer.push_back(coeff);
             }
         }
         
         else
         {
-            if ( is_first_conf )
+            if ( is_first_line )
             {
-                *particle_size = rows;
-                is_first_conf  = false;
+                is_first_line = false;
+                size_buffer.push_back(rows - rows_t);
+                
+                rows_t = rows;
             }
         }
     }
     
     input_file.close();
     
-    if ( is_first_conf ) *particle_size = rows;
+    if ( size_buffer.size() < 1 ) size_buffer.push_back(rows);
     
     // Map std::vector to Eigen::Matrix3Xd in column-major default order
-    *Vertices = Matrix3Xd::Map(&buffer[0], cols, rows);
+    *Vertices = Matrix3Xd::Map(&data_buffer[0], cols, rows);
+    *Sizes    = ArrayXi::Map(&size_buffer[0], size_buffer.size());
 }
