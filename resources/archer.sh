@@ -8,7 +8,7 @@
 #PBS -A e280-Doye
 
 
-module switch PrgEnv-cray/5.2.56 PrgEnv-gnu/5.2.56
+module switch PrgEnv-cray/5.2.82 PrgEnv-gnu/5.2.56
 module switch gcc/5.1.0 gcc/6.1.0
 
 export PBS_O_WORKDIR=$(readlink -f $PBS_O_WORKDIR)

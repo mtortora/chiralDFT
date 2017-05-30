@@ -424,8 +424,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
-					"-D__VERSION_MAJOR__=2",
-					"-D__VERSION_MINOR__=2",
+					"-D__VERSION_MAJOR__=3",
+					"-D__VERSION_MINOR__=3",
 					"-D__XCODE__",
 				);
 				PRODUCT_NAME = chiralDFT;
@@ -451,8 +451,8 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
-					"-D__VERSION_MAJOR__=2",
-					"-D__VERSION_MINOR__=2",
+					"-D__VERSION_MAJOR__=3",
+					"-D__VERSION_MINOR__=3",
 					"-D__XCODE__",
 				);
 				PRODUCT_NAME = chiralDFT;

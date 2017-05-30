@@ -29,15 +29,16 @@ TwistedPentagon::TwistedPentagon()
 	
 	R_PNT_       = 3.3  * SIGMA_R;
 	L_PNT_       = R_PNT_ * 2.*sin(PI/5.);
-
-	L_Z_         = 880. * SIGMA_R;
 	
-	double pitch = 3.3  * SIGMA_R;
-	TWIST_       = 2.*PI/5. * L_Z_/pitch;
-
 	// Helical backbone parameters
-	R_BCK_       = 146.  * SIGMA_R;
+	double pitch = 3.3  * SIGMA_R;
+	double l_ctr = 880. * SIGMA_R;
+
+	R_BCK_       = 146. * SIGMA_R;
 	P_BCK_       = 2800. * SIGMA_R;
+	
+	L_Z_         = l_ctr / sqrt(1. + SQR(2.*PI * R_BCK_/P_BCK_));
+	TWIST_       = 2.*PI/5. * L_Z_/pitch;
 	
 	R_THRESHOLD_ = sqrt(SQR(L_PNT_/(N_R_-1.)) + SQR(L_Z_/(N_Z_-1.)))/2.;
 	R_INTEG      = sqrt(SQR(2.*R_PNT_+2.*R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
