@@ -9,6 +9,23 @@
 template<class ParticleType>
 class MCIntegrator
 {
+public:
+    MCIntegrator();
+    
+    double ExcludedIntegrator(double);
+    
+    InteractionFactory<ParticleType> IManager;
+    
+    Eigen::ArrayXd Q_grid;
+    Eigen::ArrayXd Eta_grid;
+    
+    void MCInit(int, int, int);
+    void FullIntegrator    (Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    void LegendreIntegrator(Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    void LegendreIntegrator(Eigen::MatrixXd*, double);
+    void FrankIntegrator(const Eigen::ArrayXXd&,
+                         Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    
 private:
     ParticleType    Particle1_;
     ParticleType    Particle2_;
@@ -40,23 +57,6 @@ private:
     void SyncCheck(bool);
     void PruneGrid(double);
     void ConfigGenerator();
-    
-public:
-    MCIntegrator();
-
-    double ExcludedIntegrator(double);
-    
-    InteractionFactory<ParticleType> IManager;
-
-    Eigen::ArrayXd Q_grid;
-    Eigen::ArrayXd Eta_grid;
-
-    void MCInit(int, int, int);
-    void FullIntegrator    (Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
-    void LegendreIntegrator(Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
-    void LegendreIntegrator(Eigen::MatrixXd*, double);
-    void FrankIntegrator(const Eigen::ArrayXXd&,
-                         Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
 };
 
 #endif

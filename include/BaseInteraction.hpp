@@ -7,7 +7,7 @@
  * Makes use of the Curiously Recurring Template Pattern (CRTP):
  * https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
  * --
- * Speeds calculations up by roughly 30% over virtual function calls
+ * Speeds calculations up by roughly 30% over virtual function calls.
  */
 // ===================================================================
 /*

@@ -3,7 +3,7 @@
  * Monte-Carlo based DFT simulations of liquid-crystalline chiral
  * nematic phases with object-oriented MPI implementation.
  * -------
- * Requires working Eigen/OpenMPI installs (see ReadMe.md)
+ * Requires working Eigen/OpenMPI installs (see README.md).
  */
 // ===================================================================
 /*

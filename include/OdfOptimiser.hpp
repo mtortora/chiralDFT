@@ -6,7 +6,18 @@
 
 template<class ParticleType>
 class OdfOptimiser: public MCIntegrator<ParticleType>
-{    
+{
+public:
+    OdfOptimiser();
+    
+    Eigen::ArrayXd Theta_grid;
+    
+    void BinodalAnalysis(const Eigen::MatrixXd&, int);
+    void EnergyGrid(const Eigen::MatrixXd&, Eigen::ArrayXd*, int);
+    void ODFGrid(const Eigen::MatrixXd&,
+                 Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*,
+                 Eigen::ArrayXXd*, int);
+    
 private:
     Eigen::ArrayXd Psi_iso_;
     
@@ -17,17 +28,6 @@ private:
     Eigen::ArrayXd SequentialOptimiser(double, const Eigen::MatrixXd&, int);
     
     Eigen::Vector2d ODFThermo(double, const Eigen::ArrayXd&, const Eigen::MatrixXd&, int);
-
-public:
-    OdfOptimiser();
-
-    Eigen::ArrayXd Theta_grid;
-
-    void BinodalAnalysis(const Eigen::MatrixXd&, int);
-    void EnergyGrid(const Eigen::MatrixXd&, Eigen::ArrayXd*, int);
-    void ODFGrid(const Eigen::MatrixXd&,
-                 Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*,
-                 Eigen::ArrayXXd*, int);
 };
 
 #endif

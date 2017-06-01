@@ -1,7 +1,7 @@
 // ===================================================================
 /**
- * Simulation manager class - coordinates computations and handles
- * data management
+ * Simulation manager class - handles computations calls and data
+ * management.
  */
 // ===================================================================
 /*

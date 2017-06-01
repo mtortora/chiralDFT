@@ -1,7 +1,7 @@
 // ===================================================================
 /**
  * Interaction Factory class.
- * Provides full template specialisation for all particle types
+ * Provides full template specialisation for all particle types.
  */
 // ===================================================================
 /*
@@ -29,7 +29,7 @@ double InteractionFactory<BentCore>::MayerInteraction(const Vector3d& R_cm,
     double mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping beads
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, 0.);
+    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -106,7 +106,7 @@ double InteractionFactory<DNADuplex>::MayerInteraction(const Vector3d& R_cm,
     double energy(0.);
     
     // Work out pairwise interaction energies recursively
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, E_CUT_);
+    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, E_CUT_);
     
     return 1. - exp(-BETA_R_*energy);
 }
@@ -129,7 +129,7 @@ double InteractionFactory<Helix>::MayerInteraction(const Vector3d& R_cm,
     double mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping beads
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, 0.);
+    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -249,11 +249,25 @@ double InteractionFactory<ThreadedRod>::MayerInteraction(const Vector3d& R_cm,
                                                          ThreadedRod* Particle1, ThreadedRod* Particle2)
 {
     if ( !USE_DH ) return 1.;
-    
-    double energy(0.);
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, E_CUT_);
-    
-    return 1. - exp(-energy);
+    else
+    {
+        BNode Node1 = *Particle1->Hull;
+        BNode Node2 = *Particle2->Hull;
+
+        Node1.l_ch  = L_Z_    / 2.;
+        Node1.l_cr  = D_HARD_ / 2.;
+        
+        Node2.l_ch  = L_Z_    / 2.;
+        Node2.l_cr  = D_HARD_ / 2.;
+        
+        // Hard SC backbone
+        if ( Utils::OverlapBoundSC(R_cm, &Node1, &Node2) ) return 1.;
+        
+        double energy(0.);
+        RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, E_CUT_);
+        
+        return 1. - exp(-energy);
+    }
 }
 
 
@@ -274,7 +288,7 @@ double InteractionFactory<TwistedCuboid>::MayerInteraction(const Vector3d& R_cm,
     double mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping vertices
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, 0.);
+    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
 
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -299,7 +313,7 @@ double InteractionFactory<TwistedPentagon>::MayerInteraction(const Vector3d& R_c
     double mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping vertices
-    RecursiveInteraction(R_cm, Particle1->BHull, Particle2->BHull, &energy, 0.);
+    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     

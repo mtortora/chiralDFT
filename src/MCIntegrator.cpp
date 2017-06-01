@@ -1,7 +1,7 @@
 // ===================================================================
 /**
  * Monte-Carlo integrator templated base class.
- * All particle headers must be included in InteractionFactory.hpp
+ * All particle headers must be included in InteractionFactory.hpp.
  */
 // ===================================================================
 /*
@@ -173,9 +173,9 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
     LogTxt("Integrating effective excluded volume...");
     
     // Box spatial grid
-    X_grid_   = ArrayXd::LinSpaced(NX, -Particle1_.BHull->l_xh, Particle1_.BHull->l_xh);
-    Y_grid_   = ArrayXd::LinSpaced(NY, -Particle1_.BHull->l_yh, Particle1_.BHull->l_yh);
-    Z_grid_   = ArrayXd::LinSpaced(NZ, -Particle1_.BHull->l_zh, Particle1_.BHull->l_zh);
+    X_grid_   = ArrayXd::LinSpaced(NX, -Particle1_.Hull->l_xh, Particle1_.Hull->l_xh);
+    Y_grid_   = ArrayXd::LinSpaced(NY, -Particle1_.Hull->l_yh, Particle1_.Hull->l_yh);
+    Z_grid_   = ArrayXd::LinSpaced(NZ, -Particle1_.Hull->l_zh, Particle1_.Hull->l_zh);
     
     Exc_grid_ = ArrayXi::Constant(NX*NY*NZ, 1);
 
@@ -198,12 +198,12 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
             Particle2_.SetRandomAxis(rng_engine_, rng_distrib_);
             
             // Bounding spherocylinder (SC) overlap test
-            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.BHull, Particle2_.BHull) )
+            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
             {
                 Particle2_.SetRandomOrientation(rng_engine_, rng_distrib_);
                 
                 // Oriented Bounding Box (OBB) overlap test
-                if ( Utils::OverlapBoundOB(R_cm_, Particle1_.BHull, Particle2_.BHull) )
+                if ( Utils::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
                 {
                     mayer_interaction_ = IManager.MayerInteraction(R_cm_, &Particle1_, &Particle2_);
                     
@@ -214,7 +214,7 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
     }
     
     double f_exc = Exc_grid_.sum() / ((double)NX*NY*NZ);
-    double v_box = 8. * Particle1_.BHull->l_xh*Particle1_.BHull->l_yh*Particle1_.BHull->l_zh;
+    double v_box = 8. * Particle1_.Hull->l_xh*Particle1_.Hull->l_yh*Particle1_.Hull->l_zh;
     
     return (v_box * f_exc);
 }
@@ -249,7 +249,7 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
             Particle2_.SetRandomAxis(rng_engine_, rng_distrib_);
             
             // Bounding spherocylinder (SC) overlap test
-            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.BHull, Particle2_.BHull) )
+            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
             {
                 Particle1_.SetRandomOrientation(rng_engine_, rng_distrib_);
                 Particle2_.SetRandomOrientation(rng_engine_, rng_distrib_);
@@ -280,7 +280,7 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
                 
                 #else
                     // Oriented Bounding Box (OBB) overlap test
-                    if ( Utils::OverlapBoundOB(R_cm_, Particle1_.BHull, Particle2_.BHull) )
+                    if ( Utils::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
                     {
                         // Bounding Volume Hierarchy-accelerated energy computations
                         mayer_interaction_ = IManager.MayerInteraction(R_cm_, &Particle1_, &Particle2_);

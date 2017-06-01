@@ -1,6 +1,6 @@
 // ===================================================================
 /**
- * Implements robust overlap methods for convex bounding volumes
+ * Implements robust overlap methods for convex bounding volumes.
  */
 // ===================================================================
 /*

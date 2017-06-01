@@ -1,6 +1,6 @@
 // ===================================================================
 /**
- * Twisted cuboid derived particle class
+ * Twisted cuboid derived particle class.
  */
 // ===================================================================
 /*
@@ -18,8 +18,8 @@ using namespace Eigen;
 
 TwistedCuboid::TwistedCuboid()
 {
-    // Bounding tree properties
-    BHierarchy->SetTreeProperties(14, 4);
+    // Bounding leaf parameter
+    BVH.SetLeafParameter(4);
 
     N_DELTA_L    = 2;
 
@@ -154,15 +154,15 @@ void TwistedCuboid::Build(int mpi_rank)
     {
         uint num_tri;
 
-        BHull       = BHierarchy;
+        Hull       = &BVH;
         
         // Bounding volume parameters
-        BHull->l_xh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
-        BHull->l_yh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
-        BHull->l_zh = L_Z_ / 2.;
+        Hull->l_xh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        Hull->l_yh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        Hull->l_zh = L_Z_ / 2.;
         
-        BHull->l_ch = BHull->l_zh;
-        BHull->l_cr = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        Hull->l_ch = Hull->l_zh;
+        Hull->l_cr = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
         
         Tesselate(Wireframe, &num_tri);
         
@@ -172,12 +172,10 @@ void TwistedCuboid::Build(int mpi_rank)
     // Build bounding volume hierarchy
     else
     {
-        BHierarchy->AllocateForest(1);
+        // Build bounding volume hierarchy
+        BVH.Build(Wireframe, R_THRESHOLD_);
         
-        BTree* Tree = &BHierarchy->Forest[0];
-        BHierarchy->RecursiveBuild(Tree, Wireframe, R_THRESHOLD_);
-
-        if ( id_ == 1 ) BHierarchy->PrintBuildInfo();
+        if ( id_ == 1 ) BVH.PrintBuildInfo();
     }
 }
 

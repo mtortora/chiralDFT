@@ -6,6 +6,15 @@
 
 class Helix: public BaseParticle
 {
+public:
+    Helix();
+    
+    Eigen::Matrix3Xd Backbone;
+    void Build(int) override;
+    
+protected:
+    double D_HARD_;
+    
 private:
     uint   N_S_;
     uint   N_RES_;
@@ -14,17 +23,6 @@ private:
     double R_HLX_;
     double P_HLX_;
     double L_Z_;
-    
-protected:
-    double D_HARD_;
-        
-public:
-    Helix();
-    
-    Eigen::Matrix3Xd Backbone;
-    void Build(int) override;
-    
-    virtual ~Helix() {}
 };
 
 #endif

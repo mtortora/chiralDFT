@@ -6,6 +6,15 @@
 
 class BentCore: public BaseParticle
 {
+public:
+    BentCore();
+    
+    Eigen::Matrix3Xd Backbone;
+    void Build(int) override;
+    
+protected:
+    double D_HARD_;
+    
 private:
     uint   N_S_;
     uint   N_RES_;
@@ -17,17 +26,6 @@ private:
     double L_X_;
     double L_Y_;
     double L_Z_;
-    
-protected:
-    double D_HARD_;
-    
-public:
-    BentCore();
-	
-    Eigen::Matrix3Xd Backbone;
-    void Build(int) override;
-    
-    virtual ~BentCore() {}
 };
 
 #endif

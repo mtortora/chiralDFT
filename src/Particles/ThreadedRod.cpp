@@ -1,6 +1,7 @@
 // ===================================================================
 /**
- * Threaded rod derived particle class
+ * Threaded rod derived particle class.
+ * Hard spherocylinder potentially decorated with helical charges.
  */
 // ===================================================================
 /*
@@ -18,8 +19,8 @@ using namespace Eigen;
 
 ThreadedRod::ThreadedRod()
 {
-    // Bounding tree properties
-    BHierarchy->SetTreeProperties(2);
+    // Bounding leaf parameter
+    BVH.SetLeafParameter(3);
 
     N_DELTA_L = 2;
 
@@ -31,6 +32,7 @@ ThreadedRod::ThreadedRod()
 
     L_Z_      = 12. * D_HARD_;
     P_PATCH_  = 10. * D_HARD_;
+    R_PATCH_  = 0.5 * D_HARD_;
     
     V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
     V_EFF     = V0;
@@ -61,7 +63,8 @@ ThreadedRod::ThreadedRod()
         
         else throw std::runtime_error("Unsupported electrostatics model for threaded rods");
         
-        R_CUT_ = 5. / -MINUS_KAPPA_;
+        // Needs to fully include electrostatics + hard cylindrical backbone
+        R_CUT_ = fmax(5. / -MINUS_KAPPA_, D_HARD_+2.*R_PATCH_);
         E_CUT_ = 20.;
     }
     
@@ -90,8 +93,8 @@ void ThreadedRod::Build(int mpi_rank)
     
     std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
     
-    Patches.row(0) = D_HARD_/2. * cos(2.*PI/P_PATCH_ * Z_grid);
-    Patches.row(1) = D_HARD_/2. * sin(2.*PI/P_PATCH_ * Z_grid);
+    Patches.row(0) = R_PATCH_ * cos(2.*PI/P_PATCH_ * Z_grid);
+    Patches.row(1) = R_PATCH_ * sin(2.*PI/P_PATCH_ * Z_grid);
     Patches.row(2) = Z_grid;
     
     Vector3d Center;
@@ -187,21 +190,20 @@ void ThreadedRod::Build(int mpi_rank)
     if ( USE_DH )
     {
         // Build bounding volume hierarchy
-        BHierarchy->AllocateForest(1);
-        BTree* Tree = &BHierarchy->Forest[0];
+        BVH.Build(Patches, R_CUT_);
         
-        BHierarchy->RecursiveBuild(Tree, Patches, R_CUT_);
-        
-        if ( id_ == 1 ) BHierarchy->PrintBuildInfo();
+        if ( id_ == 1 ) BVH.PrintBuildInfo();
     }
     
     else
     {
-        BHierarchy->l_xh =  D_HARD_ / 2.;
-        BHierarchy->l_yh =  D_HARD_ / 2.;
-        BHierarchy->l_zh = (L_Z_+D_HARD_) / 2.;
+        Hull       = &BVH;
         
-        BHierarchy->l_ch = L_Z_    / 2.;
-        BHierarchy->l_cr = D_HARD_ / 2.;
+        Hull->l_xh =  D_HARD_ / 2.;
+        Hull->l_yh =  D_HARD_ / 2.;
+        Hull->l_zh = (L_Z_+D_HARD_) / 2.;
+        
+        Hull->l_ch = L_Z_    / 2.;
+        Hull->l_cr = D_HARD_ / 2.;
     }
 }

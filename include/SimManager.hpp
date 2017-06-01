@@ -8,12 +8,25 @@
 
 class SimManager
 {
+public:
+    SimManager(int, int);
+    ~SimManager();
+
+    void MPIInit();
+    void InitRun(int);
+    void LandscapeRun();
+    void MinSurf();
+    void Gather();
+    void Save();
+    
 private:
     int seed_;
 
     int mpi_rank_;
     int mpi_size_;
     
+    OdfOptimiser<MESOGEN> SimHandler;
+
     std::string data_path_;
     
     std::chrono::high_resolution_clock::time_point t_start_;
@@ -21,12 +34,9 @@ private:
     
     std::chrono::duration<double> t_elapsed_;
     
-public:
-    SimManager(int, int);
-    
     Eigen::ArrayXd  V_r;
     Eigen::ArrayXd  V_l;
-
+    
     Eigen::ArrayXd  Qp_min;
     Eigen::ArrayXd  Qp_inf;
     Eigen::ArrayXd  Qp_sup;
@@ -56,22 +66,11 @@ public:
     Eigen::ArrayXd  Kt;
     Eigen::ArrayXd  Kt_inf;
     Eigen::ArrayXd  Kt_sup;
-
+    
     Eigen::ArrayXXd Psi_grd;
-
+    
     Eigen::MatrixXd E_ref;
     Eigen::MatrixXd F_lnd;
-    
-    OdfOptimiser<MESOGEN> SimHandler;
-    
-    void MPIInit();
-    void InitRun(int);
-    void LandscapeRun();
-    void MinSurf();
-    void Gather();
-    void Save();
-    
-    ~SimManager();
 };
 
 #endif

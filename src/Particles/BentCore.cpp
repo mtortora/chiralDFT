@@ -1,6 +1,6 @@
 // ===================================================================
 /**
- * Bent-core mesogen derived particle class
+ * Bent-core mesogen derived particle class.
  */
 // ===================================================================
 /*
@@ -18,8 +18,8 @@ using namespace Eigen;
 
 BentCore::BentCore()
 {
-    // Bounding tree properties
-    BHierarchy->SetTreeProperties(2);
+    // Bounding leaf parameter
+    BVH.SetLeafParameter(3);
 
     N_DELTA_L   = 2;
 
@@ -113,13 +113,10 @@ void BentCore::Build(int mpi_rank)
     file_backbone .close();
     file_wireframe.close();
     
-    // Build bounding volume hierarchy
-    BHierarchy->AllocateForest(1);
-    
-    BTree* Tree = &BHierarchy->Forest[0];
-    BHierarchy->RecursiveBuild(Tree, Backbone_, D_HARD_);
-    
-    if ( id_ == 1 ) BHierarchy->PrintBuildInfo();
-
     Backbone = Backbone_;
+
+    // Build bounding volume hierarchy
+    BVH.Build(Backbone, D_HARD_);
+    
+    if ( id_ == 1 ) BVH.PrintBuildInfo();
 }

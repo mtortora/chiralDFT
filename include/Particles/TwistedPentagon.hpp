@@ -7,6 +7,22 @@
 
 class TwistedPentagon: public BaseParticle
 {
+public:
+	TwistedPentagon();
+	~TwistedPentagon() {delete Mesh;}
+	
+	RAPID_model* Mesh;
+	
+	void Build(int) override;
+	void Tesselate(const Eigen::Matrix3Xd&, uint*);
+	
+#if (USE_RAPID)
+	void Parse(std::mt19937_64&) override {}
+#endif
+	
+protected:
+	double R_THRESHOLD_;
+	
 private:
 	uint   N_R_;
 	uint   N_Z_;
@@ -20,23 +36,6 @@ private:
 	
 	void SaveWireframe(const Eigen::Matrix3Xd&);
 	void SaveMesh     (const Eigen::Matrix3Xd&, uint);
-	
-protected:
-	double R_THRESHOLD_;
-	
-public:
-	TwistedPentagon();
-	
-	RAPID_model* Mesh;
-	
-	void Build(int) override;
-	void Tesselate(const Eigen::Matrix3Xd&, uint*);
-	
-#if (USE_RAPID)
-	void Parse(std::mt19937_64&) override {}
-#endif
-	
-	virtual ~TwistedPentagon() {delete Mesh;}
 };
 
 #endif

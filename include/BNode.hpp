@@ -4,7 +4,7 @@
 // ===================================================================
 /**
  * Base bounding node structure for broad overlap tests. Includes both
- * an Oriented-Bounding Box (OBB) and a Sphero-Cylinder (SC) template
+ * an Oriented-Bounding Box (OBB) and a Sphero-Cylinder (SC) template.
  */
 // ===================================================================
 /*
@@ -23,6 +23,8 @@ struct BNode
         is_root = false;
         is_leaf = false;
     }
+    
+    virtual ~BNode() {}
     
     // Pointers to children nodes
     BNode* NodeI;
@@ -55,7 +57,6 @@ struct BNode
     // Enclosed vertices - only allocated for leaf nodes
     Eigen::Matrix3Xd* Vertices;
 
-    // Overloaded assignment operator for tree traversal
     BNode& operator=(const BNode& Node)
     {
         l_xh        = Node.l_xh;
@@ -65,6 +66,7 @@ struct BNode
         l_ch        = Node.l_ch;
         l_cr        = Node.l_cr;
         
+        Axis        = Node.Axis;
         Center      = Node.Center;
         Orientation = Node.Orientation;
 

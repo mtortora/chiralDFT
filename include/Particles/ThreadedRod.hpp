@@ -6,12 +6,15 @@
 
 class ThreadedRod: public BaseParticle
 {
-private:    
-    uint   N_PATCH_;
-    uint   N_RES_;
+public:
+    ThreadedRod();
     
-    double P_PATCH_;
-	
+    void Build(int) override;
+    
+#if (!USE_DH)
+    void Parse(std::mt19937_64&) override {}
+#endif
+    
 protected:
     double D_HARD_;
     double L_Z_;
@@ -19,17 +22,13 @@ protected:
     double E_CUT_;
     double DH_PREFACTOR_;
     double MINUS_KAPPA_;
-	
-public:
-    ThreadedRod();
     
-    void Build(int) override;
+private:
+    uint   N_PATCH_;
+    uint   N_RES_;
     
-#if (!USE_DH)
-    void Parse(std::mt19937_64&) override {BHull = BHierarchy;}
-#endif
-    
-    virtual ~ThreadedRod() {}
+    double P_PATCH_;
+    double R_PATCH_;
 };
 
 #endif

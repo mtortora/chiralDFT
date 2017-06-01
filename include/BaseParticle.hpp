@@ -3,8 +3,8 @@
 
 // ===================================================================
 /**
- * Contains the BaseParticle class, from which all particles types
- * must inherit. Also implements random axis/orientation generators
+ * Header-only BaseParticle class, from which all particles types must
+ * inherit. Implements the random axis/orientation generators.
  */
 // ===================================================================
 /*
@@ -16,25 +16,15 @@
 #include <random>
 #include <string>
 
-#include "BTree.hpp"
+#include "BHierarchy.hpp"
 
 
 class BaseParticle
 {
-private:
-    double phi_;
-    double alpha_;
-    double theta_;
-	
-protected:
-    int id_;
-	
 public:
     BaseParticle()
     {
         static int id = 0;
-
-        BHierarchy    = new BTree();
         id_           = id++;
         
         Axis          = Eigen::Vector3d::UnitZ();
@@ -52,9 +42,9 @@ public:
     Eigen::Vector3d Axis;
     Eigen::Matrix3d Orientation;
     
-    // Bounding hull + tree hierarchy
-    BTree* BHull;
-    BTree* BHierarchy;
+    // Bounding hull and hierarchy
+    BTree*     Hull;
+    BHierarchy BVH;
 	
     double GetTheta() {return theta_;}
 
@@ -69,7 +59,7 @@ public:
                  cos(theta_);
 		
         // Assume the main particle axis of all base configurations is initially borne by ez
-        BHull->Axis = Axis;
+        Hull->Axis = Axis;
     }
     
     inline void SetRandomOrientation(std::mt19937_64& rng_engine, std::uniform_real_distribution<double>& rng_distrib)
@@ -87,14 +77,20 @@ public:
                        sin(alpha_)*sin(theta_),
                        cos(theta_);
 		
-        BHull->Center      = Orientation * BHull->Center_p;
-        BHull->Orientation = Orientation * BHull->Orientation_p;
+        Hull->Center      = Orientation * Hull->Center_p;
+        Hull->Orientation = Orientation * Hull->Orientation_p;
     }
 	
     virtual void Build(int) = 0;
-    virtual void Parse(std::mt19937_64&) {BHull = &BHierarchy->Forest[0];}
-	
-    virtual ~BaseParticle() {delete BHierarchy;}
+    virtual void Parse(std::mt19937_64&) {Hull = &BVH.Forest[0];}
+    
+protected:
+    int id_;
+    
+private:
+    double phi_;
+    double alpha_;
+    double theta_;
 };
 
 #endif

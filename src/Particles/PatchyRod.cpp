@@ -1,6 +1,7 @@
 // ===================================================================
 /**
- * Patchy rod derived particle class
+ * Patchy rod derived particle class.
+ * Linear Yukawa spheres potentially decorated with helical charges.
  */
 // ===================================================================
 /*
@@ -19,6 +20,7 @@ using namespace Eigen;
 PatchyRod::PatchyRod()
 {
     N_DELTA_L    = 2;
+    Hull         = &BVH;
     
     // Rod geometric parameters
     N_PATCH_     = 21;
@@ -45,12 +47,12 @@ PatchyRod::PatchyRod()
         R_CUT_           = 5.  * SIGMA_R;
         
         // Bounding volume parameters
-        BHierarchy->l_xh = (SIGMA_R + R_CUT_) / 2.;
-        BHierarchy->l_yh = (SIGMA_R + R_CUT_) / 2.;
-        BHierarchy->l_zh = (L_Z_    + R_CUT_) / 2.;
+        Hull->l_xh = (SIGMA_R + R_CUT_) / 2.;
+        Hull->l_yh = (SIGMA_R + R_CUT_) / 2.;
+        Hull->l_zh = (L_Z_    + R_CUT_) / 2.;
         
-        BHierarchy->l_ch = (SIGMA_R + L_Z_)   / 2.;
-        BHierarchy->l_cr = (SIGMA_R + R_CUT_) / 2.;
+        Hull->l_ch = (SIGMA_R + L_Z_)   / 2.;
+        Hull->l_cr = (SIGMA_R + R_CUT_) / 2.;
     }
     
     else
@@ -58,15 +60,15 @@ PatchyRod::PatchyRod()
         R_CUT_           =  R_WCA_;
         
         // Bounding volume parameters
-        BHierarchy->l_xh = (R_WCA_ + SIGMA_R) / 2.;
-        BHierarchy->l_yh = (R_WCA_ + SIGMA_R) / 2.;
-        BHierarchy->l_zh = (R_WCA_ + L_Z_)    / 2.;
+        Hull->l_xh = (R_WCA_ + SIGMA_R) / 2.;
+        Hull->l_yh = (R_WCA_ + SIGMA_R) / 2.;
+        Hull->l_zh = (R_WCA_ + L_Z_)    / 2.;
         
-        BHierarchy->l_ch =  L_Z_              / 2.;
-        BHierarchy->l_cr = (R_WCA_ + SIGMA_R) / 2.;
+        Hull->l_ch =  L_Z_              / 2.;
+        Hull->l_cr = (R_WCA_ + SIGMA_R) / 2.;
     }
     
-    R_INTEG = 2. * (BHierarchy->l_ch + BHierarchy->l_cr);
+    R_INTEG = 2. * (Hull->l_ch + Hull->l_cr);
     V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
 }
 

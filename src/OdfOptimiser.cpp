@@ -1,7 +1,7 @@
 // ===================================================================
 /**
  * Orientation distribution function derived handler class - objects
- * and methods preceded by "this->" are inherited from MCIntegrator
+ * and methods preceded by "this->" are inherited from MCIntegrator.
  */
 // ===================================================================
 /*

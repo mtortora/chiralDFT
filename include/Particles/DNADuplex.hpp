@@ -6,16 +6,18 @@
 
 class DNADuplex: public BaseParticle
 {
-private:
-    uint   N_CONF_;
-    uint   idx_conf_;
-
-    double V_CYT_;
-    double V_GUA_;
-    double V_ADE_;
-    double V_THY_;
-    double V_BCK_;
+public:
+    DNADuplex();
     
+    // Load random configuration from BHierarchy->Forest
+    void Parse(std::mt19937_64& rng_engine) override
+    {
+        uint idx_conf = rng_engine() % N_CONF_;
+        Hull          = &BVH.Forest[idx_conf];
+    }
+    
+    void Build(int) override;
+  
 protected:
     uint   N_STAR_;
     
@@ -41,19 +43,14 @@ protected:
     double R_STAR_;
     double DELTA_R_;
     
-public:
-    DNADuplex();
+private:
+    uint   N_CONF_;
 
-    // Load random configuration from BHierarchy->Forest
-    void Parse(std::mt19937_64& rng_engine) override
-    {
-        idx_conf_ = rng_engine() % N_CONF_;
-        BHull     = &BHierarchy->Forest[idx_conf_];
-    }
-        
-    void Build(int) override;
-    
-    virtual ~DNADuplex() {}
+    double V_CYT_;
+    double V_GUA_;
+    double V_ADE_;
+    double V_THY_;
+    double V_BCK_;
 };
 
 #endif

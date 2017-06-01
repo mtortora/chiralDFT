@@ -7,6 +7,22 @@
 
 class TwistedCuboid: public BaseParticle
 {
+public:
+    TwistedCuboid();
+    ~TwistedCuboid() {delete Mesh;}
+    
+    RAPID_model* Mesh;
+    
+    void Build(int) override;
+    void Tesselate(const Eigen::Matrix3Xd&, uint*);
+    
+#if (USE_RAPID)
+    void Parse(std::mt19937_64&) override {}
+#endif
+    
+protected:
+    double R_THRESHOLD_;
+    
 private:
     uint   N_X_;
     uint   N_Y_;
@@ -21,23 +37,6 @@ private:
     
     void SaveWireframe(const Eigen::Matrix3Xd&);
     void SaveMesh     (const Eigen::Matrix3Xd&, uint);
-    
-protected:
-    double R_THRESHOLD_;
-
-public:
-    TwistedCuboid();
-
-    RAPID_model* Mesh;
-
-    void Build(int) override;
-    void Tesselate(const Eigen::Matrix3Xd&, uint*);
-
-#if (USE_RAPID)
-    void Parse(std::mt19937_64&) override {}
-#endif
-    
-    virtual ~TwistedCuboid() {delete Mesh;}
 };
 
 #endif

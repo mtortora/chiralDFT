@@ -1,7 +1,7 @@
 // ===================================================================
 /**
- * Specialised root node for the bounding volume hierarchy tree.
- * Forest properties only need to be set for flexible particles
+ * Specialised root node for a bounding volume tree.
+ * Children nodes are allocated in the std::vector Tree.
  */
 // ===================================================================
 /*
@@ -17,6 +17,7 @@ using namespace Eigen;
 
 BTree::BTree()
 {
+    // Root node parameters
     is_root       = true;
     
     idx_depth     = 0;
@@ -27,9 +28,8 @@ BTree::BTree()
     
     vert_alloced  = 0;
     nodes_alloced = 0;
-    trees_alloced = 0;
     
-    // Set reference configurations aligned with nematic director
+    // Set the principal axes of all initial configurations parallel to the reference frame
     Axis          = Vector3d::UnitZ();
     
     Center        = Vector3d::Zero();
@@ -77,9 +77,39 @@ void BTree::RecursiveDeallocate(BNode* Node)
 }
 
 // ============================
-// Vertex memory allocation & assignment
+/* Single-tree allocator */
 // ============================
-void BTree::AllocateLeaf(BNode* Node, const Eigen::Matrix3Xd& Vertices_)
+void BTree::Allocate(uint num_vert)
+{    
+    // Binary tree size parameters
+    uint tree_depth = floor(log((float)num_vert/(float)m) / log(2.) + 0.5);
+    uint n_leaves   = pow(2, tree_depth);
+    
+    uint n_nodes    = 2 * (n_leaves-1);
+    max_depth       = tree_depth;
+    
+    // Node constructor is called by the resize() method
+    if ( max_depth > 0 ) Tree.resize(n_nodes);
+    
+    RecursiveAllocate(this);
+}
+
+// ============================
+/* Single-tree constructor */
+// ============================
+void BTree::Build(const Matrix3Xd& Vertices_, double range, uint m_)
+{
+    this->m       = m_;
+    uint num_vert = Vertices_.cols();
+
+    Allocate(num_vert);
+    RecursiveBuild(this, Vertices_, range);
+}
+
+// ============================
+/*  Specialised leaf constructor */
+// ============================
+void BTree::BuildLeaf(BNode* Node, const Matrix3Xd& Vertices_)
 {
     Node->is_leaf  = true;
     Node->Vertices = new(std::nothrow) Eigen::Matrix3Xd;
@@ -90,39 +120,6 @@ void BTree::AllocateLeaf(BNode* Node, const Eigen::Matrix3Xd& Vertices_)
     vert_alloced   += Vertices_.cols();
     
     leaves_built++;
-}
-
-// ============================
-/* Single tree allocator */
-// ============================
-void BTree::AllocateTree()
-{        
-    // Allocate children node memory in std::vector Tree
-    if ( max_depth > 0 ) Tree.resize(n_nodes);
-    
-    RecursiveAllocate(this);
-    
-    trees_alloced++;
-}
-
-// ============================
-/* Allocates a forest of size num_trees */
-// ============================
-void BTree::AllocateForest(uint num_trees)
-{
-    // Initialise root nodes via the default constructor, called in the resize() method
-    if ( num_trees > 0 ) Forest.resize(num_trees);
-    
-    for ( uint idx_tree = 0; idx_tree < num_trees; ++idx_tree )
-    {
-        BTree* Tree_ = &Forest[idx_tree];
-        *Tree_       = *this;
-        
-        Tree_->AllocateTree();
-
-        nodes_alloced += Tree_->nodes_alloced;
-        trees_alloced += Tree_->trees_alloced;
-    }
 }
 
 // ============================
@@ -184,10 +181,10 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
 
     nodes_built++;
 
-    // Leaf nodes are allocated if maximum depth is reached, or if the number of enclosed vertices is < n_vert_max
-    if ( (Node->idx_depth == max_depth) || (Vertices_in.cols() < n_vert_max) )
+    // Leaf nodes are allocated if maximum depth is reached, or if the number of enclosed vertices is < m
+    if ( (Node->idx_depth == max_depth) || (Vertices_in.cols() < m) )
     {
-        AllocateLeaf(Node, Vertices_new);
+        BuildLeaf(Node, Vertices_new);
         return;
     }
 
@@ -215,6 +212,3 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     
     return;
 }
-
-// Forest nodes are allocated solely through std::vector's and do not need to be freed manually
-BTree::~BTree() {if ( (nodes_alloced > 0) && (Forest.size() == 0) ) RecursiveDeallocate(this);}

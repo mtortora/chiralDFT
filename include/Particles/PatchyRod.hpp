@@ -6,13 +6,14 @@
 
 class PatchyRod: public BaseParticle
 {
-private:
-    uint   N_PATCH_;
-    uint   N_BACK_;
-    uint   N_RES_;
+public:
+    PatchyRod();
     
-    double L_Z_;
-    double P_PATCH_;
+    Eigen::Matrix3Xd Backbone;
+    Eigen::Matrix3Xd Patches;
+    
+    void Build(int) override;
+    void Parse(std::mt19937_64&) override {}
     
 protected:
     double R_WCA_;
@@ -22,16 +23,13 @@ protected:
     double DH_PREFACTOR_;
     double MINUS_KAPPA_;
     
-public:
-    PatchyRod();
+private:
+    uint   N_PATCH_;
+    uint   N_BACK_;
+    uint   N_RES_;
     
-    Eigen::Matrix3Xd Backbone;
-    Eigen::Matrix3Xd Patches;
-    
-    void Build(int) override;
-    void Parse(std::mt19937_64&) override {BHull = BHierarchy;}
-    
-    virtual ~PatchyRod() {}
+    double L_Z_;
+    double P_PATCH_;
 };
 
 #endif

@@ -1,6 +1,6 @@
 // ===================================================================
 /**
- * DNA duplex derived particle class
+ * DNA duplex derived particle class.
  */
 // ===================================================================
 /*
@@ -19,8 +19,8 @@ using namespace Eigen;
 
 DNADuplex::DNADuplex()
 {
-    // Bounding tree properties
-    BHierarchy->SetTreeProperties(11);
+    // Bounding leaf parameter
+    BVH.SetLeafParameter(10);
     
     N_DELTA_L       = 2;
     
@@ -131,18 +131,8 @@ void DNADuplex::Build(int mpi_rank)
     MPI_Bcast(Backbones.data(), Backbones.size(), MPI_DOUBLE, MPI_MASTER, MPI_COMM_WORLD);
     
     // Build bounding volume hierarchy
-    BHierarchy->AllocateForest(N_CONF);
-    
-    for ( uint idx_conf = 0; idx_conf < N_CONF; ++idx_conf )
-    {
-        int       n_nucl   = Sizes(idx_conf);
-        
-        BTree*    Tree     = &BHierarchy->Forest[idx_conf];
-        Matrix3Xd Vertices = Matrix3Xd::Map(Backbones.data() + 3 * BHierarchy->vert_alloced, 3, n_nucl);
-        
-        BHierarchy->RecursiveBuild(Tree, Vertices, R_CUT_);
-    }
-    
+    BVH.Build(Backbones, R_CUT_, Sizes);
+
     // Print simulation parameters
     if ( id_ == 1 )
     {
@@ -158,7 +148,7 @@ void DNADuplex::Build(int mpi_rank)
             if ( MODE_DH == DH_FERRARINI ) LogInf("Using Ferrarini's Debye-Huckel model potential");
         }
         
-        BHierarchy->PrintBuildInfo();
+        BVH.PrintBuildInfo();
     }
     
     // Set particle properties
