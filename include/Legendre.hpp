@@ -15,19 +15,20 @@
 // ===================================================================
 
 
-namespace Legendre
+template<typename number>
+struct Legendre
 {
     // n = 0
-    static inline double P0(double)   {return 1.;}
+    static inline number P0(number)   {return 1.;}
     
     // n = 1
-    static inline double P1(double x) {return x;}
+    static inline number P1(number x) {return x;}
     
     // n = 2
-    static inline double P2(double x) {return ((3. * x*x) - 1.) * 0.5;}
+    static inline number P2(number x) {return ((3. * x*x) - 1.) * 0.5;}
     
     // n
-    static inline double Pn(unsigned int n, double x)
+    static inline number Pn(unsigned int n, number x)
     {
         if      ( n == 0 )          return P0(x);
         else if ( n == 1 )          return P1(x);
@@ -37,19 +38,19 @@ namespace Legendre
         if ( x == -1. )             return ((n % 2 == 0) ? 1. : -1.);
         if ( (x == 0.) && (n % 2) ) return 0.;
         
-        double pnm1(P2(x));
-        double pnm2(P1(x));
-        double pn(pnm1);
+        number pnm1(P2(x));
+        number pnm2(P1(x));
+        number pn(pnm1);
         
         for ( unsigned int l = 3; l <= n; ++l )
         {
-            pn = (((2. * (double)l) - 1.) * x * pnm1 - (((double)l - 1.) * pnm2)) / (double)l;
+            pn = (((2. * (number)l) - 1.) * x * pnm1 - (((number)l - 1.) * pnm2)) / (number)l;
             pnm2 = pnm1;
             pnm1 = pn;
         }
         
         return pn;
     }
-}
+};
 
 #endif

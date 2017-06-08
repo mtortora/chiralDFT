@@ -12,37 +12,37 @@
 
 #include "BTree.hpp"
 
-using namespace Eigen;
 
-
-BTree::BTree()
+template<typename number>
+BTree<number>::BTree()
 {
     // Root node parameters
-    is_root       = true;
+    this->is_root       = true;
     
-    idx_depth     = 0;
-    max_depth     = 0;
+    this->idx_depth     = 0;
+    this->max_depth     = 0;
     
-    nodes_built   = 0;
-    leaves_built  = 0;
+    this->nodes_built   = 0;
+    this->leaves_built  = 0;
     
-    vert_alloced  = 0;
-    nodes_alloced = 0;
+    this->vert_alloced  = 0;
+    this->nodes_alloced = 0;
     
     // Set the principal axes of all initial configurations parallel to the reference frame
-    Axis          = Vector3d::UnitZ();
+    this->Axis          = Vector3<number>::UnitZ();
     
-    Center        = Vector3d::Zero();
-    Center_p      = Vector3d::Zero();
+    this->Center        = Vector3<number>::Zero();
+    this->Center_p      = Vector3<number>::Zero();
     
-    Orientation   = Matrix3d::Identity();
-    Orientation_p = Matrix3d::Identity();
+    this->Orientation   = Matrix33<number>::Identity();
+    this->Orientation_p = Matrix33<number>::Identity();
 }
 
 // ============================
 /* Recursive memory allocation */
 // ============================
-void BTree::RecursiveAllocate(BNode* Node)
+template<typename number>
+void BTree<number>::RecursiveAllocate(BNode<number>* Node)
 {
     if ( (Node == this) && (max_depth == 0) ) nodes_alloced++;
     else
@@ -63,7 +63,8 @@ void BTree::RecursiveAllocate(BNode* Node)
 // ============================
 /* Recursive memory deallocation */
 // ============================
-void BTree::RecursiveDeallocate(BNode* Node)
+template<typename number>
+void BTree<number>::RecursiveDeallocate(BNode<number>* Node)
 {
     if ( Node->is_leaf ) delete Node->Vertices;
     else
@@ -79,7 +80,8 @@ void BTree::RecursiveDeallocate(BNode* Node)
 // ============================
 /* Single-tree allocator */
 // ============================
-void BTree::Allocate(uint num_vert)
+template<typename number>
+void BTree<number>::Allocate(uint num_vert)
 {    
     // Binary tree size parameters
     uint tree_depth = floor(log((float)num_vert/(float)m) / log(2.) + 0.5);
@@ -97,7 +99,8 @@ void BTree::Allocate(uint num_vert)
 // ============================
 /* Single-tree constructor */
 // ============================
-void BTree::Build(const Matrix3Xd& Vertices_, double range, uint m_)
+template<typename number>
+void BTree<number>::Build(const Matrix3X<number>& Vertices_, number range, uint m_)
 {
     this->m       = m_;
     uint num_vert = Vertices_.cols();
@@ -109,10 +112,11 @@ void BTree::Build(const Matrix3Xd& Vertices_, double range, uint m_)
 // ============================
 /*  Specialised leaf constructor */
 // ============================
-void BTree::BuildLeaf(BNode* Node, const Matrix3Xd& Vertices_)
+template<typename number>
+void BTree<number>::BuildLeaf(BNode<number>* Node, const Matrix3X<number>& Vertices_)
 {
     Node->is_leaf  = true;
-    Node->Vertices = new(std::nothrow) Eigen::Matrix3Xd;
+    Node->Vertices = new(std::nothrow) Matrix3X<number>;
     
     if ( !Node->Vertices ) throw std::runtime_error("Vertex memory allocation failed");
     
@@ -125,35 +129,36 @@ void BTree::BuildLeaf(BNode* Node, const Matrix3Xd& Vertices_)
 // ============================
 /* Build bounding volume hierarchy */
 // ============================
-void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double range)
+template<typename number>
+void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& Vertices_in, number range)
 {
     // Vertices are expressed in the parent frame
-    Vector3d  Center_of_mass = Vertices_in.rowwise().mean();
-    Matrix3Xd Vertices_cm    = Vertices_in.colwise() - Center_of_mass;
+    Vector3<number>  Center_of_mass = Vertices_in.rowwise().mean();
+    Matrix3X<number> Vertices_cm    = Vertices_in.colwise() - Center_of_mass;
     
     // Principal Component Analysis (PCA) fails for 3xn matrices if n < 3 so set transformation to identity
-    if ( Vertices_in.cols() < 3 ) Node->Orientation_p = Matrix3d::Identity();
+    if ( Vertices_in.cols() < 3 ) Node->Orientation_p = Matrix33<number>::Identity();
     else
     {
         // Orientation_p_ is expressed in the parent frame
-        Node->Orientation_p = Utils::PCA(Vertices_cm);
+        Node->Orientation_p = Utils<number>::PCA(Vertices_cm);
         
         // Project Vertices_cm in child frame
         Vertices_cm         = Node->Orientation_p.transpose() * Vertices_cm;
     }
     
     // Work out bounding box dimensions
-    ArrayXd Vertex_x = Vertices_cm.row(0).array();
-    ArrayXd Vertex_y = Vertices_cm.row(1).array();
-    ArrayXd Vertex_z = Vertices_cm.row(2).array();
+    ArrayX<number> Vertex_x = Vertices_cm.row(0).array();
+    ArrayX<number> Vertex_y = Vertices_cm.row(1).array();
+    ArrayX<number> Vertex_z = Vertices_cm.row(2).array();
 
-    double  x_min    = Vertex_x.minCoeff();
-    double  y_min    = Vertex_y.minCoeff();
-    double  z_min    = Vertex_z.minCoeff();
+    number  x_min    = Vertex_x.minCoeff();
+    number  y_min    = Vertex_y.minCoeff();
+    number  z_min    = Vertex_z.minCoeff();
 
-    double  x_max    = Vertex_x.maxCoeff();
-    double  y_max    = Vertex_y.maxCoeff();
-    double  z_max    = Vertex_z.maxCoeff();
+    number  x_max    = Vertex_x.maxCoeff();
+    number  y_max    = Vertex_y.maxCoeff();
+    number  z_max    = Vertex_z.maxCoeff();
 
     Node->l_xh       = (x_max-x_min + range) / 2.;
     Node->l_yh       = (y_max-y_min + range) / 2.;
@@ -167,7 +172,7 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     }
 
     // Bounding spherocylinder dimensions
-    double r_max          = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
+    number r_max          = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
     
     Node->l_cr            = r_max + range/2.;
     Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min)/2.;
@@ -177,7 +182,7 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     Node->Center_p        = Node->Orientation_p * Node->Center_p + Center_of_mass;
     
     // Vertices expressed in child frame
-    MatrixXd Vertices_new = Node->Orientation_p.transpose() * Vertices_in;
+    Matrix3X<number> Vertices_new = Node->Orientation_p.transpose() * Vertices_in;
 
     nodes_built++;
 
@@ -189,8 +194,8 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     }
 
     // Split box in 2 along the axis of maximal dispersion
-    ArrayXb Vertex_inf = (Vertex_z <= (z_max+z_min)/2.);
-    ArrayXb Vertex_sup = (Vertex_z >  (z_max+z_min)/2.);
+    ArrayX<bool> Vertex_inf = (Vertex_z <= (z_max+z_min)/2.);
+    ArrayX<bool> Vertex_sup = (Vertex_z >  (z_max+z_min)/2.);
     
     uint    num_inf    = Vertex_inf.cast<uint>().sum();
     uint    num_sup    = Vertex_sup.cast<uint>().sum();
@@ -198,8 +203,8 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     uint    ctr_inf    = 0;
     uint    ctr_sup    = 0;
 
-    Matrix3Xd Vertices_inf(3, num_inf);
-    Matrix3Xd Vertices_sup(3, num_sup);
+    Matrix3X<number> Vertices_inf(3, num_inf);
+    Matrix3X<number> Vertices_sup(3, num_sup);
 
     for ( uint idx_vtx = 0; idx_vtx < Vertices_in.cols(); ++idx_vtx )
     {
@@ -212,3 +217,6 @@ void BTree::RecursiveBuild(BNode* Node, const Matrix3Xd& Vertices_in, double ran
     
     return;
 }
+
+template class BTree<float>;
+template class BTree<double>;

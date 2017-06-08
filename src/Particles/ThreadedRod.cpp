@@ -14,35 +14,34 @@
 
 #include "Particles/ThreadedRod.hpp"
 
-using namespace Eigen;
 
-
-ThreadedRod::ThreadedRod()
+template<typename number>
+ThreadedRod<number>::ThreadedRod()
 {
     // Bounding leaf parameter
-    BVH.SetLeafParameter(3);
+    this->BVH.SetLeafParameter(3);
 
-    N_DELTA_L = 2;
+    this->N_DELTA_L = 2;
 
     // Rod parameters - if the Lagerwall Debye-Huckel potential is used, model lengths are reported in nanometers
-    N_PATCH_  = 17;
-    N_RES_    = 15;
+    N_PATCH_        = 17;
+    N_RES_          = 15;
     
-    D_HARD_   = 1. * SIGMA_R;
+    D_HARD_         = 1. * this->SIGMA_R;
 
-    L_Z_      = 12. * D_HARD_;
-    P_PATCH_  = 10. * D_HARD_;
-    R_PATCH_  = 0.5 * D_HARD_;
+    L_Z_            = 12. * D_HARD_;
+    P_PATCH_        = 10. * D_HARD_;
+    R_PATCH_        = 0.5 * D_HARD_;
     
-    V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
-    V_EFF     = V0;
+    this->V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
+    this->V_EFF     = this->V0;
     
     // Debye-Huckel parameters
     if ( USE_DH )
     {
         if ( MODE_DH == DH_WENSINK )
         {
-            double c_dens = L_Z_ / (double)N_PATCH_;
+            number c_dens = L_Z_ / (number)N_PATCH_;
             
             DH_PREFACTOR_ = 1. * SQR(c_dens);
             MINUS_KAPPA_  = -20. / L_Z_;
@@ -50,12 +49,12 @@ ThreadedRod::ThreadedRod()
         
         else if ( MODE_DH == DH_LAGERWALL )
         {
-            double z_s    = 15. * (double)N_PATCH_;
-            double eta_c  = 0.19;
-            double l_bjer = 0.07 * D_HARD_;
+            number z_s    = 15. * (number)N_PATCH_;
+            number eta_c  = 0.19;
+            number l_bjer = 0.07 * D_HARD_;
             
-            double rho_c  = eta_c / V0;
-            double c_dens = z_s / (double)N_PATCH_;
+            number rho_c  = eta_c / this->V0;
+            number c_dens = z_s / (number)N_PATCH_;
             
             DH_PREFACTOR_ = l_bjer * SQR(c_dens);
             MINUS_KAPPA_  = -sqrt(4*PI * l_bjer * (z_s*rho_c + 2*C_SALT));
@@ -70,21 +69,22 @@ ThreadedRod::ThreadedRod()
     
     else R_CUT_ = 0.;
     
-    R_INTEG = L_Z_ + R_CUT_ + D_HARD_;
-    V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
+    this->R_INTEG = L_Z_ + R_CUT_ + D_HARD_;
+    this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
 }
 
 // ============================
 /* Build particle model */
 // ============================
-void ThreadedRod::Build(int mpi_rank)
+template<typename number>
+void ThreadedRod<number>::Build(int mpi_rank)
 {
-    Matrix3Xd Patches  (3, N_PATCH_);
-    Matrix3Xd Wireframe(3, SQR(N_RES_));
+    Matrix3X<number> Patches  (3, N_PATCH_);
+    Matrix3X<number> Wireframe(3, SQR(N_RES_));
     
-    ArrayXd   Z_grid     = ArrayXd::LinSpaced(N_PATCH_, 0., L_Z_);
-    ArrayXd   Phi_grid   = ArrayXd::LinSpaced(N_RES_, 0., 2.*PI);
-    ArrayXd   Theta_grid = ArrayXd::LinSpaced(N_RES_, 0., PI);
+    ArrayX<number> Z_grid     = ArrayX<number>::LinSpaced(N_PATCH_, 0., L_Z_);
+    ArrayX<number> Phi_grid   = ArrayX<number>::LinSpaced(N_RES_, 0., 2.*PI);
+    ArrayX<number> Theta_grid = ArrayX<number>::LinSpaced(N_RES_, 0., PI);
 
     std::string DATA_PATH;
     
@@ -97,8 +97,8 @@ void ThreadedRod::Build(int mpi_rank)
     Patches.row(1) = R_PATCH_ * sin(2.*PI/P_PATCH_ * Z_grid);
     Patches.row(2) = Z_grid;
     
-    Vector3d Center;
-    Vector3d Center_of_mass = Patches.rowwise().mean();
+    Vector3<number> Center;
+    Vector3<number> Center_of_mass = Patches.rowwise().mean();
     
     // Draw spherical beads in lieu of interaction patches
     for ( uint idx_center = 0; idx_center < N_PATCH_; ++idx_center )
@@ -108,11 +108,11 @@ void ThreadedRod::Build(int mpi_rank)
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            double theta = Theta_grid(idx_theta);
+            number theta = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi = Phi_grid(idx_phi);
+                number phi = Phi_grid(idx_phi);
                 uint   idx = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
@@ -133,7 +133,7 @@ void ThreadedRod::Build(int mpi_rank)
     // Draw cylinder
     Wireframe.resize(3, N_RES_);
 
-    ArrayXd Ax_grid = ArrayXd::LinSpaced(N_RES_, -L_Z_/2., L_Z_/2.);
+    ArrayX<number> Ax_grid = ArrayX<number>::LinSpaced(N_RES_, -L_Z_/2., L_Z_/2.);
     
     for ( uint idx_center = 0; idx_center < N_RES_; ++idx_center )
     {
@@ -141,7 +141,7 @@ void ThreadedRod::Build(int mpi_rank)
         
         for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
         {
-            double phi             = Phi_grid(idx_phi);
+            number phi             = Phi_grid(idx_phi);
             
             Wireframe.col(idx_phi) = Center;
             
@@ -159,15 +159,15 @@ void ThreadedRod::Build(int mpi_rank)
 
     for ( uint idx_cap = 0; idx_cap < 2; ++idx_cap )
     {
-        Theta_grid = ArrayXd::LinSpaced(N_RES_/2, (idx_cap+1) * PI/2., idx_cap * PI/2.);
+        Theta_grid = ArrayX<number>::LinSpaced(N_RES_/2, (idx_cap+1) * PI/2., idx_cap * PI/2.);
         
         for ( uint idx_theta = 0; idx_theta < N_RES_/2; ++idx_theta )
         {
-            double theta = Theta_grid(idx_theta);
+            number theta = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi          = Phi_grid(idx_phi);
+                number phi          = Phi_grid(idx_phi);
                 uint   idx          = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) << 0., 0., L_Z_/2. - idx_cap*L_Z_;
@@ -190,20 +190,23 @@ void ThreadedRod::Build(int mpi_rank)
     if ( USE_DH )
     {
         // Build bounding volume hierarchy
-        BVH.Build(Patches, R_CUT_);
+        this->BVH.Build(Patches, R_CUT_);
         
-        if ( id_ == 1 ) BVH.PrintBuildInfo();
+        if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
     }
     
     else
     {
-        Hull       = &BVH;
+        this->Hull       = &this->BVH;
         
-        Hull->l_xh =  D_HARD_ / 2.;
-        Hull->l_yh =  D_HARD_ / 2.;
-        Hull->l_zh = (L_Z_+D_HARD_) / 2.;
+        this->Hull->l_xh =  D_HARD_ / 2.;
+        this->Hull->l_yh =  D_HARD_ / 2.;
+        this->Hull->l_zh = (L_Z_+D_HARD_) / 2.;
         
-        Hull->l_ch = L_Z_    / 2.;
-        Hull->l_cr = D_HARD_ / 2.;
+        this->Hull->l_ch = L_Z_    / 2.;
+        this->Hull->l_cr = D_HARD_ / 2.;
     }
 }
+
+template class ThreadedRod<float>;
+template class ThreadedRod<double>;

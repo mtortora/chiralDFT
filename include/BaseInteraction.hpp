@@ -19,13 +19,14 @@
 #include "Utils.hpp"
 
 
-template<class Interaction>
+template<class Interaction, typename number>
 struct BaseInteraction
 {
     // ============================
     /* Recursive BNode collision detection and energy computations */
     // ============================
-    void RecursiveInteraction(const Eigen::Vector3d& R_cm, BNode* Node1, BNode* Node2, double* energy, double cutoff)
+    void RecursiveInteraction(const Vector3<number>& R_cm, BNode<number>* Node1, BNode<number>* Node2,
+                              number* energy, number cutoff)
     {
         bool overlap(true);
 
@@ -35,8 +36,8 @@ struct BaseInteraction
         // Avoid overlap checks on root node, as these were already handled by the MC integrator
         if ( (!Node1->is_root) || (!Node2->is_root) )
         {
-            if ( MODE_TREE == TREE_OB ) overlap = Utils::OverlapBoundOB(R_cm, Node1, Node2);
-            if ( MODE_TREE == TREE_SC ) overlap = Utils::OverlapBoundSC(R_cm, Node1, Node2);
+            if ( MODE_TREE == TREE_OB ) overlap = Utils<number>::OverlapBoundOB(R_cm, Node1, Node2);
+            if ( MODE_TREE == TREE_SC ) overlap = Utils<number>::OverlapBoundSC(R_cm, Node1, Node2);
         }
         
         // Stop tree traversal if boxes are disjoint
@@ -76,19 +77,20 @@ struct BaseInteraction
     // ============================
     /* Work out leaf-leaf interaction energy */
     // ============================
-    double LeafInteraction(const Eigen::Vector3d& R_cm, BNode* Node1, BNode* Node2, double energy, double cutoff)
+    number LeafInteraction(const Vector3<number>& R_cm, BNode<number>* Node1, BNode<number>* Node2,
+                           number energy, number cutoff)
     {
-        double energy_(0.);
+        number energy_(0.);
         
-        Eigen::Matrix3Xd Voxel1 = Node1->Orientation * (*Node1->Vertices);
-        Eigen::Matrix3Xd Voxel2 = Node2->Orientation * (*Node2->Vertices);
+        Matrix3X<number> Voxel1 = Node1->Orientation * (*Node1->Vertices);
+        Matrix3X<number> Voxel2 = Node2->Orientation * (*Node2->Vertices);
         
         for ( uint idx_vtx1 = 0; idx_vtx1 < Voxel1.cols() && energy_ <= cutoff-energy; ++idx_vtx1 )
         {
             for ( uint idx_vtx2 = 0; idx_vtx2 < Voxel2.cols() && energy_ <= cutoff-energy; ++idx_vtx2 )
             {
-                Eigen::Vector3d R_sep = R_cm + Voxel2.col(idx_vtx2) - Voxel1.col(idx_vtx1);
-                double norm           = R_sep.norm();
+                Vector3<number> R_sep = R_cm + Voxel2.col(idx_vtx2) - Voxel1.col(idx_vtx1);
+                number norm           = R_sep.norm();
                 
                 // Significantly faster than a direct virtual function call
                 energy_ += static_cast<Interaction*>(this)->PairInteraction(norm);

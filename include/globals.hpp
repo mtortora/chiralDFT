@@ -5,76 +5,6 @@
 
 
 // ============================
-/* Simulation options */
-// ============================
-
-// Particle type to be used - implemented: BentCore, DNADuplex, Helix, PatchyRod, ThreadedRod, TwistedCuboid, TwistedPentagon
-#define MESOGEN       DNADuplex
-
-// Full run switch - set to 0 for full run, 1 for perturbative run or 2 for excluded volume only (BentCore, Helix)
-#define MODE          1
-
-// Set to 0 for full functional minimisation or 1 for Legendre-projected run (only for preliminary run)
-#define MC_TYPE       0
-
-// Use RAPID library for collision queries - only implemented for the TwistedCuboid & TwistedPentagon particle templates
-#define USE_RAPID     0
-
-// Set to 1 to enable Debye-Huckel interactions
-#define USE_DH        1
-
-// Type of soft interaction - 0: oxDNA-parametrised electrostatics, 1: Ferrarini, 2: Wensink, 3: Lagerwall
-#define MODE_DH       0
-
-// Bounding tree hierarchy mode - set to 0 for Oriented Bounding Box or 1 for SpheroCylinder
-#define MODE_TREE     0
-
-
-// ============================
-/* Model parameters */
-// ============================
-
-// Maximum number of Monte-Carlo steps for excluded volume integration
-#define N_MC          1E14
-
-// Soft interaction parameters - only relevant for the DNADuplex template
-#define T_ABS         293.16
-#define C_SALT        0.26
-
-// Set maximum range of concentrations to be simulated
-#define ETA_MIN       0.01
-#define ETA_MAX       0.27
-
-// Set inverse pitch grid range
-#define Q_MIN        -0.0002
-#define Q_MAX         0.0005
-
-// Gamma coefficient for the relaxed Newton-Raphson method
-#define GAMMA_NR      0.5
-
-// Parameter grid sizes
-#define N_L           20
-#define N_SYNC        50
-#define N_STEPS_Q     15
-#define N_STEPS_ETA   100
-#define N_STEPS_THETA 250
-#define N_STEPS_ODF   2500
-#define N_STEPS_NR    5000
-
-// Numerical tolerance coefficients
-#define TOL_NEM       1e-2
-#define TOL_BIN       1e-4
-#define TOL_ODF       1e-6
-#define TOL_SC        1e-6
-#define TOL_OB        1e-6
-
-// Excluded volume grid dimensions
-#define NX            150
-#define NY            150
-#define NZ            1500
-
-
-// ============================
 /* Custom symbols */
 // ============================
 
@@ -85,8 +15,8 @@
 #define MPI_MASTER    0
 
 // Model options
-#define MODE_FULL     0
-#define MODE_PERT     1
+#define MODE_PERT     0
+#define MODE_FULL     1
 #define MODE_EXC      2
 
 #define ODF_FULL      0
@@ -99,9 +29,6 @@
 
 #define TREE_OB       0
 #define TREE_SC       1
-
-#define SQR(x)        ((x)*(x))
-#define CUB(x)        ((x)*(x)*(x))
 
 
 // ============================
@@ -158,9 +85,23 @@
 typedef unsigned int           uint;
 typedef unsigned long long int ullint;
 
-typedef Eigen::MatrixXd::Index                              IndexXd;
-typedef Eigen::Array <bool, Eigen::Dynamic, 1>              ArrayXb;
-typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> MatrixXb;
+template<typename T> using Matrix22 = Eigen::Matrix<T, 2, 2>;
+template<typename T> using Matrix33 = Eigen::Matrix<T, 3, 3>;
+template<typename T> using Matrix3X = Eigen::Matrix<T, 3, Eigen::Dynamic>;
+template<typename T> using MatrixXX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+template<typename T> using Vector2  = Eigen::Matrix<T, 2, 1>;
+template<typename T> using Vector3  = Eigen::Matrix<T, 3, 1>;
+template<typename T> using VectorX  = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+
+template<typename T> using ArrayX   = Eigen::Array<T, Eigen::Dynamic, 1>;
+template<typename T> using ArrayXX  = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+template<typename T> using IndexX   = typename MatrixXX<T>::Index;
+
+
+#define SQR(x) ((x)*(x))
+#define CUB(x) ((x)*(x)*(x))
 
 
 // ============================

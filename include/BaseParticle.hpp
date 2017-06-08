@@ -19,6 +19,7 @@
 #include "BHierarchy.hpp"
 
 
+template<typename number>
 class BaseParticle
 {
 public:
@@ -27,29 +28,29 @@ public:
         static int id = 0;
         id_           = id++;
         
-        Axis          = Eigen::Vector3d::UnitZ();
-        Orientation   = Eigen::Matrix3d::Identity();
+        Axis          = Vector3<number>::UnitZ();
+        Orientation   = Matrix33<number>::Identity();
     }
 
     uint   N_DELTA_L;
     
-    double SIGMA_R = 1.;
-    double R_INTEG;
-    double V_INTEG;
-    double V_EFF;
-    double V0;
+    number SIGMA_R = 1.;
+    number R_INTEG;
+    number V_INTEG;
+    number V_EFF;
+    number V0;
 
-    Eigen::Vector3d Axis;
-    Eigen::Matrix3d Orientation;
+    Vector3<number> Axis;
+    Matrix33<number> Orientation;
     
     // Bounding hull and hierarchy
-    BTree*     Hull;
-    BHierarchy BVH;
+    BTree<number>*     Hull;
+    BHierarchy<number> BVH;
 	
-    double GetTheta() {return theta_;}
+    number GetTheta() {return theta_;}
 
     // Random configuration generators
-    inline void SetRandomAxis(std::mt19937_64& rng_engine, std::uniform_real_distribution<double>& rng_distrib)
+    inline void SetRandomAxis(std::mt19937_64& rng_engine, std::uniform_real_distribution<number>& rng_distrib)
     {
         phi_   = rng_distrib(rng_engine) * 2.*PI;
         theta_ = rng_distrib(rng_engine) * PI;
@@ -62,7 +63,7 @@ public:
         Hull->Axis = Axis;
     }
     
-    inline void SetRandomOrientation(std::mt19937_64& rng_engine, std::uniform_real_distribution<double>& rng_distrib)
+    inline void SetRandomOrientation(std::mt19937_64& rng_engine, std::uniform_real_distribution<number>& rng_distrib)
     {
         alpha_ = rng_distrib(rng_engine) * 2.*PI;
         
@@ -88,9 +89,9 @@ protected:
     int id_;
     
 private:
-    double phi_;
-    double alpha_;
-    double theta_;
+    number phi_;
+    number alpha_;
+    number theta_;
 };
 
 #endif

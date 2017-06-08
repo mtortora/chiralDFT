@@ -13,49 +13,48 @@
 
 #include "Particles/TwistedCuboid.hpp"
 
-using namespace Eigen;
 
-
-TwistedCuboid::TwistedCuboid()
+template<typename number>
+TwistedCuboid<number>::TwistedCuboid()
 {
     // Bounding leaf parameter
-    BVH.SetLeafParameter(4);
+    this->BVH.SetLeafParameter(4);
 
-    N_DELTA_L    = 2;
+    this->N_DELTA_L = 2;
 
     // Cuboid parameters
-    N_X_         = 10;
-    N_Y_         = 10;
-    N_Z_         = 1000;
+    N_X_            = 10;
+    N_Y_            = 10;
+    N_Z_            = 1000;
 
-    L_X_         = 1.   * SIGMA_R;
-    L_Y_         = 1.   * SIGMA_R;
-    L_Z_         = 100. * SIGMA_R;
+    L_X_            = 1.   * this->SIGMA_R;
+    L_Y_            = 1.   * this->SIGMA_R;
+    L_Z_            = 100. * this->SIGMA_R;
     
-    double alpha = 0.5;
+    number alpha    = 0.5;
     
     // Helical backbone parameters
-    R_BCK_       = 0.  * SIGMA_R;
-    P_BCK_       = 40. * SIGMA_R;
+    R_BCK_          = 0.  * this->SIGMA_R;
+    P_BCK_          = 40. * this->SIGMA_R;
     
     // Thread angle in radians
-    double mu    = 80. * PI/180.;
-    TWIST_       = 2. * L_Z_ / (sqrt(SQR(L_X_)+SQR(L_Y_)) * tan(mu));
+    number mu       = 80. * PI/180.;
+    TWIST_          = 2. * L_Z_ / (sqrt(SQR(L_X_)+SQR(L_Y_)) * tan(mu));
 
-    V0           = L_X_*L_Y_*L_Z_;
-    V_EFF        = V0;
+    this->V0        = L_X_*L_Y_*L_Z_;
+    this->V_EFF     = this->V0;
     
-    R_THRESHOLD_ = (1.+alpha) * fmin(L_X_/((double)N_X_), fmin(L_Y_/((double)N_Y_), L_Z_/((double)N_Z_)));
+    R_THRESHOLD_    = (1.+alpha) * fmin(L_X_/((number)N_X_), fmin(L_Y_/((number)N_Y_), L_Z_/((number)N_Z_)));
 
     #if (!USE_RAPID)
     // Rescale cuboid dimensions to account for finite HS radii
-    L_X_        *= (1. - (1.+alpha)/((double)N_X_));
-    L_Y_        *= (1. - (1.+alpha)/((double)N_Y_));
-    L_Z_        *= (1. - (1.+alpha)/((double)N_Z_));
+    L_X_           *= (1. - (1.+alpha)/((number)N_X_));
+    L_Y_           *= (1. - (1.+alpha)/((number)N_Y_));
+    L_Z_           *= (1. - (1.+alpha)/((number)N_Z_));
     #endif
     
-    R_INTEG      = sqrt(SQR(L_X_+R_BCK_) + SQR(L_Y_+R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
-    V_INTEG      = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
+    this->R_INTEG   = sqrt(SQR(L_X_+R_BCK_) + SQR(L_Y_+R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
+    this->V_INTEG   = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
     
     // Allocate RAPID mesh
     Mesh         = new RAPID_model;
@@ -64,48 +63,49 @@ TwistedCuboid::TwistedCuboid()
 // ============================
 /* Build particle model */
 // ============================
-void TwistedCuboid::Build(int mpi_rank)
+template<typename number>
+void TwistedCuboid<number>::Build(int mpi_rank)
 {
-    Matrix3Xd Face_xz(3, N_X_*N_Z_), Edge_x(3, N_X_);
-    Matrix3Xd Face_yz(3, N_Y_*N_Z_), Edge_y(3, N_Y_);
-    Matrix3Xd Face_xy(3, N_X_*N_Y_);
+    Matrix3X<number> Face_xz(3, N_X_*N_Z_), Edge_x(3, N_X_);
+    Matrix3X<number> Face_yz(3, N_Y_*N_Z_), Edge_y(3, N_Y_);
+    Matrix3X<number> Face_xy(3, N_X_*N_Y_);
     
-    Matrix3Xd Backbone (3, N_Z_);
-    Matrix3Xd Wireframe(3, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + 2*N_X_*N_Y_);
+    Matrix3X<number> Backbone (3, N_Z_);
+    Matrix3X<number> Wireframe(3, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + 2*N_X_*N_Y_);
 
-    Vector3d  Z_axis     = Vector3d::UnitZ();
+    Vector3<number>  Z_axis     = Vector3<number>::UnitZ();
     
-    ArrayXd   X_grid     = VectorXd::LinSpaced(N_X_, -L_X_/2., L_X_/2.);
-    ArrayXd   Y_grid     = VectorXd::LinSpaced(N_Y_, -L_Y_/2., L_Y_/2.);
-    ArrayXd   Z_grid     = VectorXd::LinSpaced(N_Z_,  0.,      L_Z_);
-    ArrayXd   Alpha_grid = VectorXd::LinSpaced(N_Z_,  0.,      TWIST_);
+    ArrayX<number>   X_grid     = ArrayX<number>::LinSpaced(N_X_, -L_X_/2., L_X_/2.);
+    ArrayX<number>   Y_grid     = ArrayX<number>::LinSpaced(N_Y_, -L_Y_/2., L_Y_/2.);
+    ArrayX<number>   Z_grid     = ArrayX<number>::LinSpaced(N_Z_,  0.,      L_Z_);
+    ArrayX<number>   Alpha_grid = ArrayX<number>::LinSpaced(N_Z_,  0.,      TWIST_);
 
     // Generate helical backbone
-    Backbone.row(0)      = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
-    Backbone.row(1)      = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
-    Backbone.row(2)      = Z_grid;
+    Backbone.row(0)             = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
+    Backbone.row(1)             = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
+    Backbone.row(2)             = Z_grid;
     
     // Generate first edges
-    Edge_x.row(0)        = X_grid;
-    Edge_x.row(1)        = VectorXd::Constant(N_X_, -L_Y_/2.);
-    Edge_x.row(2)        = VectorXd::Constant(N_X_, -L_Z_/2.);
+    Edge_x.row(0)               = X_grid;
+    Edge_x.row(1)               = VectorX<number>::Constant(N_X_, -L_Y_/2.);
+    Edge_x.row(2)               = VectorX<number>::Constant(N_X_, -L_Z_/2.);
 
-    Edge_y.row(0)        = VectorXd::Constant(N_Y_, -L_X_/2.);
-    Edge_y.row(1)        = Y_grid;
-    Edge_y.row(2)        = VectorXd::Constant(N_Y_, -L_Z_/2.);
+    Edge_y.row(0)               = VectorX<number>::Constant(N_Y_, -L_X_/2.);
+    Edge_y.row(1)               = Y_grid;
+    Edge_y.row(2)               = VectorX<number>::Constant(N_Y_, -L_Z_/2.);
 
     // Generate transversal faces
     for ( uint idx_f = 0; idx_f < 2; ++idx_f )
     {
-        Edge_x = AngleAxisd(idx_f*PI, Z_axis).toRotationMatrix() * Edge_x;
-        Edge_y = AngleAxisd(idx_f*PI, Z_axis).toRotationMatrix() * Edge_y;
+        Edge_x = Eigen::AngleAxis<number>(idx_f*PI, Z_axis).toRotationMatrix() * Edge_x;
+        Edge_y = Eigen::AngleAxis<number>(idx_f*PI, Z_axis).toRotationMatrix() * Edge_y;
 
         for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
         {
-            double alpha        = Alpha_grid(idx_z);
+            number alpha              = Alpha_grid(idx_z);
             
-            Matrix3Xd R_edge_x  = AngleAxisd(alpha, Z_axis).toRotationMatrix() * Edge_x;
-            Matrix3Xd R_edge_y  = AngleAxisd(alpha, Z_axis).toRotationMatrix() * Edge_y;
+            Matrix3X<number> R_edge_x = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge_x;
+            Matrix3X<number> R_edge_y = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge_y;
 
             R_edge_x.colwise() += Backbone.col(idx_z);
             R_edge_y.colwise() += Backbone.col(idx_z);
@@ -133,18 +133,18 @@ void TwistedCuboid::Build(int mpi_rank)
             }
         }
         
-        Face_xy = AngleAxisd(idx_f*TWIST_, Z_axis).toRotationMatrix() * Face_xy;
+        Face_xy = Eigen::AngleAxis<number>(idx_f*TWIST_, Z_axis).toRotationMatrix() * Face_xy;
         Face_xy.colwise() += Backbone.col(idx_f * (N_Z_-1));
         
         Wireframe.block(0, 2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_f * N_X_*N_Y_, 3, N_X_*N_Y_) = Face_xy;
     }
     
     // Set center of mass to the origin and main axis to e_z
-    Vector3d Center_of_mass = Wireframe.rowwise().mean();
-    Wireframe               = Wireframe.colwise() - Center_of_mass;
+    Vector3<number> Center_of_mass = Wireframe.rowwise().mean();
+    Wireframe                      = Wireframe.colwise() - Center_of_mass;
     
-    Matrix3d Rot            = Utils::PCA(Wireframe);
-    Wireframe               = Rot.transpose() * Wireframe;
+    Matrix33<number> Rot           = Utils<number>::PCA(Wireframe);
+    Wireframe                      = Rot.transpose() * Wireframe;
     
     // Save to file on master thread
     if ( mpi_rank == MPI_MASTER ) SaveWireframe(Wireframe);
@@ -154,15 +154,15 @@ void TwistedCuboid::Build(int mpi_rank)
     {
         uint num_tri;
 
-        Hull       = &BVH;
+        this->Hull       = &this->BVH;
         
         // Bounding volume parameters
-        Hull->l_xh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
-        Hull->l_yh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
-        Hull->l_zh = L_Z_ / 2.;
+        this->Hull->l_xh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        this->Hull->l_yh = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        this->Hull->l_zh = L_Z_ / 2.;
         
-        Hull->l_ch = Hull->l_zh;
-        Hull->l_cr = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
+        this->Hull->l_ch = this->Hull->l_zh;
+        this->Hull->l_cr = R_BCK_ + sqrt(SQR(L_X_) + SQR(L_Y_)) / 2.;
         
         Tesselate(Wireframe, &num_tri);
         
@@ -173,16 +173,17 @@ void TwistedCuboid::Build(int mpi_rank)
     else
     {
         // Build bounding volume hierarchy
-        BVH.Build(Wireframe, R_THRESHOLD_);
+        this->BVH.Build(Wireframe, R_THRESHOLD_);
         
-        if ( id_ == 1 ) BVH.PrintBuildInfo();
+        if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
     }
 }
 
 // ============================
 /* Wireframe triangulation for RAPID interference tests */
 // ============================
-void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
+template<typename number>
+void TwistedCuboid<number>::Tesselate(const Matrix3X<number>& Wireframe, uint* num_tri)
 {
     uint   ctr_tri(0);
 
@@ -288,7 +289,7 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
 
     Mesh->EndModel();
     
-    if ( id_ == 1 ) LogTxt("Running with %d-triangle tesselated mesh", ctr_tri);
+    if ( this->id_ == 1 ) LogTxt("Running with %d-triangle tesselated mesh", ctr_tri);
     
     *num_tri = ctr_tri;
 }
@@ -296,7 +297,8 @@ void TwistedCuboid::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
 // ============================
 /* Save wireframe to gnuplot-readable file */
 // ============================
-void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
+template<typename number>
+void TwistedCuboid<number>::SaveWireframe(const Matrix3X<number>& Wireframe)
 {
     std::string   DATA_PATH = __DATA_PATH;
     std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
@@ -308,8 +310,8 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
         {
             for ( uint idx_x = 0; idx_x < N_X_; ++idx_x )
             {
-                uint idx        = idx_fy*N_X_*N_Z_ + idx_z*N_X_ + idx_x;
-                Vector3d Vertex = Wireframe.col(idx);
+                uint idx = idx_fy*N_X_*N_Z_ + idx_z*N_X_ + idx_x;
+                Vector3<number> Vertex = Wireframe.col(idx);
                 
                 file_wireframe << Vertex.adjoint() << std::endl;
             }
@@ -327,8 +329,8 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
         {
             for ( uint idx_y = 0; idx_y < N_Y_; ++idx_y )
             {
-                uint idx        = 2*N_X_*N_Z_ + idx_fx*N_Y_*N_Z_ + idx_z*N_Y_ + idx_y;
-                Vector3d Vertex = Wireframe.col(idx);
+                uint idx = 2*N_X_*N_Z_ + idx_fx*N_Y_*N_Z_ + idx_z*N_Y_ + idx_y;
+                Vector3<number> Vertex = Wireframe.col(idx);
                 
                 file_wireframe << Vertex.adjoint() << std::endl;
             }
@@ -346,8 +348,8 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
         {
             for ( uint idx_y = 0; idx_y < N_Y_; ++idx_y )
             {
-                uint idx        = 2*N_X_*N_Z_ + 2*N_Y_*N_Z_+ idx_fz*N_X_*N_Y_ + idx_x*N_Y_ + idx_y;
-                Vector3d Vertex = Wireframe.col(idx);
+                uint idx = 2*N_X_*N_Z_ + 2*N_Y_*N_Z_+ idx_fz*N_X_*N_Y_ + idx_x*N_Y_ + idx_y;
+                Vector3<number> Vertex = Wireframe.col(idx);
                 
                 file_wireframe << Vertex.adjoint() << std::endl;
             }
@@ -364,7 +366,8 @@ void TwistedCuboid::SaveWireframe(const Matrix3Xd& Wireframe)
 // ============================
 /* Save mesh to PLY file */
 // ============================
-void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
+template<typename number>
+void TwistedCuboid<number>::SaveMesh(const Matrix3X<number>& Wireframe, uint num_tri)
 {
     uint ctr_tri(0);
     
@@ -392,10 +395,10 @@ void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
         {
             for ( uint idx_x = 0; idx_x < N_X_-1; ++idx_x )
             {
-                Vector3d Vtx1 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
-                Vector3d Vtx2 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
-                Vector3d Vtx3 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
-                Vector3d Vtx4 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
+                Vector3<number> Vtx1 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x);
+                Vector3<number> Vtx2 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + 1);
+                Vector3<number> Vtx3 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_);
+                Vector3<number> Vtx4 = Wireframe.col(idx_fy * N_X_*N_Z_ + idx_z*N_X_ + idx_x + N_X_ + 1);
 
                 file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
                 file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
@@ -412,10 +415,10 @@ void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
         {
             for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
             {
-                Vector3d Vtx1 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
-                Vector3d Vtx2 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
-                Vector3d Vtx3 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
-                Vector3d Vtx4 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
+                Vector3<number> Vtx1 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y);
+                Vector3<number> Vtx2 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + 1);
+                Vector3<number> Vtx3 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_);
+                Vector3<number> Vtx4 = Wireframe.col(2*N_X_*N_Z_ + idx_fx * N_Y_*N_Z_ + idx_z*N_Y_ + idx_y + N_Y_ + 1);
                 
                 file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
                 file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
@@ -432,10 +435,10 @@ void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
         {
             for ( uint idx_y = 0; idx_y < N_Y_-1; ++idx_y )
             {
-                Vector3d Vtx1 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
-                Vector3d Vtx2 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
-                Vector3d Vtx3 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
-                Vector3d Vtx4 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
+                Vector3<number> Vtx1 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y);
+                Vector3<number> Vtx2 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + 1);
+                Vector3<number> Vtx3 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_);
+                Vector3<number> Vtx4 = Wireframe.col(2*N_X_*N_Z_ + 2*N_Y_*N_Z_ + idx_fz * N_X_*N_Y_ + idx_x*N_Y_ + idx_y + N_Y_ + 1);
                 
                 file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
                 file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
@@ -456,3 +459,6 @@ void TwistedCuboid::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
     
     file_mesh.close();
 }
+
+template class TwistedCuboid<float>;
+template class TwistedCuboid<double>;

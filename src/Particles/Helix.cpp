@@ -13,48 +13,48 @@
 
 #include "Particles/Helix.hpp"
 
-using namespace Eigen;
 
-
-Helix::Helix()
+template<typename number>
+Helix<number>::Helix()
 {
     // Bounding leaf parameter
-    BVH.SetLeafParameter(3);
+    this->BVH.SetLeafParameter(3);
 
-    N_DELTA_L   = 2;
+    this->N_DELTA_L = 2;
 
     // Helix parameters
-    N_S_        = 500;
-    N_RES_      = 20;
+    N_S_            = 500;
+    N_RES_          = 20;
     
-    D_HARD_     = 6.6   * SIGMA_R;
-    L_CTR_      = 880.  * SIGMA_R;
+    D_HARD_         = 6.6   * this->SIGMA_R;
+    L_CTR_          = 880.  * this->SIGMA_R;
     
-    R_HLX_      = 146.  * SIGMA_R;
-    P_HLX_      = 2800. * SIGMA_R;
+    R_HLX_          = 146.  * this->SIGMA_R;
+    P_HLX_          = 2800. * this->SIGMA_R;
     
-    L_Z_        = L_CTR_ / sqrt(1. + SQR(2.*PI * R_HLX_/P_HLX_));
+    L_Z_            = L_CTR_ / sqrt(1. + SQR(2.*PI * R_HLX_/P_HLX_));
     
-    double d_cc = sqrt(SQR(2.*R_HLX_*sin(PI/P_HLX_ * L_Z_/(N_S_-1.))) + SQR(L_Z_/(N_S_-1.)));
+    number d_cc     = sqrt(SQR(2.*R_HLX_*sin(PI/P_HLX_ * L_Z_/(N_S_-1.))) + SQR(L_Z_/(N_S_-1.)));
     
-    R_INTEG     = sqrt(SQR(L_Z_+D_HARD_) + SQR(2.*R_HLX_+D_HARD_));
-    V_INTEG     = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
+    this->R_INTEG   = sqrt(SQR(L_Z_+D_HARD_) + SQR(2.*R_HLX_+D_HARD_));
+    this->V_INTEG   = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
     
-    V0          = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)));
-    V_EFF       = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*D_HARD_))) * asin(d_cc/(2.*D_HARD_))));
+    this->V0        = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.)/2. * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)));
+    this->V_EFF     = PI/6.*CUB(D_HARD_) * (1. + (N_S_-1.) * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*D_HARD_))) * asin(d_cc/(2.*D_HARD_))));
 }
 
 // ============================
 /* Build particle model */
 // ============================
-void Helix::Build(int mpi_rank)
+template<typename number>
+void Helix<number>::Build(int mpi_rank)
 {
-    Matrix3Xd Backbone_(3, N_S_);
-    Matrix3Xd Wireframe(3, SQR(N_RES_));
+    Matrix3X<number> Backbone_(3, N_S_);
+    Matrix3X<number> Wireframe(3, SQR(N_RES_));
     
-    ArrayXd   Z_grid     = ArrayXd::LinSpaced(N_S_, 0., L_Z_);
-    ArrayXd   Theta_grid = ArrayXd::LinSpaced(N_RES_, 0., PI);
-    ArrayXd   Phi_grid   = ArrayXd::LinSpaced(N_RES_, 0., 2.*PI);
+    ArrayX<number> Z_grid     = ArrayX<number>::LinSpaced(N_S_, 0., L_Z_);
+    ArrayX<number> Theta_grid = ArrayX<number>::LinSpaced(N_RES_, 0., PI);
+    ArrayX<number> Phi_grid   = ArrayX<number>::LinSpaced(N_RES_, 0., 2.*PI);
 
     std::string DATA_PATH;
     
@@ -65,29 +65,29 @@ void Helix::Build(int mpi_rank)
     std::ofstream file_backbone (DATA_PATH + "/backbone.out");
     std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
 
-    Backbone_.row(0)        = R_HLX_ * cos(2.*PI/P_HLX_ * Z_grid);
-    Backbone_.row(1)        = R_HLX_ * sin(2.*PI/P_HLX_ * Z_grid);
-    Backbone_.row(2)        = Z_grid;
+    Backbone_.row(0) = R_HLX_ * cos(2.*PI/P_HLX_ * Z_grid);
+    Backbone_.row(1) = R_HLX_ * sin(2.*PI/P_HLX_ * Z_grid);
+    Backbone_.row(2) = Z_grid;
     
     // Set center of mass to the origin and main axis to e_z
-    Vector3d Center_of_mass = Backbone_.rowwise().mean();
-    Backbone_               = Backbone_.colwise() - Center_of_mass;
+    Vector3<number> Center_of_mass = Backbone_.rowwise().mean();
+    Backbone_            = Backbone_.colwise() - Center_of_mass;
     
-    Matrix3d Rot            = Utils::PCA(Backbone_);
-    Backbone_               = Rot.transpose() * Backbone_;
+    Matrix33<number> Rot = Utils<number>::PCA(Backbone_);
+    Backbone_            = Rot.transpose() * Backbone_;
     
 	for ( uint idx_center = 0; idx_center < N_S_; ++idx_center )
     {
-        Vector3d Center = Backbone_.col(idx_center);
+        Vector3<number> Center = Backbone_.col(idx_center);
         
         // Draw spherical beads
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            double theta = Theta_grid(idx_theta);
+            number theta = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                double phi         = Phi_grid(idx_phi);
+                number phi         = Phi_grid(idx_phi);
                 uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
@@ -113,7 +113,10 @@ void Helix::Build(int mpi_rank)
     Backbone = Backbone_;
 
     // Build bounding volume hierarchy
-    BVH.Build(Backbone, D_HARD_);
+    this->BVH.Build(Backbone, D_HARD_);
     
-    if ( id_ == 1 ) BVH.PrintBuildInfo();
+    if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
 }
+
+template class Helix<float>;
+template class Helix<double>;

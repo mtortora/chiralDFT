@@ -13,81 +13,83 @@
 
 #include "Particles/TwistedPentagon.hpp"
 
-using namespace Eigen;
 
-
-TwistedPentagon::TwistedPentagon()
+template<typename number>
+TwistedPentagon<number>::TwistedPentagon()
 {
 	// Bounding leaf parameter
-	BVH.SetLeafParameter(5);
+	this->BVH.SetLeafParameter(5);
 	
-	N_DELTA_L    = 2;
+	this->N_DELTA_L = 2;
 	
 	// Twisted pentagon parameters
-	N_R_         = 10;
-	N_Z_         = 2000;
+	N_R_            = 10;
+	N_Z_            = 2000;
 	
-	R_PNT_       = 3.3  * SIGMA_R;
-	L_PNT_       = R_PNT_ * 2.*sin(PI/5.);
+	R_PNT_          = 3.3  * this->SIGMA_R;
+	L_PNT_          = R_PNT_ * 2.*sin(PI/5.);
 	
 	// Helical backbone parameters
-	double pitch = 3.3  * SIGMA_R;
-	double l_ctr = 880. * SIGMA_R;
+	number pitch    = 3.3  * this->SIGMA_R;
+	number l_ctr    = 880. * this->SIGMA_R;
 
-	R_BCK_       = 146. * SIGMA_R;
-	P_BCK_       = 2800. * SIGMA_R;
+	R_BCK_          = 146. * this->SIGMA_R;
+	P_BCK_          = 2800. * this->SIGMA_R;
 	
-	L_Z_         = l_ctr / sqrt(1. + SQR(2.*PI * R_BCK_/P_BCK_));
-	TWIST_       = 2.*PI/5. * L_Z_/pitch;
+	L_Z_            = l_ctr / sqrt(1. + SQR(2.*PI * R_BCK_/P_BCK_));
+	TWIST_          = 2.*PI/5. * L_Z_/pitch;
 	
-	R_THRESHOLD_ = sqrt(SQR(L_PNT_/(N_R_-1.)) + SQR(L_Z_/(N_Z_-1.)))/2.;
-	R_INTEG      = sqrt(SQR(2.*R_PNT_+2.*R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
-	V_INTEG      = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
-	V0           = SQR(L_PNT_)*L_Z_ * 5./4. * tan(54. * PI/180.);
-	V_EFF        = V0;
+	R_THRESHOLD_    = sqrt(SQR(L_PNT_/(N_R_-1.)) + SQR(L_Z_/(N_Z_-1.)))/2.;
+	
+	this->R_INTEG   = sqrt(SQR(2.*R_PNT_+2.*R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
+	this->V_INTEG   = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
+	
+	this->V0        = SQR(L_PNT_)*L_Z_ * 5./4. * tan(54. * PI/180.);
+	this->V_EFF     = this->V0;
 	
 	// Allocate RAPID mesh
-	Mesh         = new RAPID_model;
+	Mesh            = new RAPID_model;
 }
 
 // ============================
 /* Build particle model */
 // ============================
-void TwistedPentagon::Build(int mpi_rank)
+template<typename number>
+void TwistedPentagon<number>::Build(int mpi_rank)
 {
-	double    l_h = L_PNT_ / tan(36. * PI/180.);
+	number l_h = L_PNT_ / tan(36. * PI/180.);
 	
-	Matrix3Xd Edge(3, N_R_);
+	Matrix3X<number> Edge(3, N_R_);
 	
-	Matrix3Xd Backbone (3, N_Z_);
-	Matrix3Xd Wireframe(3, 5*N_R_*N_Z_);
-	Matrix3Xd Face_r   (3, N_R_*N_Z_);
+	Matrix3X<number> Backbone (3, N_Z_);
+	Matrix3X<number> Wireframe(3, 5*N_R_*N_Z_);
+	Matrix3X<number> Face_r   (3, N_R_*N_Z_);
 	
-	Vector3d  Z_axis     = Vector3d::UnitZ();
+	Vector3<number>  Z_axis     = Vector3<number>::UnitZ();
 	
-	ArrayXd   R_grid     = VectorXd::LinSpaced(N_R_, -L_PNT_/2., L_PNT_/2.);
-	ArrayXd   Z_grid     = VectorXd::LinSpaced(N_Z_,  0.,      L_Z_);
+	ArrayX<number>   R_grid     = ArrayX<number>::LinSpaced(N_R_, -L_PNT_/2., L_PNT_/2.);
+	ArrayX<number>   Z_grid     = ArrayX<number>::LinSpaced(N_Z_,  0.,      L_Z_);
 	
-	ArrayXd   Alpha_grid = VectorXd::LinSpaced(N_Z_,  0.,      TWIST_);
+	ArrayX<number>   Alpha_grid = ArrayX<number>::LinSpaced(N_Z_,  0.,      TWIST_);
 	
 	// Generate helical backbone
-	Backbone.row(0)      = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
-	Backbone.row(1)      = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
-	Backbone.row(2)      = Z_grid;
+	Backbone.row(0)             = R_BCK_ * cos(2.*PI/P_BCK_ * Z_grid);
+	Backbone.row(1)             = R_BCK_ * sin(2.*PI/P_BCK_ * Z_grid);
+	Backbone.row(2)             = Z_grid;
 	
 	// Generate first edges
-	Edge.row(0)          = R_grid;
-	Edge.row(1)          = VectorXd::Constant(N_R_, -l_h/2.);
-	Edge.row(2)          = VectorXd::Constant(N_R_, -L_Z_/2.);
+	Edge.row(0)                 = R_grid;
+	Edge.row(1)                 = VectorX<number>::Constant(N_R_, -l_h/2.);
+	Edge.row(2)                 = VectorX<number>::Constant(N_R_, -L_Z_/2.);
 	
 	// Generate transversal faces
 	for ( uint idx_f = 0; idx_f < 5; ++idx_f )
 	{
 		for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
 		{
-			double alpha      = Alpha_grid(idx_z);
+			number alpha      = Alpha_grid(idx_z);
 			
-			Matrix3Xd R_edge  = AngleAxisd(alpha, Z_axis).toRotationMatrix() * Edge;
+			Matrix3X<number> R_edge = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge;
 			R_edge.colwise() += Backbone.col(idx_z);
 			
 			Face_r.block(0, idx_z * N_R_, 3, N_R_) = R_edge;
@@ -95,15 +97,15 @@ void TwistedPentagon::Build(int mpi_rank)
 		
 		Wireframe.block(0, idx_f * N_R_*N_Z_, 3, N_R_*N_Z_) = Face_r;
 		
-		Edge = AngleAxisd(2.*PI/5., Z_axis).toRotationMatrix() * Edge;
+		Edge = Eigen::AngleAxis<number>(2.*PI/5., Z_axis).toRotationMatrix() * Edge;
 	}
 	
 	// Set center of mass to the origin and main axis to e_z
-	Vector3d Center_of_mass = Wireframe.rowwise().mean();
-	Wireframe               = Wireframe.colwise() - Center_of_mass;
+	Vector3<number> Center_of_mass = Wireframe.rowwise().mean();
+	Wireframe                      = Wireframe.colwise() - Center_of_mass;
 	
-	Matrix3d Rot            = Utils::PCA(Wireframe);
-	Wireframe               = Rot.transpose() * Wireframe;
+	Matrix33<number> Rot           = Utils<number>::PCA(Wireframe);
+	Wireframe                      = Rot.transpose() * Wireframe;
 	
 	// Save to file on master thread
 	if ( mpi_rank == MPI_MASTER ) SaveWireframe(Wireframe);
@@ -113,15 +115,15 @@ void TwistedPentagon::Build(int mpi_rank)
 	{
 		uint num_tri;
 		
-		Hull       = &BVH;
+		this->Hull       = &this->BVH;
 		
 		// Bounding volume parameters
-		Hull->l_xh = R_BCK_ + R_PNT_;
-		Hull->l_yh = R_BCK_ + R_PNT_;
-		Hull->l_zh = L_Z_ / 2.;
+		this->Hull->l_xh = R_BCK_ + R_PNT_;
+		this->Hull->l_yh = R_BCK_ + R_PNT_;
+		this->Hull->l_zh = L_Z_ / 2.;
 		
-		Hull->l_ch = Hull->l_zh;
-		Hull->l_cr = R_BCK_ + R_PNT_;
+		this->Hull->l_ch = this->Hull->l_zh;
+		this->Hull->l_cr = R_BCK_ + R_PNT_;
 		
 		Tesselate(Wireframe, &num_tri);
 		
@@ -132,9 +134,9 @@ void TwistedPentagon::Build(int mpi_rank)
 	else
 	{
 		// Build bounding volume hierarchy
-		BVH.Build(Wireframe, R_THRESHOLD_);
+		this->BVH.Build(Wireframe, R_THRESHOLD_);
 		
-		if ( id_ == 1 ) BVH.PrintBuildInfo();
+		if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
 	}
 }
 
@@ -142,7 +144,8 @@ void TwistedPentagon::Build(int mpi_rank)
 // ============================
 /* Wireframe triangulation for RAPID interference tests */
 // ============================
-void TwistedPentagon::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
+template<typename number>
+void TwistedPentagon<number>::Tesselate(const Matrix3X<number>& Wireframe, uint* num_tri)
 {
 	uint   ctr_tri(0);
 	
@@ -185,7 +188,7 @@ void TwistedPentagon::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
 	
 	Mesh->EndModel();
 	
-	if ( id_ == 1 ) LogTxt("Running with %d-triangle tesselated mesh", ctr_tri);
+	if ( this->id_ == 1 ) LogTxt("Running with %d-triangle tesselated mesh", ctr_tri);
 	
 	*num_tri = ctr_tri;
 }
@@ -193,7 +196,8 @@ void TwistedPentagon::Tesselate(const Matrix3Xd& Wireframe, uint* num_tri)
 // ============================
 /* Save wireframe to gnuplot-readable file */
 // ============================
-void TwistedPentagon::SaveWireframe(const Matrix3Xd& Wireframe)
+template<typename number>
+void TwistedPentagon<number>::SaveWireframe(const Matrix3X<number>& Wireframe)
 {
 	std::string   DATA_PATH = __DATA_PATH;
 	std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
@@ -204,8 +208,8 @@ void TwistedPentagon::SaveWireframe(const Matrix3Xd& Wireframe)
 		{
 			for ( uint idx_r = 0; idx_r < N_R_; ++idx_r )
 			{
-				uint idx        = idx_f*N_R_*N_Z_ + idx_z*N_R_ + idx_r;
-				Vector3d Vertex = Wireframe.col(idx);
+				uint idx = idx_f*N_R_*N_Z_ + idx_z*N_R_ + idx_r;
+				Vector3<number> Vertex = Wireframe.col(idx);
 				
 				file_wireframe << Vertex.adjoint() << std::endl;
 			}
@@ -222,7 +226,8 @@ void TwistedPentagon::SaveWireframe(const Matrix3Xd& Wireframe)
 // ============================
 /* Save mesh to PLY file */
 // ============================
-void TwistedPentagon::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
+template<typename number>
+void TwistedPentagon<number>::SaveMesh(const Matrix3X<number>& Wireframe, uint num_tri)
 {
 	uint ctr_tri(0);
 	
@@ -250,10 +255,10 @@ void TwistedPentagon::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
 		{
 			for ( uint idx_r = 0; idx_r < N_R_-1; ++idx_r )
 			{
-				Vector3d Vtx1 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r);
-				Vector3d Vtx2 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + 1);
-				Vector3d Vtx3 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + N_R_);
-				Vector3d Vtx4 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + N_R_ + 1);
+				Vector3<number> Vtx1 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r);
+				Vector3<number> Vtx2 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + 1);
+				Vector3<number> Vtx3 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + N_R_);
+				Vector3<number> Vtx4 = Wireframe.col(idx_f * N_R_*N_Z_ + idx_z*N_R_ + idx_r + N_R_ + 1);
 				
 				file_mesh << Vtx1(0) << " " << Vtx1(1) << " " << Vtx1(2) << std::endl;
 				file_mesh << Vtx2(0) << " " << Vtx2(1) << " " << Vtx2(2) << std::endl;
@@ -274,3 +279,6 @@ void TwistedPentagon::SaveMesh(const Matrix3Xd& Wireframe, uint num_tri)
 	
 	file_mesh.close();
 }
+
+template class TwistedPentagon<float>;
+template class TwistedPentagon<double>;

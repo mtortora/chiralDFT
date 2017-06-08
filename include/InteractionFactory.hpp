@@ -11,96 +11,96 @@
 #include "Particles/TwistedPentagon.hpp"
 
 
-// Full template specialisation
-template<class ParticleType>
+// Requires full template specialisation
+template<class ParticleType, typename number>
 struct InteractionFactory {};
 
 
 // BentCore
-template<>
-struct InteractionFactory<BentCore>: public BaseInteraction<InteractionFactory<BentCore> >, BentCore
+template<typename number>
+struct InteractionFactory<BentCore<number>, number>: public BaseInteraction<InteractionFactory<BentCore<number>, number>, number>, BentCore<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, BentCore*, BentCore*);
+    number MayerInteraction(const Vector3<number>&, BentCore<number>*, BentCore<number>*);
     
-    inline double PairInteraction(double r) {return (r < D_HARD_);}
+    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
 };
 
 
 // DNADuplex
-template<>
-struct InteractionFactory<DNADuplex>: public BaseInteraction<InteractionFactory<DNADuplex> >, DNADuplex
+template<typename number>
+struct InteractionFactory<DNADuplex<number>, number>: public BaseInteraction<InteractionFactory<DNADuplex<number>, number>, number>, DNADuplex<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, DNADuplex*, DNADuplex*);
+    number MayerInteraction(const Vector3<number>&, DNADuplex<number>*, DNADuplex<number>*);
     
-    inline double PairInteraction(double r)
+    inline number PairInteraction(number r)
     {
         if ( USE_DH )
         {
-            return DebyeHuckel_(r) + RepulsiveLJ_(r, EXCL_S1_, EXCL_R1_, EXCL_B1_, EXCL_RC1_);
+            return DebyeHuckel_(r) + RepulsiveLJ_(r, this->EXCL_S1_, this->EXCL_R1_, this->EXCL_B1_, this->EXCL_RC1_);
         }
         
-        return RepulsiveLJ_(r, EXCL_S1_, EXCL_R1_, EXCL_B1_, EXCL_RC1_);
+        return RepulsiveLJ_(r, this->EXCL_S1_, this->EXCL_R1_, this->EXCL_B1_, this->EXCL_RC1_);
     }
     
 private:
-    double RepulsiveLJ_(double, double , double, double, double);
-    double DebyeHuckel_(double);
+    number RepulsiveLJ_(number, number , number, number, number);
+    number DebyeHuckel_(number);
 };
 
 
 // Helix
-template<>
-struct InteractionFactory<Helix>: public BaseInteraction<InteractionFactory<Helix> >, Helix
+template<typename number>
+struct InteractionFactory<Helix<number>, number>: public BaseInteraction<InteractionFactory<Helix<number>, number>, number>, Helix<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, Helix*, Helix*);
+    number MayerInteraction(const Vector3<number>&, Helix<number>*, Helix<number>*);
     
-    inline double PairInteraction(double r) {return (r < D_HARD_);}
+    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
 };
 
 
 // PatchyRod
-template<>
-struct InteractionFactory<PatchyRod>: public PatchyRod
+template<typename number>
+struct InteractionFactory<PatchyRod<number>, number>: public PatchyRod<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, PatchyRod*, PatchyRod*);
+    number MayerInteraction(const Vector3<number>&, PatchyRod<number>*, PatchyRod<number>*);
     
 private:
-    double RepulsiveWCA_(double);
-    double DebyeHuckel_(double);
+    number RepulsiveWCA_(number);
+    number DebyeHuckel_(number);
 };
 
 
 // ThreadedRod
-template<>
-struct InteractionFactory<ThreadedRod>: public BaseInteraction<InteractionFactory<ThreadedRod> >, ThreadedRod
+template<typename number>
+struct InteractionFactory<ThreadedRod<number>, number>: public BaseInteraction<InteractionFactory<ThreadedRod<number>, number>, number>, ThreadedRod<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, ThreadedRod*, ThreadedRod*);
+    number MayerInteraction(const Vector3<number>&, ThreadedRod<number>*, ThreadedRod<number>*);
     
-    inline double PairInteraction(double r)
+    inline number PairInteraction(number r)
     {
         // Debye-Huckel with abrupt cutoff at r = R_CUT_
-        return (( r < R_CUT_ ) ? exp(r * MINUS_KAPPA_) * (DH_PREFACTOR_ / r) : 0.);
+        return (( r < this->R_CUT_ ) ? exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r) : 0.);
     }
 };
 
 
 // TwistedCuboid
-template<>
-struct InteractionFactory<TwistedCuboid>: public BaseInteraction<InteractionFactory<TwistedCuboid> >, TwistedCuboid
+template<typename number>
+struct InteractionFactory<TwistedCuboid<number>, number>: public BaseInteraction<InteractionFactory<TwistedCuboid<number>, number>, number>, TwistedCuboid<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, TwistedCuboid*, TwistedCuboid*);
+    number MayerInteraction(const Vector3<number>&, TwistedCuboid<number>*, TwistedCuboid<number>*);
     
-    inline double PairInteraction(double r) {return (r < R_THRESHOLD_);}
+    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
 };
 
 
 // TwistedPentagon
-template<>
-struct InteractionFactory<TwistedPentagon>: public BaseInteraction<InteractionFactory<TwistedPentagon> >, TwistedPentagon
+template<typename number>
+struct InteractionFactory<TwistedPentagon<number>, number>: public BaseInteraction<InteractionFactory<TwistedPentagon<number>, number>, number>, TwistedPentagon<number>
 {
-    double MayerInteraction(const Eigen::Vector3d&, TwistedPentagon*, TwistedPentagon*);
+    number MayerInteraction(const Vector3<number>&, TwistedPentagon<number>*, TwistedPentagon<number>*);
     
-    inline double PairInteraction(double r) {return (r < R_THRESHOLD_);}
+    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
 };
 
 #endif

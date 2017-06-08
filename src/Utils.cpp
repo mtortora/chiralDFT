@@ -1,6 +1,7 @@
 // ===================================================================
 /**
  * Implements robust overlap methods for convex bounding volumes.
+ * Also includes parser for processed trajectory files.
  */
 // ===================================================================
 /*
@@ -13,21 +14,29 @@
 
 #include "Utils.hpp"
 
-using namespace Eigen;
 
-    
+// ============================
+/* Wrapper for MPI datatypes */
+// ============================
+template<> Utils<float> ::Utils(): MPI_type(MPI_FLOAT)    {}
+template<> Utils<double>::Utils(): MPI_type(MPI_DOUBLE)   {}
+
+template<> Utils<uint>  ::Utils(): MPI_type(MPI_UNSIGNED) {}
+template<> Utils<ullint>::Utils(): MPI_type(MPI_UNSIGNED_LONG_LONG) {}
+
 // ============================
 /* Bounding spherocylinders overlap test */
 // ============================
-bool Utils::OverlapBoundSC(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
+template<typename number>
+bool Utils<number>::OverlapBoundSC(const Vector3<number>& R_cm, BNode<number>* Node1, BNode<number>* Node2)
 {
-    double   xlambda;
-    double   xmu;
-    double   aux1;
-    double   aux2;
-    double   rm2;
+    number xlambda;
+    number xmu;
+    number aux1;
+    number aux2;
+    number rm2;
 
-    Vector3d R_sep;
+    Vector3<number> R_sep;
     
     // Root spherocylinders centers are forced to the particle center of mass 
     if      ( Node1->is_root && Node2->is_root ) R_sep = R_cm;
@@ -35,12 +44,12 @@ bool Utils::OverlapBoundSC(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
     else if ( Node2->is_root )                   R_sep = R_cm - Node1->Center;
     else                                         R_sep = R_cm + Node2->Center - Node1->Center;
 
-    double rEo1  = Node1->Axis.dot(R_sep);
-    double rEo2  = Node2->Axis.dot(R_sep);;
-    double o1Eo2 = Node1->Axis.dot(Node2->Axis);
+    number rEo1  = Node1->Axis.dot(R_sep);
+    number rEo2  = Node2->Axis.dot(R_sep);;
+    number o1Eo2 = Node1->Axis.dot(Node2->Axis);
     
-    double rsqr  = SQR(Node1->l_cr + Node2->l_cr);
-    double cc    = 1. - SQR(o1Eo2);
+    number rsqr  = SQR(Node1->l_cr + Node2->l_cr);
+    number cc    = 1. - SQR(o1Eo2);
     
     /* VEGA ET AL., A FAST ALGORITHM TO EVALUATE THE SHORTEST DISTANCE BETWEEN RODS */
     // Case Axis1, Axis2 colinear
@@ -100,19 +109,20 @@ bool Utils::OverlapBoundSC(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
 // ============================
 /* OBB overlap test */
 // ============================
-bool Utils::OverlapBoundOB(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
+template<typename number>
+bool Utils<number>::OverlapBoundOB(const Vector3<number>& R_cm, BNode<number>* Node1, BNode<number>* Node2)
 {
-    double   r1;
-    double   r2;
+    number r1;
+    number r2;
     
-    Vector3d E1;
-    Vector3d E2;
-    Vector3d T;
+    Vector3<number>  E1;
+    Vector3<number>  E2;
+    Vector3<number>  T;
     
-    Matrix3d Rot;
-    Matrix3d Abs_rot;
+    Matrix33<number> Rot;
+    Matrix33<number> Abs_rot;
     
-    Vector3d R_sep = R_cm + Node2->Center - Node1->Center;
+    Vector3<number>  R_sep = R_cm + Node2->Center - Node1->Center;
     
     /* ADAPTED FROM C. ERICSON, REAL-TIME COLLISION DETECTION */
     // Node half-dimensions
@@ -204,14 +214,15 @@ bool Utils::OverlapBoundOB(const Vector3d& R_cm, BNode* Node1, BNode* Node2)
 // ============================
 /* Vertex Principal Component Analysis (PCA) by Singular Value Decomposition (SVD) */
 // ============================
-Matrix3d Utils::PCA(const Matrix3Xd& Vertices_in)
+template<typename number>
+Matrix33<number> Utils<number>::PCA(const Matrix3X<number>& Vertices_in)
 {
     // Set vertex center of mass to the origin if needed
-    Vector3d  Center_of_mass = Vertices_in.rowwise().mean();
-    Matrix3Xd Vertices_cm    = Vertices_in.colwise() - Center_of_mass;
+    Vector3<number>  Center_of_mass = Vertices_in.rowwise().mean();
+    Matrix3X<number> Vertices_cm    = Vertices_in.colwise() - Center_of_mass;
     
-    JacobiSVD<Matrix3Xd> SVD(Vertices_cm, ComputeThinU);
-    Matrix3d Rot = SVD.matrixU();
+    Eigen::JacobiSVD<Matrix3X<number> > SVD(Vertices_cm, Eigen::ComputeThinU);
+    Matrix33<number> Rot = SVD.matrixU();
     
     // Swap axes so that Rot.y and Rot.z correspond to the directions of minimal and maximal spread, respectively
     Rot.col(0).swap(Rot.col(1));
@@ -224,18 +235,19 @@ Matrix3d Utils::PCA(const Matrix3Xd& Vertices_in)
 }
 
 // ============================
-/* Configuration file reader with Eigen format conversion */
+/* Configuration file parser with Eigen format conversion */
 // ============================
-void Utils::Load(const std::string& filename, Matrix3Xd* Vertices, ArrayXi* Sizes)
+template<typename number>
+void Utils<number>::Load(const std::string& filename, Matrix3X<number>* Vertices, ArrayX<uint>* Sizes)
 {
-    double coeff;
+    number coeff;
     
     bool   is_first_line(false);
     
     // Size counters
-    int    rows  (0);
-    int    cols  (0);
-    int    rows_t(0);
+    uint   rows  (0);
+    uint   cols  (0);
+    uint   rows_t(0);
     
     std::string   line;
     std::ifstream input_file(filename);
@@ -243,8 +255,8 @@ void Utils::Load(const std::string& filename, Matrix3Xd* Vertices, ArrayXi* Size
     if ( !input_file.good() ) throw std::runtime_error("Couldn't open input file " + filename);
     
     // Store unkown number of configurations into std::vector containers
-    std::vector<double> data_buffer;
-    std::vector<int>    size_buffer;
+    std::vector<number> data_buffer;
+    std::vector<uint>   size_buffer;
     
     while ( std::getline(input_file, line) )
     {
@@ -278,7 +290,10 @@ void Utils::Load(const std::string& filename, Matrix3Xd* Vertices, ArrayXi* Size
     
     if ( size_buffer.size() < 1 ) size_buffer.push_back(rows);
     
-    // Map std::vector to Eigen::Matrix3Xd in column-major default order
-    *Vertices = Matrix3Xd::Map(&data_buffer[0], cols, rows);
-    *Sizes    = ArrayXi::Map(&size_buffer[0], size_buffer.size());
+    // Map std::vector to Matrix3X<number> in column-major default order
+    *Vertices = Matrix3X<number>::Map(&data_buffer[0], cols, rows);
+    *Sizes    = ArrayX<uint>::Map(&size_buffer[0], size_buffer.size());
 }
+
+template struct Utils<float>;
+template struct Utils<double>;

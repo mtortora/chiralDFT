@@ -12,8 +12,6 @@
 
 #include "InteractionFactory.hpp"
 
-using namespace Eigen;
-
 
 /* ************************* */
 /* BentCore */
@@ -22,14 +20,15 @@ using namespace Eigen;
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<BentCore>::MayerInteraction(const Vector3d& R_cm,
-                                                      BentCore* Particle1, BentCore* Particle2)
+template<typename number>
+number InteractionFactory<BentCore<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                      BentCore<number>* Particle1, BentCore<number>* Particle2)
 {
-    double energy(0.);
-    double mayer_interaction(0.);
+    number energy(0.);
+    number mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping beads
-    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -47,20 +46,21 @@ double InteractionFactory<BentCore>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* Repulsive Lennard-Jones (WCA) potential */
 // ============================
-double InteractionFactory<DNADuplex>::RepulsiveLJ_(double r, double sigma, double r_star, double b, double r_cut)
+template<typename number>
+number InteractionFactory<DNADuplex<number>, number>::RepulsiveLJ_(number r, number sigma, number r_star, number b, number r_cut)
 {
-    double energy(0.);
+    number energy(0.);
     
     // Short-range LJ potential with quadratic cutoff for r_star < r < r_cut
     if( r < r_cut )
     {
         if( r < r_star )
         {
-            double lj_part = SQR(CUB(sigma/r));
-            energy         = 4. * EXCL_EPS_ * (SQR(lj_part) - lj_part);
+            number lj_part = SQR(CUB(sigma/r));
+            energy         = 4. * this->EXCL_EPS_ * (SQR(lj_part) - lj_part);
         }
         
-        else energy = EXCL_EPS_ * b * SQR(r - r_cut);
+        else energy = this->EXCL_EPS_ * b * SQR(r - r_cut);
     }
     
     return energy;
@@ -69,28 +69,29 @@ double InteractionFactory<DNADuplex>::RepulsiveLJ_(double r, double sigma, doubl
 // ============================
 /* Debye-Huckel interaction potential */
 // ============================
-double InteractionFactory<DNADuplex>::DebyeHuckel_(double r)
+template<typename number>
+number InteractionFactory<DNADuplex<number>, number>::DebyeHuckel_(number r)
 {
-    double energy(0.);
+    number energy(0.);
     
     if ( MODE_DH == DH_OXDNA )
     {
         // Debye-Huckel with quadratic cutoff for R_STAR_ < r < R_CUT_
-        if ( r < R_CUT_ )
+        if ( r < this->R_CUT_ )
         {
-            if ( r < R_STAR_ ) energy = exp(r * MINUS_KAPPA_) * (DH_PREFACTOR_ / r);
-            else               energy = B_CUT_ * SQR(r - R_CUT_);
+            if ( r < this->R_STAR_ ) energy = exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r);
+            else                     energy = this->B_CUT_ * SQR(r - this->R_CUT_);
         }
     }
     
     if ( MODE_DH == DH_FERRARINI )
     {
         // Short-range Coulomb + long-range DH with linear interpolation for EXCL_S1_ < r < R_STAR_
-        if ( r < R_CUT_ )
+        if ( r < this->R_CUT_ )
         {
-            if      ( r < EXCL_S1_ ) energy = (PREFACTOR_ / r);
-            else if ( r < R_STAR_ )  energy = (DH_OFFSET_ - OFFSET_) * (r - EXCL_S1_)/(R_STAR_ - EXCL_S1_) + OFFSET_;
-            else                     energy = (DH_PREFACTOR_ / r) * exp(r * MINUS_KAPPA_);
+            if      ( r < this->EXCL_S1_ ) energy = (this->PREFACTOR_ / r);
+            else if ( r < this->R_STAR_ )  energy = (this->DH_OFFSET_ - this->OFFSET_) * (r - this->EXCL_S1_)/(this->R_STAR_ - this->EXCL_S1_) + this->OFFSET_;
+            else                           energy = (this->DH_PREFACTOR_ / r) * exp(r * this->MINUS_KAPPA_);
         }
     }
     
@@ -100,15 +101,16 @@ double InteractionFactory<DNADuplex>::DebyeHuckel_(double r)
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<DNADuplex>::MayerInteraction(const Vector3d& R_cm,
-                                                       DNADuplex* Particle1, DNADuplex* Particle2)
+template<typename number>
+number InteractionFactory<DNADuplex<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                       DNADuplex<number>* Particle1, DNADuplex<number>* Particle2)
 {
-    double energy(0.);
+    number energy(0.);
     
     // Work out pairwise interaction energies recursively
-    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, E_CUT_);
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
     
-    return 1. - exp(-BETA_R_*energy);
+    return 1. - exp(-this->BETA_R_*energy);
 }
 
 
@@ -122,14 +124,15 @@ double InteractionFactory<DNADuplex>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<Helix>::MayerInteraction(const Vector3d& R_cm,
-                                                   Helix* Particle1, Helix* Particle2)
+template<typename number>
+number InteractionFactory<Helix<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                   Helix<number>* Particle1, Helix<number>* Particle2)
 {
-    double energy(0.);
-    double mayer_interaction(0.);
+    number energy(0.);
+    number mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping beads
-    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -147,14 +150,15 @@ double InteractionFactory<Helix>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* WCA interaction potential */
 // ============================
-double InteractionFactory<PatchyRod>::RepulsiveWCA_(double r)
+template<typename number>
+number InteractionFactory<PatchyRod<number>, number>::RepulsiveWCA_(number r)
 {
-    double energy(0.);
+    number energy(0.);
     
-    if ( r < R_WCA_ )
+    if ( r < this->R_WCA_ )
     {
-        double lj_part = SQR(CUB(SIGMA_R/r));
-        energy         = 4. * EPSILON_WCA_ * (SQR(lj_part) - lj_part) + EPSILON_WCA_;
+        number lj_part = SQR(CUB(this->SIGMA_R/r));
+        energy         = 4. * this->EPSILON_WCA_ * (SQR(lj_part) - lj_part) + this->EPSILON_WCA_;
     }
     
     return energy;
@@ -163,11 +167,12 @@ double InteractionFactory<PatchyRod>::RepulsiveWCA_(double r)
 // ============================
 /* Debye-Huckel interaction potential */
 // ============================
-double InteractionFactory<PatchyRod>::DebyeHuckel_(double r)
+template<typename number>
+number InteractionFactory<PatchyRod<number>, number>::DebyeHuckel_(number r)
 {
-    double energy(0.);
+    number energy(0.);
     
-    if ( r < R_CUT_ ) energy = exp(r * MINUS_KAPPA_) * (DH_PREFACTOR_ / r);
+    if ( r < this->R_CUT_ ) energy = exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r);
     
     return energy;
 }
@@ -175,42 +180,43 @@ double InteractionFactory<PatchyRod>::DebyeHuckel_(double r)
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<PatchyRod>::MayerInteraction(const Vector3d& R_cm,
-                                                       PatchyRod* Particle1, PatchyRod* Particle2)
+template<typename number>
+number InteractionFactory<PatchyRod<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                       PatchyRod<number>* Particle1, PatchyRod<number>* Particle2)
 {
-    double energy(0.);
+    number energy(0.);
     
     // Backbone-backbone WCA repulsion
-    MatrixXd Backbone1 = Particle1->Orientation * Particle1->Backbone;
-    MatrixXd Backbone2 = Particle2->Orientation * Particle2->Backbone;
+    Matrix3X<number> Backbone1 = Particle1->Orientation * Particle1->Backbone;
+    Matrix3X<number> Backbone2 = Particle2->Orientation * Particle2->Backbone;
     
-    for ( uint idx_vtx1 = 0; idx_vtx1 < Backbone1.cols() && energy < E_CUT_; ++idx_vtx1 )
+    for ( uint idx_vtx1 = 0; idx_vtx1 < Backbone1.cols() && energy < this->E_CUT_; ++idx_vtx1 )
     {
-        for ( uint idx_vtx2 = 0; idx_vtx2 < Backbone2.cols() && energy < E_CUT_; ++idx_vtx2 )
+        for ( uint idx_vtx2 = 0; idx_vtx2 < Backbone2.cols() && energy < this->E_CUT_; ++idx_vtx2 )
         {
-            Vector3d R_sep = R_cm + Backbone2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
-            double   norm  = R_sep.norm();
+            Vector3<number> R_sep = R_cm + Backbone2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
+            number          norm  = R_sep.norm();
             
-            energy        += RepulsiveWCA_(norm);
+            energy               += RepulsiveWCA_(norm);
         }
     }
     
-    if ( energy < E_CUT_ )
+    if ( energy < this->E_CUT_ )
     {
-        MatrixXd Patches1 = Particle1->Orientation * Particle1->Patches;
-        MatrixXd Patches2 = Particle2->Orientation * Particle2->Patches;
+        Matrix3X<number> Patches1 = Particle1->Orientation * Particle1->Patches;
+        Matrix3X<number> Patches2 = Particle2->Orientation * Particle2->Patches;
         
         if ( USE_DH )
         {
             // Assume pairwise-additivity for site-site electrostatic interactions
-            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < E_CUT_; ++idx_vtx1 )
+            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < this->E_CUT_; ++idx_vtx1 )
             {
-                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < E_CUT_; ++idx_vtx2 )
+                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < this->E_CUT_; ++idx_vtx2 )
                 {
-                    Vector3d R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
-                    double   norm  = R_sep.norm();
+                    Vector3<number> R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
+                    number          norm  = R_sep.norm();
                     
-                    energy        += DebyeHuckel_(norm);
+                    energy               += DebyeHuckel_(norm);
                 }
             }
         }
@@ -218,14 +224,14 @@ double InteractionFactory<PatchyRod>::MayerInteraction(const Vector3d& R_cm,
         else
         {
             // Hard spherical thread of radius SIGMA_R
-            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < E_CUT_; ++idx_vtx1 )
+            for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < this->E_CUT_; ++idx_vtx1 )
             {
-                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < E_CUT_; ++idx_vtx2 )
+                for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < this->E_CUT_; ++idx_vtx2 )
                 {
-                    Vector3d R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
-                    double   norm  = R_sep.norm();
+                    Vector3<number> R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
+                    number          norm  = R_sep.norm();
                     
-                    if ( norm < SIGMA_R ) return 1.;
+                    if ( norm < this->SIGMA_R ) return 1.;
                 }
             }
         }
@@ -245,26 +251,27 @@ double InteractionFactory<PatchyRod>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<ThreadedRod>::MayerInteraction(const Vector3d& R_cm,
-                                                         ThreadedRod* Particle1, ThreadedRod* Particle2)
+template<typename number>
+number InteractionFactory<ThreadedRod<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                         ThreadedRod<number>* Particle1, ThreadedRod<number>* Particle2)
 {
     if ( !USE_DH ) return 1.;
     else
     {
-        BNode Node1 = *Particle1->Hull;
-        BNode Node2 = *Particle2->Hull;
+        BNode<number> Node1 = *Particle1->Hull;
+        BNode<number> Node2 = *Particle2->Hull;
 
-        Node1.l_ch  = L_Z_    / 2.;
-        Node1.l_cr  = D_HARD_ / 2.;
+        Node1.l_ch = this->L_Z_    / 2.;
+        Node1.l_cr = this->D_HARD_ / 2.;
         
-        Node2.l_ch  = L_Z_    / 2.;
-        Node2.l_cr  = D_HARD_ / 2.;
+        Node2.l_ch = this->L_Z_    / 2.;
+        Node2.l_cr = this->D_HARD_ / 2.;
         
         // Hard SC backbone
-        if ( Utils::OverlapBoundSC(R_cm, &Node1, &Node2) ) return 1.;
+        if ( Utils<number>::OverlapBoundSC(R_cm, &Node1, &Node2) ) return 1.;
         
-        double energy(0.);
-        RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, E_CUT_);
+        number energy(0.);
+        this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
         
         return 1. - exp(-energy);
     }
@@ -281,14 +288,15 @@ double InteractionFactory<ThreadedRod>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<TwistedCuboid>::MayerInteraction(const Vector3d& R_cm,
-                                                           TwistedCuboid* Particle1, TwistedCuboid* Particle2)
+template<typename number>
+number InteractionFactory<TwistedCuboid<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                           TwistedCuboid<number>* Particle1, TwistedCuboid<number>* Particle2)
 {
-    double energy(0.);
-    double mayer_interaction(0.);
+    number energy(0.);
+    number mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping vertices
-    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
 
     if ( energy > 0. ) mayer_interaction = 1.;
     
@@ -306,16 +314,21 @@ double InteractionFactory<TwistedCuboid>::MayerInteraction(const Vector3d& R_cm,
 // ============================
 /* Mayer interaction function */
 // ============================
-double InteractionFactory<TwistedPentagon>::MayerInteraction(const Vector3d& R_cm,
-                                                             TwistedPentagon* Particle1, TwistedPentagon* Particle2)
+template<typename number>
+number InteractionFactory<TwistedPentagon<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                             TwistedPentagon<number>* Particle1, TwistedPentagon<number>* Particle2)
 {
-    double energy(0.);
-    double mayer_interaction(0.);
+    number energy(0.);
+    number mayer_interaction(0.);
     
     // In this case, energy counts the number of overlapping vertices
-    RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
     
     if ( energy > 0. ) mayer_interaction = 1.;
     
     return mayer_interaction;
 }
+
+
+template struct InteractionFactory<MESOGEN<float>, float>;
+template struct InteractionFactory<MESOGEN<double>, double>;

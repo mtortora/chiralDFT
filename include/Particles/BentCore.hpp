@@ -4,28 +4,29 @@
 #include "BaseParticle.hpp"
 
 
-class BentCore: public BaseParticle
+template<typename number>
+class BentCore: public BaseParticle<number>
 {
 public:
     BentCore();
     
-    Eigen::Matrix3Xd Backbone;
+    Matrix3X<number> Backbone;
     void Build(int) override;
     
 protected:
-    double D_HARD_;
+    number D_HARD_;
     
 private:
     uint   N_S_;
     uint   N_RES_;
     
-    double L_CTR_;
-    double R_BTC_;
-    double GAMMA_;
-    double CHI_;
-    double L_X_;
-    double L_Y_;
-    double L_Z_;
+    number L_CTR_;
+    number R_BTC_;
+    number GAMMA_;
+    number CHI_;
+    number L_X_;
+    number L_Y_;
+    number L_Z_;
 };
 
 #endif

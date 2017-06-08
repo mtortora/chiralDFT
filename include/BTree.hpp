@@ -4,7 +4,8 @@
 #include "Utils.hpp"
 
 
-class BTree: public BNode
+template<typename number>
+class BTree: public BNode<number>
 {
 public:
     BTree();
@@ -20,22 +21,22 @@ public:
     uint vert_alloced;
     uint nodes_alloced;
     
-    void Build(const Eigen::Matrix3Xd&, double, uint);
+    void Build(const Matrix3X<number>&, number, uint);
     
 private:
     uint max_depth;
 
     // Memory storage to be assigned for the bounding volume hierarchy
-    std::vector<BNode> Tree;
+    std::vector<BNode<number> > Tree;
 
     void Allocate(uint);
 
     // Recursive allocators and constructors
-	void RecursiveAllocate(BNode*);
-	void RecursiveDeallocate(BNode*);
-    void RecursiveBuild(BNode*, const Eigen::Matrix3Xd&, double);
+	void RecursiveAllocate(BNode<number>*);
+	void RecursiveDeallocate(BNode<number>*);
+    void RecursiveBuild(BNode<number>*, const Matrix3X<number>&, number);
 
-    void BuildLeaf(BNode*, const Eigen::Matrix3Xd&);
+    void BuildLeaf(BNode<number>*, const Matrix3X<number>&);
 };
 
 #endif

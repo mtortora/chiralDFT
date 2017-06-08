@@ -4,7 +4,8 @@
 #include "BaseParticle.hpp"
 
 
-class ThreadedRod: public BaseParticle
+template<typename number>
+class ThreadedRod: public BaseParticle<number>
 {
 public:
     ThreadedRod();
@@ -16,19 +17,20 @@ public:
 #endif
     
 protected:
-    double D_HARD_;
-    double L_Z_;
-    double R_CUT_;
-    double E_CUT_;
-    double DH_PREFACTOR_;
-    double MINUS_KAPPA_;
+    number E_CUT_;
+    number DH_PREFACTOR_;
+
+    number D_HARD_;
+    number L_Z_;
+    number R_CUT_;
+    number MINUS_KAPPA_;
     
 private:
     uint   N_PATCH_;
     uint   N_RES_;
     
-    double P_PATCH_;
-    double R_PATCH_;
+    number P_PATCH_;
+    number R_PATCH_;
 };
 
 #endif

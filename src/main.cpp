@@ -12,8 +12,6 @@
  */
 // ===================================================================
 
-#include <mpi.h>
-
 #include "SimManager.hpp"
 
 
@@ -31,15 +29,15 @@ int main(int argc, char* argv[])
     try
     {
         // Simulation constructor
-        SimManager MCsim(mpi_rank, mpi_size);
+        SimManager<double> MCsim(mpi_rank, mpi_size);
         
         // Seed MPI MC integrator and load particle templates
         MCsim.MPIInit();
         
         // Initial perturbative run
-        MCsim.InitRun(MC_TYPE);
+        MCsim.InitRun();
         
-        if ( MODE == MODE_FULL )
+        if ( MODE_SIM == MODE_FULL )
         {
             // Main chiral sweeping run
             MCsim.LandscapeRun();
@@ -48,7 +46,7 @@ int main(int argc, char* argv[])
             MCsim.MinSurf();
         }
         
-        if ( MODE != MODE_EXC )
+        if ( MODE_SIM != MODE_EXC )
         {
             // Broadcast results to master thread
             MCsim.Gather();

@@ -10,31 +10,27 @@
  */
 // ===================================================================
 
-#include <mpi.h>
-
 #include "Legendre.hpp"
 #include "MCIntegrator.hpp"
-
-using namespace Eigen;
 
 
 // ============================
 /* Class constructor */
 // ============================
-template<class ParticleType>
-MCIntegrator<ParticleType>::MCIntegrator()
+template<template<typename number> class ParticleType, typename number>
+MCIntegrator<ParticleType, number>::MCIntegrator()
 {
-    Q_grid      = ArrayXd::LinSpaced(N_STEPS_Q, Q_MIN, Q_MAX);
-    Eta_grid    = ArrayXd::LinSpaced(N_STEPS_ETA, ETA_MIN, ETA_MAX);
+    Q_grid      = ArrayX<number>::LinSpaced(N_STEPS_Q, Q_MIN, Q_MAX);
+    Eta_grid    = ArrayX<number>::LinSpaced(N_STEPS_ETA, ETA_MIN, ETA_MAX);
     
-    Theta_grid_ = ArrayXd::LinSpaced(N_STEPS_THETA+1, 0, PI);
+    Theta_grid_ = ArrayX<number>::LinSpaced(N_STEPS_THETA+1, 0, PI);
 }
 
 // ============================
 /* Initialise MPI parameters and seed RNGs */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::MCInit(int seed, int mpi_rank, int mpi_size)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::MCInit(int seed, int mpi_rank, int mpi_size)
 {
     // Build particle models
     Particle1_.Build(mpi_rank);
@@ -59,8 +55,8 @@ void MCIntegrator<ParticleType>::MCInit(int seed, int mpi_rank, int mpi_size)
 // ============================
 /* Reset MC counters */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::MCReset()
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::MCReset()
 {
     MPI_Barrier(MPI_COMM_WORLD);
     
@@ -73,15 +69,15 @@ void MCIntegrator<ParticleType>::MCReset()
 // ============================
 /* Thread sync check every (1/N_SYNC)% */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::SyncCheck(bool prune)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::SyncCheck(bool prune)
 {
     if ( ctr_mc_ % (N_PER_PROC_ / N_SYNC) == 0 )
     {
         ullint ctr_mc;
         
         // Aggregate simulation statistics
-        MPI_Reduce(&ctr_mc_, &ctr_mc, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
+        MPI_Reduce(&ctr_mc_, &ctr_mc, 1, Utils<ullint>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
         
         t_end_     = MPI_Wtime();
         t_elapsed_ = t_end_ - t_start_;
@@ -93,12 +89,12 @@ void MCIntegrator<ParticleType>::SyncCheck(bool prune)
         
         if ( prune )
         {
-            MPI_Allreduce(MPI_IN_PLACE, Exc_grid_.data(), Exc_grid_.size(), MPI_INT, MPI_BAND, MPI_COMM_WORLD);
+            MPI_Allreduce(MPI_IN_PLACE, Exc_grid_.data(), Exc_grid_.size(), Utils<uint>().MPI_type, MPI_BAND, MPI_COMM_WORLD);
             
             ullint ctr_ov = NX*NY*NZ - Exc_grid_.sum();
             
-            double frac_p = (ctr_ov - ctr_ov_) * 100. / ((double)NX*NY*NZ);
-            double frac_t =  ctr_ov            * 100. / ((double)NX*NY*NZ);
+            number frac_p = (ctr_ov - ctr_ov_) * 100. / ((number)NX*NY*NZ);
+            number frac_t =  ctr_ov            * 100. / ((number)NX*NY*NZ);
             
             LogInf("Pruned %.3f%% of the grid (total: %.3f%%)", frac_p, frac_t);
             
@@ -109,7 +105,7 @@ void MCIntegrator<ParticleType>::SyncCheck(bool prune)
         {
             ullint ctr_ov;
             
-            MPI_Reduce(&ctr_ov_, &ctr_ov, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
+            MPI_Reduce(&ctr_ov_, &ctr_ov, 1, Utils<ullint>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
             
             LogInf("%.3f%% configurations interacted", ctr_ov * 100.*N_SYNC/N_MC);
             
@@ -118,17 +114,17 @@ void MCIntegrator<ParticleType>::SyncCheck(bool prune)
     }
 }
 
-#if (MODE == MODE_EXC)
+#if (MODE_SIM == MODE_EXC)
 
 // ============================
 /* Prune grid points outside of excluded volume manifold */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::PruneGrid(double r_hard)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
 {
-    Vector3d Grid_point;
+    Vector3<number> Grid_point;
     
-    MatrixXd Backbone   = Particle2_.Orientation * Particle2_.Backbone;
+    Matrix3X<number> Backbone = Particle2_.Orientation * Particle2_.Backbone;
     Backbone.colwise() += R_cm_;
     
     // Iterate over grid points
@@ -147,7 +143,7 @@ void MCIntegrator<ParticleType>::PruneGrid(double r_hard)
                     // Prune grid points located in non-overlapping particles pairs
                     for ( uint idx_vtx = 0; idx_vtx < Backbone.cols(); ++idx_vtx )
                     {
-                        Vector3d R_sep = Backbone.col(idx_vtx) - Grid_point;
+                        Vector3<number> R_sep = Backbone.col(idx_vtx) - Grid_point;
                         
                         if ( R_sep.norm() < r_hard )
                         {
@@ -164,8 +160,8 @@ void MCIntegrator<ParticleType>::PruneGrid(double r_hard)
 // ============================
 /* MC integration of the effective particle volume */
 // ============================
-template<class ParticleType>
-double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
+template<template<typename number> class ParticleType, typename number>
+number MCIntegrator<ParticleType, number>::ExcludedIntegrator(number r_hard)
 {
     MCReset();
     
@@ -173,9 +169,9 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
     LogTxt("Integrating effective excluded volume...");
     
     // Box spatial grid
-    X_grid_   = ArrayXd::LinSpaced(NX, -Particle1_.Hull->l_xh, Particle1_.Hull->l_xh);
-    Y_grid_   = ArrayXd::LinSpaced(NY, -Particle1_.Hull->l_yh, Particle1_.Hull->l_yh);
-    Z_grid_   = ArrayXd::LinSpaced(NZ, -Particle1_.Hull->l_zh, Particle1_.Hull->l_zh);
+    X_grid_   = ArrayX<number>::LinSpaced(NX, -Particle1_.Hull->l_xh, Particle1_.Hull->l_xh);
+    Y_grid_   = ArrayX<number>::LinSpaced(NY, -Particle1_.Hull->l_yh, Particle1_.Hull->l_yh);
+    Z_grid_   = ArrayX<number>::LinSpaced(NZ, -Particle1_.Hull->l_zh, Particle1_.Hull->l_zh);
     
     Exc_grid_ = ArrayXi::Constant(NX*NY*NZ, 1);
 
@@ -190,7 +186,7 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
         Particle2_.Parse(rng_engine_);
         
         // Random center-of-mass to center-of-mass separation vector
-        R_cm_ = Vector3d::NullaryExpr([&](int) {return rng_distrib_(rng_engine_)-0.5;}) * 2.*IManager.R_INTEG;
+        R_cm_ = Vector3<number>::NullaryExpr([&](int) {return rng_distrib_(rng_engine_)-0.5;}) * 2.*IManager.R_INTEG;
         
         // Bounding sphere overlap test
         if ( R_cm_.norm() < IManager.R_INTEG )
@@ -198,12 +194,12 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
             Particle2_.SetRandomAxis(rng_engine_, rng_distrib_);
             
             // Bounding spherocylinder (SC) overlap test
-            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
+            if ( Utils<number>::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
             {
                 Particle2_.SetRandomOrientation(rng_engine_, rng_distrib_);
                 
                 // Oriented Bounding Box (OBB) overlap test
-                if ( Utils::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
+                if ( Utils<number>::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
                 {
                     mayer_interaction_ = IManager.MayerInteraction(R_cm_, &Particle1_, &Particle2_);
                     
@@ -213,8 +209,8 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
         }
     }
     
-    double f_exc = Exc_grid_.sum() / ((double)NX*NY*NZ);
-    double v_box = 8. * Particle1_.Hull->l_xh*Particle1_.Hull->l_yh*Particle1_.Hull->l_zh;
+    number f_exc = Exc_grid_.sum() / ((number)NX*NY*NZ);
+    number v_box = 8. * Particle1_.Hull->l_xh*Particle1_.Hull->l_yh*Particle1_.Hull->l_zh;
     
     return (v_box * f_exc);
 }
@@ -224,8 +220,8 @@ double MCIntegrator<ParticleType>::ExcludedIntegrator(double r_hard)
 // ============================
 /* Random configuration generator */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::ConfigGenerator()
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::ConfigGenerator()
 {
     mayer_interaction_ = 0.;
     
@@ -240,7 +236,7 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
         Particle2_.Parse(rng_engine_);
         
         // Random center-of-mass to center-of-mass separation vector
-        R_cm_ = Vector3d::NullaryExpr([&](int) {return rng_distrib_(rng_engine_)-0.5;}) * 2.*IManager.R_INTEG;
+        R_cm_ = Vector3<number>::NullaryExpr([&](int) {return rng_distrib_(rng_engine_)-0.5;}) * 2.*IManager.R_INTEG;
         
         // Bounding sphere overlap test
         if ( R_cm_.norm() < IManager.R_INTEG )
@@ -249,7 +245,7 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
             Particle2_.SetRandomAxis(rng_engine_, rng_distrib_);
             
             // Bounding spherocylinder (SC) overlap test
-            if ( Utils::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
+            if ( Utils<number>::OverlapBoundSC(R_cm_, Particle1_.Hull, Particle2_.Hull) )
             {
                 Particle1_.SetRandomOrientation(rng_engine_, rng_distrib_);
                 Particle2_.SetRandomOrientation(rng_engine_, rng_distrib_);
@@ -280,7 +276,7 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
                 
                 #else
                     // Oriented Bounding Box (OBB) overlap test
-                    if ( Utils::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
+                    if ( Utils<number>::OverlapBoundOB(R_cm_, Particle1_.Hull, Particle2_.Hull) )
                     {
                         // Bounding Volume Hierarchy-accelerated energy computations
                         mayer_interaction_ = IManager.MayerInteraction(R_cm_, &Particle1_, &Particle2_);
@@ -295,18 +291,18 @@ void MCIntegrator<ParticleType>::ConfigGenerator()
 // ============================
 /* MC integration of the full angle-dependant excluded volume */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::FullIntegrator(MatrixXd* E_out, ArrayXd* V_r, ArrayXd* V_l)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::FullIntegrator(MatrixXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
 {
     MCReset();
 
     LogTxt("------------");
     LogTxt("Integrating full Onsager angle-dependant second-virial coefficient");
     
-    ArrayXd  V_r_  = ArrayXd::Zero(N_STEPS_THETA);
-    ArrayXd  V_l_  = ArrayXd::Zero(N_STEPS_THETA);
+    ArrayX<number>  V_r_  = ArrayX<number>::Zero(N_STEPS_THETA);
+    ArrayX<number>  V_l_  = ArrayX<number>::Zero(N_STEPS_THETA);
     
-    MatrixXd E_loc = MatrixXd::Zero(N_STEPS_THETA, N_STEPS_THETA);
+    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_STEPS_THETA, N_STEPS_THETA);
 
     while ( ctr_mc_ < N_PER_PROC_ )
     {
@@ -320,11 +316,11 @@ void MCIntegrator<ParticleType>::FullIntegrator(MatrixXd* E_out, ArrayXd* V_r, A
             uint   idx_theta2(0);
             uint   idx_theta (0);
 
-            double theta1 = Particle1_.GetTheta();
-            double theta2 = Particle2_.GetTheta();
+            number theta1 = Particle1_.GetTheta();
+            number theta2 = Particle2_.GetTheta();
             
-            double theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
-            double deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
+            number theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
+            number deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
 
             // Work out configuration angles
             for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
@@ -350,18 +346,18 @@ void MCIntegrator<ParticleType>::FullIntegrator(MatrixXd* E_out, ArrayXd* V_r, A
 // ============================
 /* MC integration of the nematic Legendre coefficients */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, ArrayXd* V_r, ArrayXd* V_l)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
 {
     MCReset();
 
     LogTxt("------------");
     LogTxt("Integrating uniaxial Legendre-projected second-virial coefficients");
     
-    ArrayXd  V_r_  = ArrayXd::Zero(N_STEPS_THETA);
-    ArrayXd  V_l_  = ArrayXd::Zero(N_STEPS_THETA);
+    ArrayX<number>  V_r_  = ArrayX<number>::Zero(N_STEPS_THETA);
+    ArrayX<number>  V_l_  = ArrayX<number>::Zero(N_STEPS_THETA);
     
-    MatrixXd E_loc = MatrixXd::Zero(N_L, N_L);
+    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_L, N_L);
 
     while ( ctr_mc_ < N_PER_PROC_ )
     {
@@ -373,11 +369,11 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, ArrayXd* V_
             
             uint   idx_theta (0);
 
-            double theta1 = Particle1_.GetTheta();
-            double theta2 = Particle2_.GetTheta();
+            number theta1 = Particle1_.GetTheta();
+            number theta2 = Particle2_.GetTheta();
             
-            double theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
-            double deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
+            number theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
+            number deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
             
             // Work out configuration angles
             for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
@@ -393,9 +389,9 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, ArrayXd* V_
                 for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
                 {
                     E_loc(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                  * sqrt((2.*(double)l1 + 1.)*(2.*(double)l2 + 1.)/4.)
-                                  * Legendre::Pn(l1, cos(theta2))
-                                  * Legendre::Pn(l2, cos(theta1));
+                                  * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                  * Legendre<number>::Pn(l1, cos(theta2))
+                                  * Legendre<number>::Pn(l2, cos(theta1));
                 }
             }
         }
@@ -410,16 +406,16 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, ArrayXd* V_
 // ============================
 /* MC integration of the cholesteric Legendre coefficients */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, double q_macro)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_out, number q_macro)
 {
     MCReset();
     
     LogTxt("------------");
     LogTxt("Integrating Legendre-projected second-virial coefficients - q=%.5f", q_macro);
     
-    Vector3d N_q;
-    MatrixXd E_loc = MatrixXd::Zero(N_L, N_L);
+    Vector3<number> N_q;
+    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_L, N_L);
     
     while ( ctr_mc_ < N_PER_PROC_ )
     {
@@ -429,8 +425,8 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, double q_ma
         {
             ctr_ov_++;
             
-            double theta1 = Particle1_.GetTheta();
-            double theta2 = Particle2_.GetTheta();
+            number theta1 = Particle1_.GetTheta();
+            number theta2 = Particle2_.GetTheta();
             
             N_q << sin(q_macro*R_cm_(1)), 0., cos(q_macro*R_cm_(1));
             
@@ -439,9 +435,9 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, double q_ma
                 for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
                 {
                     E_loc(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                  * sqrt((2.*(double)l1 + 1.)*(2.*(double)l2 + 1.)/4.)
-                                  * Legendre::Pn(l1, Particle2_.Axis.dot(N_q))
-                                  * Legendre::Pn(l2, cos(theta1));
+                                  * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                  * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
+                                  * Legendre<number>::Pn(l2, cos(theta1));
                 }
             }
         }
@@ -453,26 +449,26 @@ void MCIntegrator<ParticleType>::LegendreIntegrator(MatrixXd* E_out, double q_ma
 // ============================
 /* Work out preliminary chiral properties */
 // ============================
-template<class ParticleType>
-void MCIntegrator<ParticleType>::FrankIntegrator(const ArrayXXd& Psi_in,
-                                                 ArrayXd* K1_out, ArrayXd* K2_out, ArrayXd* K3_out, ArrayXd* Kt_out)
+template<template<typename number> class ParticleType, typename number>
+void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& Psi_in,
+                                                         ArrayX<number>* K1_out, ArrayX<number>* K2_out, ArrayX<number>* K3_out, ArrayX<number>* Kt_out)
 {
     MCReset();
 
     LogTxt("------------");
     LogTxt("Starting preliminary chiral run...");
     
-    ArrayXXd Psi_dot(N_STEPS_ETA, N_STEPS_THETA);
+    ArrayXX<number> Psi_dot(N_STEPS_ETA, N_STEPS_THETA);
 
-    ArrayXd  Eff_grid = Eta_grid * this->IManager.V_EFF/this->IManager.V0;
+    ArrayX<number>  Eff_grid = Eta_grid * this->IManager.V_EFF/this->IManager.V0;
     
-    ArrayXd  G_grid   = (1. - 3/4.*Eff_grid) / SQR(1. - Eff_grid);
-    ArrayXd  N_grid   = Eta_grid * CUB(IManager.SIGMA_R)/IManager.V0;
+    ArrayX<number>  G_grid   = (1. - 3/4.*Eff_grid) / SQR(1. - Eff_grid);
+    ArrayX<number>  N_grid   = Eta_grid * CUB(IManager.SIGMA_R)/IManager.V0;
     
-    ArrayXd  K1       = ArrayXd::Zero(N_STEPS_ETA);
-    ArrayXd  K2       = ArrayXd::Zero(N_STEPS_ETA);
-    ArrayXd  K3       = ArrayXd::Zero(N_STEPS_ETA);
-    ArrayXd  Kt       = ArrayXd::Zero(N_STEPS_ETA);
+    ArrayX<number>  K1       = ArrayX<number>::Zero(N_STEPS_ETA);
+    ArrayX<number>  K2       = ArrayX<number>::Zero(N_STEPS_ETA);
+    ArrayX<number>  K3       = ArrayX<number>::Zero(N_STEPS_ETA);
+    ArrayX<number>  Kt       = ArrayX<number>::Zero(N_STEPS_ETA);
     
     // Work out Psi differentials
     for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
@@ -494,8 +490,8 @@ void MCIntegrator<ParticleType>::FrankIntegrator(const ArrayXXd& Psi_in,
             uint   idx_theta1(0);
             uint   idx_theta2(0);
 
-            double theta1 = Particle1_.GetTheta();
-            double theta2 = Particle2_.GetTheta();
+            number theta1 = Particle1_.GetTheta();
+            number theta2 = Particle2_.GetTheta();
             
             // Work out configuration angles
             for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
@@ -539,4 +535,5 @@ void MCIntegrator<ParticleType>::FrankIntegrator(const ArrayXXd& Psi_in,
     *Kt_out = Kt * SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 4);
 }
 
-template class MCIntegrator<MESOGEN>;
+template class MCIntegrator<MESOGEN, float>;
+template class MCIntegrator<MESOGEN, double>;

@@ -13,9 +13,10 @@
  */
 // ===================================================================
 
-#include "globals.hpp"
+#include "params.hpp"
 
 
+template<typename number>
 struct BNode
 {
     BNode()
@@ -27,8 +28,8 @@ struct BNode
     virtual ~BNode() {}
     
     // Pointers to children nodes
-    BNode* NodeI;
-    BNode* NodeS;
+    BNode<number>* NodeI;
+    BNode<number>* NodeS;
     
     // Tree locators
     bool   is_root;
@@ -37,27 +38,27 @@ struct BNode
     uint   idx_depth;
 
     // OBB dimensions
-    double l_xh;
-    double l_yh;
-    double l_zh;
+    number l_xh;
+    number l_yh;
+    number l_zh;
 
     // SC dimensions
-    double l_ch;
-    double l_cr;
+    number l_ch;
+    number l_cr;
 
     // 3d properties - Center_p_ and Orientation_p_ are expressed in the parent frame
-    Eigen::Vector3d Axis;
+    Vector3<number> Axis;
     
-    Eigen::Vector3d Center;
-    Eigen::Vector3d Center_p;
+    Vector3<number> Center;
+    Vector3<number> Center_p;
 
-    Eigen::Matrix3d Orientation;
-    Eigen::Matrix3d Orientation_p;
+    Matrix33<number> Orientation;
+    Matrix33<number> Orientation_p;
     
     // Enclosed vertices - only allocated for leaf nodes
-    Eigen::Matrix3Xd* Vertices;
+    Matrix3X<number>* Vertices;
 
-    BNode& operator=(const BNode& Node)
+    BNode<number>& operator=(const BNode<number>& Node)
     {
         l_xh        = Node.l_xh;
         l_yh        = Node.l_yh;

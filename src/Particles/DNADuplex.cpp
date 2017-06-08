@@ -9,31 +9,28 @@
  */
 // ===================================================================
 
-#include <mpi.h>
-
 #include "Utils.hpp"
 #include "Particles/DNADuplex.hpp"
 
-using namespace Eigen;
 
-
-DNADuplex::DNADuplex()
+template<typename number>
+DNADuplex<number>::DNADuplex()
 {
     // Bounding leaf parameter
-    BVH.SetLeafParameter(10);
+    this->BVH.SetLeafParameter(10);
     
-    N_DELTA_L       = 2;
+    this->N_DELTA_L = 2;
     
     // Angstroms and inverse temperature to OxDNA units conversion factors
-    SIGMA_R         = 0.11739845;
+    this->SIGMA_R   = 0.11739845;
     BETA_R_         = 3000. / T_ABS;
 
     // B-DNA nucleotide volumes in OxDNA units - from Nadassy et al., Nucl. Acids Res. (2001)
-    V_ADE_          = 136.2 * CUB(SIGMA_R);
-    V_GUA_          = 143.8 * CUB(SIGMA_R);
-    V_CYT_          = 113.6 * CUB(SIGMA_R);
-    V_THY_          = 132.4 * CUB(SIGMA_R);
-    V_BCK_          = 174.8 * CUB(SIGMA_R);
+    V_ADE_          = 136.2 * CUB(this->SIGMA_R);
+    V_GUA_          = 143.8 * CUB(this->SIGMA_R);
+    V_CYT_          = 113.6 * CUB(this->SIGMA_R);
+    V_THY_          = 132.4 * CUB(this->SIGMA_R);
+    V_BCK_          = 174.8 * CUB(this->SIGMA_R);
     
     // oxDNA interaction parameters
     N_STAR_         = 3;
@@ -73,7 +70,7 @@ DNADuplex::DNADuplex()
         // DNA electrostatics model of Tombolato et al., JCP (2005)
         else if ( MODE_DH == DH_FERRARINI )
         {
-            R_STAR_       = 8. * SIGMA_R;
+            R_STAR_       = 8. * this->SIGMA_R;
             
             PREFACTOR_    = COULOMB_FACTOR_ * SQR(DELTA_SCREEN_) / EPSILON_DNA_;
             DH_PREFACTOR_ = COULOMB_FACTOR_ * SQR(DELTA_SCREEN_) / EPSILON_WATER_;
@@ -95,13 +92,14 @@ DNADuplex::DNADuplex()
 // ============================
 /* Build particle model */
 // ============================
-void DNADuplex::Build(int mpi_rank)
+template<typename number>
+void DNADuplex<number>::Build(int mpi_rank)
 {
     uint      N_CONF;
     uint      N_NUCL;
     
-    ArrayXi   Sizes;
-    Matrix3Xd Backbones;
+    ArrayX<uint>     Sizes;
+    Matrix3X<number> Backbones;
 
     // Load configurations from trajectory files on master thread
     if ( mpi_rank == MPI_MASTER )
@@ -109,7 +107,7 @@ void DNADuplex::Build(int mpi_rank)
         std::string DATA_PATH   = __DATA_PATH;
         std::string filename_in = DATA_PATH + "/trajectory.in";
         
-        Utils::Load(filename_in, &Backbones, &Sizes);
+        Utils<number>::Load(filename_in, &Backbones, &Sizes);
         
         if ( Backbones.size() == 0 ) throw std::runtime_error("Unreadable DNA input file");
         
@@ -118,8 +116,8 @@ void DNADuplex::Build(int mpi_rank)
     }
     
     // Broadcast data to slave threads
-    MPI_Bcast(&N_CONF, 1, MPI_UNSIGNED, MPI_MASTER, MPI_COMM_WORLD);
-    MPI_Bcast(&N_NUCL, 1, MPI_UNSIGNED, MPI_MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&N_CONF, 1, Utils<uint>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&N_NUCL, 1, Utils<uint>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 
     if ( mpi_rank != MPI_MASTER )
     {
@@ -127,14 +125,14 @@ void DNADuplex::Build(int mpi_rank)
         Backbones.resize(3, N_NUCL);
     }
     
-    MPI_Bcast(Sizes.data(),     Sizes.size(),     MPI_INT,    MPI_MASTER, MPI_COMM_WORLD);
-    MPI_Bcast(Backbones.data(), Backbones.size(), MPI_DOUBLE, MPI_MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(Sizes.data(),     Sizes.size(),     Utils<uint>()  .MPI_type, MPI_MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(Backbones.data(), Backbones.size(), Utils<number>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
     
     // Build bounding volume hierarchy
-    BVH.Build(Backbones, R_CUT_, Sizes);
+    this->BVH.Build(Backbones, R_CUT_, Sizes);
 
     // Print simulation parameters
-    if ( id_ == 1 )
+    if ( this->id_ == 1 )
     {
         LogTxt("Loaded DNA trajectory file: %d configurations, %d nucleotides", N_CONF, N_NUCL);
         LogInf("Running temperature: %f K", T_ABS);
@@ -142,21 +140,23 @@ void DNADuplex::Build(int mpi_rank)
         if ( USE_DH )
         {
             LogInf("Running salt concentration: %f mol/L", (float)C_SALT);
-            LogInf("Corresponding Debye length: %f nm", LAMBDA_ / (10.*SIGMA_R));
+            LogInf("Corresponding Debye length: %f nm", LAMBDA_ / (10.*this->SIGMA_R));
             
             if ( MODE_DH == DH_OXDNA )     LogInf("Using oxDNA-parametrised Debye-Huckel potential");
             if ( MODE_DH == DH_FERRARINI ) LogInf("Using Ferrarini's Debye-Huckel model potential");
         }
         
-        BVH.PrintBuildInfo();
+        this->BVH.PrintBuildInfo();
     }
     
-    // Set particle properties
     N_CONF_ = N_CONF;
     
-    R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
-    V_INTEG = CUB(2.*R_INTEG) * 16.*pow(PI, 6);
+    this->R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
+    this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
     
-    V0      = ((float)N_NUCL) / ((float)N_CONF) * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
-    V_EFF   = V0;
+    this->V0      = ((float)N_NUCL) / ((float)N_CONF) * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
+    this->V_EFF   = this->V0;
 }
+
+template class DNADuplex<float>;
+template class DNADuplex<double>;

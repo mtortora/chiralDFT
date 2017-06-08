@@ -4,32 +4,34 @@
 #include "BaseParticle.hpp"
 
 
-class PatchyRod: public BaseParticle
+template<typename number>
+class PatchyRod: public BaseParticle<number>
 {
 public:
     PatchyRod();
     
-    Eigen::Matrix3Xd Backbone;
-    Eigen::Matrix3Xd Patches;
+    Matrix3X<number> Backbone;
+    Matrix3X<number> Patches;
     
     void Build(int) override;
     void Parse(std::mt19937_64&) override {}
     
 protected:
-    double R_WCA_;
-    double EPSILON_WCA_;
-    double R_CUT_;
-    double E_CUT_;
-    double DH_PREFACTOR_;
-    double MINUS_KAPPA_;
+    number EPSILON_WCA_;
+    number E_CUT_;
+    number DH_PREFACTOR_;
+    
+    number R_WCA_;
+    number R_CUT_;
+    number MINUS_KAPPA_;
     
 private:
     uint   N_PATCH_;
     uint   N_BACK_;
     uint   N_RES_;
     
-    double L_Z_;
-    double P_PATCH_;
+    number L_Z_;
+    number P_PATCH_;
 };
 
 #endif

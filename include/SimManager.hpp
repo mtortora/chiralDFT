@@ -6,6 +6,7 @@
 #include "OdfOptimiser.hpp"
 
 
+template<typename number>
 class SimManager
 {
 public:
@@ -13,7 +14,7 @@ public:
     ~SimManager();
 
     void MPIInit();
-    void InitRun(int);
+    void InitRun();
     void LandscapeRun();
     void MinSurf();
     void Gather();
@@ -25,52 +26,52 @@ private:
     int mpi_rank_;
     int mpi_size_;
     
-    OdfOptimiser<MESOGEN> SimHandler;
+    OdfOptimiser<MESOGEN, number> SimHandler;
 
     std::string data_path_;
     
     std::chrono::high_resolution_clock::time_point t_start_;
     std::chrono::high_resolution_clock::time_point t_end_;
     
-    std::chrono::duration<double> t_elapsed_;
+    std::chrono::duration<number> t_elapsed_;
     
-    Eigen::ArrayXd  V_r;
-    Eigen::ArrayXd  V_l;
+    ArrayX<number>  V_r;
+    ArrayX<number>  V_l;
     
-    Eigen::ArrayXd  Qp_min;
-    Eigen::ArrayXd  Qp_inf;
-    Eigen::ArrayXd  Qp_sup;
+    ArrayX<number>  Qp_min;
+    ArrayX<number>  Qp_inf;
+    ArrayX<number>  Qp_sup;
     
-    Eigen::ArrayXd  Q_min;
-    Eigen::ArrayXd  Q_inf;
-    Eigen::ArrayXd  Q_sup;
+    ArrayX<number>  Q_min;
+    ArrayX<number>  Q_inf;
+    ArrayX<number>  Q_sup;
     
-    Eigen::ArrayXd  F_ref;
+    ArrayX<number>  F_ref;
     
-    Eigen::ArrayXd  P_res;
-    Eigen::ArrayXd  Mu_res;
-    Eigen::ArrayXd  S_res;
+    ArrayX<number>  P_res;
+    ArrayX<number>  Mu_res;
+    ArrayX<number>  S_res;
     
-    Eigen::ArrayXd  K1;
-    Eigen::ArrayXd  K1_inf;
-    Eigen::ArrayXd  K1_sup;
+    ArrayX<number>  K1;
+    ArrayX<number>  K1_inf;
+    ArrayX<number>  K1_sup;
     
-    Eigen::ArrayXd  K2;
-    Eigen::ArrayXd  K2_inf;
-    Eigen::ArrayXd  K2_sup;
+    ArrayX<number>  K2;
+    ArrayX<number>  K2_inf;
+    ArrayX<number>  K2_sup;
     
-    Eigen::ArrayXd  K3;
-    Eigen::ArrayXd  K3_inf;
-    Eigen::ArrayXd  K3_sup;
+    ArrayX<number>  K3;
+    ArrayX<number>  K3_inf;
+    ArrayX<number>  K3_sup;
     
-    Eigen::ArrayXd  Kt;
-    Eigen::ArrayXd  Kt_inf;
-    Eigen::ArrayXd  Kt_sup;
+    ArrayX<number>  Kt;
+    ArrayX<number>  Kt_inf;
+    ArrayX<number>  Kt_sup;
     
-    Eigen::ArrayXXd Psi_grd;
+    ArrayXX<number> Psi_grd;
     
-    Eigen::MatrixXd E_ref;
-    Eigen::MatrixXd F_lnd;
+    MatrixXX<number> E_ref;
+    MatrixXX<number> F_lnd;
 };
 
 #endif

@@ -12,12 +12,11 @@
 
 #include "BHierarchy.hpp"
 
-using namespace Eigen;
 
-
-BHierarchy::BHierarchy()
+template<typename number>
+BHierarchy<number>::BHierarchy()
 {
-	m             = 3;
+	this->m       = 3;
 	trees_alloced = 0;
 	
 	total_built   = 0;
@@ -30,13 +29,14 @@ BHierarchy::BHierarchy()
 // ============================
 /* Build single tree hierarchy */
 // ============================
-void BHierarchy::Build(const Matrix3Xd& Vertices_, double range)
+template<typename number>
+void BHierarchy<number>::Build(const Matrix3X<number>& Vertices_, number range)
 {
 	if ( Forest.size() == 0 ) Forest.resize(1);
 	
-	BTree* Tree_   = &Forest[trees_alloced++];
+	BTree<number>* Tree_ = &Forest[trees_alloced++];
 	
-	Tree_->Build(Vertices_, range, m);
+	Tree_->Build(Vertices_, range, this->m);
 	
 	total_built   += Tree_->nodes_built;
 	total_alloced += Tree_->nodes_alloced;
@@ -48,7 +48,8 @@ void BHierarchy::Build(const Matrix3Xd& Vertices_, double range)
 // ============================
 /* Overloaded forest constructor */
 // ============================
-void BHierarchy::Build(const Matrix3Xd& Vertices_trees, double range, const ArrayXi& Size_trees)
+template<typename number>
+void BHierarchy<number>::Build(const Matrix3X<number>& Vertices_trees, number range, const ArrayX<uint>& Size_trees)
 {
 	uint num_trees = Size_trees.size();
 	
@@ -57,9 +58,12 @@ void BHierarchy::Build(const Matrix3Xd& Vertices_trees, double range, const Arra
 
 	for ( uint idx_tree = 0; idx_tree < num_trees; ++idx_tree )
 	{
-		uint      n_vert    = Size_trees(idx_tree);
-		Matrix3Xd Vertices_ = Matrix3Xd::Map(Vertices_trees.data() + 3 * total_vert, 3, n_vert);
+		uint n_vert = Size_trees(idx_tree);
+		Matrix3X<number> Vertices_ = Matrix3X<number>::Map(Vertices_trees.data() + 3 * total_vert, 3, n_vert);
 		
 		Build(Vertices_, range);
 	}
 }
+
+template class BHierarchy<float>;
+template class BHierarchy<double>;

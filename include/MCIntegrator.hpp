@@ -6,56 +6,56 @@
 #include "InteractionFactory.hpp"
 
 
-template<class ParticleType>
+template<template<typename number> class ParticleType, typename number>
 class MCIntegrator
 {
 public:
     MCIntegrator();
     
-    double ExcludedIntegrator(double);
+    number ExcludedIntegrator(number);
     
-    InteractionFactory<ParticleType> IManager;
+    InteractionFactory<ParticleType<number>, number> IManager;
     
-    Eigen::ArrayXd Q_grid;
-    Eigen::ArrayXd Eta_grid;
+    ArrayX<number> Q_grid;
+    ArrayX<number> Eta_grid;
     
     void MCInit(int, int, int);
-    void FullIntegrator    (Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
-    void LegendreIntegrator(Eigen::MatrixXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
-    void LegendreIntegrator(Eigen::MatrixXd*, double);
-    void FrankIntegrator(const Eigen::ArrayXXd&,
-                         Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*);
+    void FullIntegrator    (MatrixXX<number>*, ArrayX<number>*, ArrayX<number>*);
+    void LegendreIntegrator(MatrixXX<number>*, ArrayX<number>*, ArrayX<number>*);
+    void LegendreIntegrator(MatrixXX<number>*, number);
+    void FrankIntegrator(const ArrayXX<number>&,
+                         ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*);
     
 private:
-    ParticleType    Particle1_;
-    ParticleType    Particle2_;
+    ParticleType<number> Particle1_;
+    ParticleType<number> Particle2_;
     
-    ullint          N_PER_PROC_;
+    ullint N_PER_PROC_;
 
-    ullint          ctr_mc_;
-    ullint          ctr_ov_;
+    ullint ctr_mc_;
+    ullint ctr_ov_;
     
-    double          mayer_interaction_;
-    double          t_start_;
-    double          t_end_;
-    double          t_elapsed_;
+    number mayer_interaction_;
+    number t_start_;
+    number t_end_;
+    number t_elapsed_;
 
-    Eigen::Vector3d R_cm_;
+    Vector3<number> R_cm_;
     
-    Eigen::ArrayXd  X_grid_;
-    Eigen::ArrayXd  Y_grid_;
-    Eigen::ArrayXd  Z_grid_;
+    ArrayX<number>  X_grid_;
+    ArrayX<number>  Y_grid_;
+    ArrayX<number>  Z_grid_;
 
-    Eigen::ArrayXd  Theta_grid_;
+    ArrayX<number>  Theta_grid_;
     
-    Eigen::ArrayXi  Exc_grid_;
+    ArrayX<uint>    Exc_grid_;
 
     std::mt19937_64 rng_engine_;
-    std::uniform_real_distribution<double> rng_distrib_{0., 1.};
+    std::uniform_real_distribution<number> rng_distrib_{0., 1.};
 	
     void MCReset();
     void SyncCheck(bool);
-    void PruneGrid(double);
+    void PruneGrid(number);
     void ConfigGenerator();
 };
 

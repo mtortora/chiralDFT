@@ -4,25 +4,26 @@
 #include "BaseParticle.hpp"
 
 
-class Helix: public BaseParticle
+template<typename number>
+class Helix: public BaseParticle<number>
 {
 public:
     Helix();
     
-    Eigen::Matrix3Xd Backbone;
+    Matrix3X<number> Backbone;
     void Build(int) override;
     
 protected:
-    double D_HARD_;
+    number D_HARD_;
     
 private:
     uint   N_S_;
     uint   N_RES_;
     
-    double L_CTR_;
-    double R_HLX_;
-    double P_HLX_;
-    double L_Z_;
+    number L_CTR_;
+    number R_HLX_;
+    number P_HLX_;
+    number L_Z_;
 };
 
 #endif

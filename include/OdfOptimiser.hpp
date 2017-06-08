@@ -4,30 +4,30 @@
 #include "MCIntegrator.hpp"
 
 
-template<class ParticleType>
-class OdfOptimiser: public MCIntegrator<ParticleType>
+template<template<typename number> class ParticleType, typename number>
+class OdfOptimiser: public MCIntegrator<ParticleType, number>
 {
 public:
     OdfOptimiser();
     
-    Eigen::ArrayXd Theta_grid;
+    ArrayX<number> Theta_grid;
     
-    void BinodalAnalysis(const Eigen::MatrixXd&, int);
-    void EnergyGrid(const Eigen::MatrixXd&, Eigen::ArrayXd*, int);
-    void ODFGrid(const Eigen::MatrixXd&,
-                 Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*, Eigen::ArrayXd*,
-                 Eigen::ArrayXXd*, int);
+    void BinodalAnalysis(const MatrixXX<number>&);
+    void EnergyGrid(const MatrixXX<number>&, ArrayX<number>*);
+    void ODFGrid(const MatrixXX<number>&,
+                 ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*,
+                 ArrayXX<number>*);
     
 private:
-    Eigen::ArrayXd Psi_iso_;
+    ArrayX<number> Psi_iso_;
     
-    double VirialCoeff(const Eigen::ArrayXd&, const Eigen::MatrixXd&, int);
-    double FreeEnergy(double, const Eigen::ArrayXd&, const Eigen::MatrixXd&, int);
+    number VirialCoeff(const ArrayX<number>&, const MatrixXX<number>&);
+    number FreeEnergy(number, const ArrayX<number>&, const MatrixXX<number>&);
     
-    Eigen::ArrayXd LegendreCoeffs(const Eigen::ArrayXd&);
-    Eigen::ArrayXd SequentialOptimiser(double, const Eigen::MatrixXd&, int);
+    ArrayX<number> LegendreCoeffs(const ArrayX<number>&);
+    ArrayX<number> SequentialOptimiser(number, const MatrixXX<number>&);
     
-    Eigen::Vector2d ODFThermo(double, const Eigen::ArrayXd&, const Eigen::MatrixXd&, int);
+    Vector2<number> ODFThermo(number, const ArrayX<number>&, const MatrixXX<number>&);
 };
 
 #endif
