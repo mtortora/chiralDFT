@@ -16,12 +16,13 @@
 
 
 // ============================
-/* Wrapper for MPI datatypes */
+/* Wrappers for MPI datatypes */
 // ============================
-template<> Utils<float> ::Utils(): MPI_type(MPI_FLOAT)    {}
-template<> Utils<double>::Utils(): MPI_type(MPI_DOUBLE)   {}
+template<> Utils<float> ::Utils(): MPI_type(MPI_FLOAT)              {}
+template<> Utils<double>::Utils(): MPI_type(MPI_DOUBLE)             {}
 
-template<> Utils<uint>  ::Utils(): MPI_type(MPI_UNSIGNED) {}
+template<> Utils<int>   ::Utils(): MPI_type(MPI_INT)                {}
+template<> Utils<uint>  ::Utils(): MPI_type(MPI_UNSIGNED)           {}
 template<> Utils<ullint>::Utils(): MPI_type(MPI_UNSIGNED_LONG_LONG) {}
 
 // ============================
