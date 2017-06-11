@@ -20,10 +20,8 @@
 template<template<typename number> class ParticleType, typename number>
 MCIntegrator<ParticleType, number>::MCIntegrator()
 {
-    Q_grid      = ArrayX<number>::LinSpaced(N_STEPS_Q, Q_MIN, Q_MAX);
-    Eta_grid    = ArrayX<number>::LinSpaced(N_STEPS_ETA, ETA_MIN, ETA_MAX);
-    
-    Theta_grid_ = ArrayX<number>::LinSpaced(N_STEPS_THETA+1, 0, PI);
+    Q_grid   = ArrayX<number>::LinSpaced(N_STEPS_Q, Q_MIN, Q_MAX);
+    Eta_grid = ArrayX<number>::LinSpaced(N_STEPS_ETA, ETA_MIN, ETA_MAX);
 }
 
 // ============================
@@ -42,6 +40,7 @@ void MCIntegrator<ParticleType, number>::MCInit(int seed, int mpi_rank, int mpi_
     // Assign extra constants to interaction manager
     IManager.R_INTEG = Particle1_.R_INTEG;
     IManager.V_INTEG = Particle1_.V_INTEG;
+    
     IManager.V0      = Particle1_.V0;
     IManager.V_EFF   = Particle1_.V_EFF;
 
@@ -125,7 +124,7 @@ void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
     Vector3<number> Grid_point;
     
     Matrix3X<number> Backbone = Particle2_.Orientation * Particle2_.Backbone;
-    Backbone.colwise() += R_cm_;
+    Backbone.colwise()       += R_cm_;
     
     // Iterate over grid points
     for ( uint idx_x = 0; idx_x < NX; ++idx_x )
@@ -163,8 +162,6 @@ void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
 template<template<typename number> class ParticleType, typename number>
 number MCIntegrator<ParticleType, number>::ExcludedIntegrator(number r_hard)
 {
-    MCReset();
-    
     LogTxt("------------");
     LogTxt("Integrating effective excluded volume...");
     
@@ -174,6 +171,8 @@ number MCIntegrator<ParticleType, number>::ExcludedIntegrator(number r_hard)
     Z_grid_   = ArrayX<number>::LinSpaced(NZ, -Particle1_.Hull->l_zh, Particle1_.Hull->l_zh);
     
     Exc_grid_ = ArrayXi::Constant(NX*NY*NZ, 1);
+
+    MCReset();
 
     while ( ctr_mc_ < N_PER_PROC_ )
     {
@@ -289,20 +288,20 @@ void MCIntegrator<ParticleType, number>::ConfigGenerator()
 }
 
 // ============================
-/* MC integration of the full angle-dependant excluded volume */
+/* MC integration of virial coefficients */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::FullIntegrator(MatrixXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
+void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
 {
-    MCReset();
-
     LogTxt("------------");
-    LogTxt("Integrating full Onsager angle-dependant second-virial coefficient");
+    LogTxt("Integrating angle-dependant second-virial coefficients");
     
-    ArrayX<number>  V_r_  = ArrayX<number>::Zero(N_STEPS_THETA);
-    ArrayX<number>  V_l_  = ArrayX<number>::Zero(N_STEPS_THETA);
+    *V_r   = ArrayX<number>::Zero(N_THETA);
+    *V_l   = ArrayX<number>::Zero(N_THETA);
     
-    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_STEPS_THETA, N_STEPS_THETA);
+    *E_out = ArrayX<number>::Zero(E_out->get_sym_size(E_DIM));
+
+    MCReset();
 
     while ( ctr_mc_ < N_PER_PROC_ )
     {
@@ -312,111 +311,86 @@ void MCIntegrator<ParticleType, number>::FullIntegrator(MatrixXX<number>* E_out,
         {
             ctr_ov_++;
             
-            uint   idx_theta1(0);
-            uint   idx_theta2(0);
-            uint   idx_theta (0);
-
-            number theta1 = Particle1_.GetTheta();
-            number theta2 = Particle2_.GetTheta();
+            number theta    = acos((Particle1_.Axis).dot(Particle2_.Axis));
+            number deter    = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
             
-            number theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
-            number deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
-
-            // Work out configuration angles
-            for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
-            {
-                if ( (theta1 > Theta_grid_(idx_ang)) && (theta1 <= Theta_grid_(idx_ang+1)) ) idx_theta1 = idx_ang;
-                if ( (theta2 > Theta_grid_(idx_ang)) && (theta2 <= Theta_grid_(idx_ang+1)) ) idx_theta2 = idx_ang;
-                if ( (theta  > Theta_grid_(idx_ang)) && (theta  <= Theta_grid_(idx_ang+1)) ) idx_theta  = idx_ang;
-            }
+            uint idx_theta  = floor(theta /PI * (number)N_THETA);
+            idx_theta       = fmin(idx_theta, N_THETA-1);
             
-            if ( deter > 0. ) V_r_(idx_theta) += mayer_interaction_;
-            else              V_l_(idx_theta) += mayer_interaction_;
-            
-            E_loc(idx_theta1, idx_theta2) += mayer_interaction_;
-        }
-    }
-    
-    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
-    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
-
-    *E_out = E_loc * IManager.V_INTEG/N_PER_PROC_ / SQR(D_THETA);
-}
-
-// ============================
-/* MC integration of the nematic Legendre coefficients */
-// ============================
-template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
-{
-    MCReset();
-
-    LogTxt("------------");
-    LogTxt("Integrating uniaxial Legendre-projected second-virial coefficients");
-    
-    ArrayX<number>  V_r_  = ArrayX<number>::Zero(N_STEPS_THETA);
-    ArrayX<number>  V_l_  = ArrayX<number>::Zero(N_STEPS_THETA);
-    
-    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_L, N_L);
-
-    while ( ctr_mc_ < N_PER_PROC_ )
-    {
-        ConfigGenerator();
-        
-        if ( mayer_interaction_ != 0. )
-        {
-            ctr_ov_++;
-            
-            uint   idx_theta (0);
-
-            number theta1 = Particle1_.GetTheta();
-            number theta2 = Particle2_.GetTheta();
-            
-            number theta  = acos((Particle1_.Axis).dot(Particle2_.Axis));
-            number deter  = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
+            if ( deter > 0. ) (*V_r)(idx_theta) += mayer_interaction_;
+            else              (*V_l)(idx_theta) += mayer_interaction_;
             
             // Work out configuration angles
-            for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
-            {
-                if ( (theta  > Theta_grid_(idx_ang)) && (theta  <= Theta_grid_(idx_ang+1)) ) idx_theta  = idx_ang;
-            }
+            number alpha1   = Particle1_.alpha;
+            number alpha2   = Particle2_.alpha;
             
-            if ( deter > 0. ) V_r_(idx_theta) += mayer_interaction_;
-            else              V_l_(idx_theta) += mayer_interaction_;
+            number theta1   = Particle1_.theta;
+            number theta2   = Particle2_.theta;
             
-            for ( uint l1 = 0; l1 < N_L; l1 += IManager.N_DELTA_L )
+            number phi1     = Particle1_.phi;
+            number phi2     = Particle2_.phi;
+            
+            uint idx_alpha1 = floor(alpha1/(2.*PI) * (number)N_ALPHA);
+            uint idx_alpha2 = floor(alpha2/(2.*PI) * (number)N_ALPHA);
+            
+            uint idx_theta1 = floor(theta1/PI      * (number)N_THETA);
+            uint idx_theta2 = floor(theta2/PI      * (number)N_THETA);
+            
+            uint idx_phi1   = floor(phi1/(2.*PI)   * (number)N_PHI);
+            uint idx_phi2   = floor(phi2/(2.*PI)   * (number)N_PHI);
+            
+            // Necessary for single-precision floats
+            idx_alpha1      = fmin(idx_alpha1, N_ALPHA-1);
+            idx_alpha2      = fmin(idx_alpha2, N_ALPHA-1);
+            
+            idx_theta1      = fmin(idx_theta1, N_THETA-1);
+            idx_theta2      = fmin(idx_theta2, N_THETA-1);
+            
+            idx_phi1        = fmin(idx_phi1,   N_PHI-1);
+            idx_phi2        = fmin(idx_phi2,   N_PHI-1);
+            
+            if ( ODF_TYPE == ODF_FULL ) (*E_out).sym(idx_alpha1, idx_theta1, idx_phi1,
+                                                     idx_alpha2, idx_theta2, idx_phi2) += mayer_interaction_;
+            
+            if ( ODF_TYPE == ODF_LEGENDRE )
             {
-                for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
+                for ( uint l1 = 0; l1 < N_L; l1 += IManager.N_DELTA_L )
                 {
-                    E_loc(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                  * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
-                                  * Legendre<number>::Pn(l1, cos(theta2))
-                                  * Legendre<number>::Pn(l2, cos(theta1));
+                    for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
+                    {
+                        (*E_out).sym(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
+                                             * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                             * Legendre<number>::Pn(l1, cos(theta2))
+                                             * Legendre<number>::Pn(l2, cos(theta1));
+                    }
                 }
             }
         }
     }
     
-    *V_r   = V_r_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
-    *V_l   = V_l_  * IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+    number prefactor = ((ODF_TYPE == ODF_FULL) ? SQR(D_ALPHA*D_THETA*D_PHI) : 1.);
     
-    *E_out = E_loc * IManager.V_INTEG/N_PER_PROC_;
+    *V_r   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+    *V_l   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+
+    *E_out *= IManager.V_INTEG/N_PER_PROC_ / prefactor;
 }
 
 // ============================
 /* MC integration of the cholesteric Legendre coefficients */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_out, number q_macro)
+void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayX<number>* E_out, number q_macro)
 {
-    MCReset();
-    
     LogTxt("------------");
     LogTxt("Integrating Legendre-projected second-virial coefficients - q=%.5f", q_macro);
     
     Vector3<number> N_q;
-    MatrixXX<number> E_loc = MatrixXX<number>::Zero(N_L, N_L);
     
+    *E_out = ArrayX<number>::Zero(E_out->get_sym_size(E_DIM));
+    
+    MCReset();
+
     while ( ctr_mc_ < N_PER_PROC_ )
     {
         ConfigGenerator();
@@ -425,8 +399,8 @@ void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_
         {
             ctr_ov_++;
             
-            number theta1 = Particle1_.GetTheta();
-            number theta2 = Particle2_.GetTheta();
+            number theta1 = Particle1_.theta;
+            number theta2 = Particle2_.theta;
             
             N_q << sin(q_macro*R_cm_(1)), 0., cos(q_macro*R_cm_(1));
             
@@ -434,16 +408,16 @@ void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_
             {
                 for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
                 {
-                    E_loc(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                  * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
-                                  * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
-                                  * Legendre<number>::Pn(l2, cos(theta1));
+                    (*E_out).sym(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
+                                         * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                         * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
+                                         * Legendre<number>::Pn(l2, cos(theta1));
                 }
             }
         }
     }
     
-    *E_out = E_loc * IManager.V_INTEG/N_PER_PROC_;
+    *E_out *= IManager.V_INTEG/N_PER_PROC_;
 }
 
 // ============================
@@ -451,34 +425,49 @@ void MCIntegrator<ParticleType, number>::LegendreIntegrator(MatrixXX<number>* E_
 // ============================
 template<template<typename number> class ParticleType, typename number>
 void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& Psi_in,
-                                                         ArrayX<number>* K1_out, ArrayX<number>* K2_out, ArrayX<number>* K3_out, ArrayX<number>* Kt_out)
+                                                         ArrayX<number>* K1_out, ArrayX<number>* K2_out, ArrayX<number>* K3_out,
+                                                         ArrayX<number>* Kt_out)
 {
-    MCReset();
-
     LogTxt("------------");
     LogTxt("Starting preliminary chiral run...");
     
-    ArrayXX<number> Psi_dot(N_STEPS_ETA, N_STEPS_THETA);
+    ArrayXX<number> Psi_dot(Psi_in.rows(), Psi_in.cols());
 
     ArrayX<number>  Eff_grid = Eta_grid * this->IManager.V_EFF/this->IManager.V0;
     
     ArrayX<number>  G_grid   = (1. - 3/4.*Eff_grid) / SQR(1. - Eff_grid);
     ArrayX<number>  N_grid   = Eta_grid * CUB(IManager.SIGMA_R)/IManager.V0;
     
-    ArrayX<number>  K1       = ArrayX<number>::Zero(N_STEPS_ETA);
-    ArrayX<number>  K2       = ArrayX<number>::Zero(N_STEPS_ETA);
-    ArrayX<number>  K3       = ArrayX<number>::Zero(N_STEPS_ETA);
-    ArrayX<number>  Kt       = ArrayX<number>::Zero(N_STEPS_ETA);
+    *K1_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
+    *K2_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
+    *K3_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
+    *Kt_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
     
     // Work out Psi differentials
-    for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
+    for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
     {
-        if ( idx_ang < N_STEPS_THETA-1 ) Psi_dot.col(idx_ang) = Psi_in.col(idx_ang+1) - Psi_in.col(idx_ang);
-        else                             Psi_dot.col(idx_ang) = -Psi_dot.col(0);
+        for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
+        {
+            for ( uint idx_phi = 0; idx_phi < N_PHI; ++idx_phi )
+            {
+                if ( idx_theta < N_THETA-1 )
+                {
+                    Psi_dot.col_at(idx_alpha, idx_theta, idx_phi) = Psi_in.col_at(idx_alpha, idx_theta+1, idx_phi)
+                                                                  - Psi_in.col_at(idx_alpha, idx_theta,   idx_phi);
+                }
+                
+                else
+                {
+                    Psi_dot.col_at(idx_alpha, idx_theta, idx_phi) = -Psi_dot.col_at(idx_alpha, 0, idx_phi);
+                }
+            }
+        }
     }
     
     Psi_dot /= D_THETA;
     
+    MCReset();
+
     while ( ctr_mc_ < N_PER_PROC_ )
     {
         ConfigGenerator();
@@ -486,53 +475,69 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
         if ( mayer_interaction_ != 0. )
         {
             ctr_ov_++;
-            
-            uint   idx_theta1(0);
-            uint   idx_theta2(0);
 
-            number theta1 = Particle1_.GetTheta();
-            number theta2 = Particle2_.GetTheta();
-            
             // Work out configuration angles
-            for ( uint idx_ang = 0; idx_ang < N_STEPS_THETA; ++idx_ang )
-            {
-                if ( (theta1 > Theta_grid_(idx_ang)) && (theta1 <= Theta_grid_(idx_ang+1)) ) idx_theta1 = idx_ang;
-                if ( (theta2 > Theta_grid_(idx_ang)) && (theta2 <= Theta_grid_(idx_ang+1)) ) idx_theta2 = idx_ang;
-            }
+            number alpha1   = Particle1_.alpha;
+            number alpha2   = Particle2_.alpha;
+            
+            number theta1   = Particle1_.theta;
+            number theta2   = Particle2_.theta;
+            
+            number phi1     = Particle1_.phi;
+            number phi2     = Particle2_.phi;
+            
+            uint idx_alpha1 = floor(alpha1/(2.*PI) * (number)N_ALPHA);
+            uint idx_alpha2 = floor(alpha2/(2.*PI) * (number)N_ALPHA);
+            
+            uint idx_theta1 = floor(theta1/PI      * (number)N_THETA);
+            uint idx_theta2 = floor(theta2/PI      * (number)N_THETA);
+            
+            uint idx_phi1   = floor(phi1/(2.*PI)   * (number)N_PHI);
+            uint idx_phi2   = floor(phi2/(2.*PI)   * (number)N_PHI);
+            
+            // Necessary for single-precision floats
+            idx_alpha1      = fmin(idx_alpha1, N_ALPHA-1);
+            idx_alpha2      = fmin(idx_alpha2, N_ALPHA-1);
+            
+            idx_theta1      = fmin(idx_theta1, N_THETA-1);
+            idx_theta2      = fmin(idx_theta2, N_THETA-1);
+            
+            idx_phi1        = fmin(idx_phi1,   N_PHI-1);
+            idx_phi2        = fmin(idx_phi2,   N_PHI-1);
             
             // Update Frank elastic constants
-            K1 -= mayer_interaction_
-                * Psi_dot.col(idx_theta1)
-                * Psi_dot.col(idx_theta2)
-                * Particle1_.Axis(0) * Particle2_.Axis(0)
-                * SQR(R_cm_(0));
+            *K1_out -= mayer_interaction_
+                     * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
+                     * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
+                     * Particle1_.Axis(0) * Particle2_.Axis(0)
+                     * SQR(R_cm_(0));
 			
-            K2 -= mayer_interaction_
-                * Psi_dot.col(idx_theta1)
-                * Psi_dot.col(idx_theta2)
-                * Particle1_.Axis(1) * Particle2_.Axis(1)
-                * SQR(R_cm_(0));
+            *K2_out -= mayer_interaction_
+                     * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
+                     * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
+                     * Particle1_.Axis(1) * Particle2_.Axis(1)
+                     * SQR(R_cm_(0));
             
-            K3 -= mayer_interaction_
-                * Psi_dot.col(idx_theta1)
-                * Psi_dot.col(idx_theta2)
-                * Particle1_.Axis(0) * Particle2_.Axis(0)
-                * SQR(R_cm_(2));
+            *K3_out -= mayer_interaction_
+                     * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
+                     * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
+                     * Particle1_.Axis(0) * Particle2_.Axis(0)
+                     * SQR(R_cm_(2));
             
             // Update twist modulus
-            Kt -= mayer_interaction_ * sin(theta1)
-                * Psi_in. col(idx_theta1)
-                * Psi_dot.col(idx_theta2)
-                * Particle2_.Axis(1)
-                * R_cm_(0);
+            *Kt_out -= mayer_interaction_ * sin(theta1)
+                     * Psi_in. col_at(idx_alpha1, idx_theta1, idx_phi1)
+                     * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
+                     * Particle2_.Axis(1)
+                     * R_cm_(0);
         }
     }
     
-    *K1_out = K1 * SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
-    *K2_out = K2 * SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
-    *K3_out = K3 * SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
+    *K1_out *= SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
+    *K2_out *= SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
+    *K3_out *= SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 5);
     
-    *Kt_out = Kt * SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 4);
+    *Kt_out *= SQR(N_grid)/2. * G_grid * IManager.V_INTEG/N_PER_PROC_ / pow(IManager.SIGMA_R, 4);
 }
 
 template class MCIntegrator<MESOGEN, float>;

@@ -34,6 +34,10 @@ public:
 
     uint   N_DELTA_L;
     
+    number phi;
+    number alpha;
+    number theta;
+    
     number SIGMA_R = 1.;
     number R_INTEG;
     number V_INTEG;
@@ -47,17 +51,15 @@ public:
     BTree<number>*     Hull;
     BHierarchy<number> BVH;
 	
-    number GetTheta() {return theta_;}
-
     // Random configuration generators
     inline void SetRandomAxis(std::mt19937_64& rng_engine, std::uniform_real_distribution<number>& rng_distrib)
     {
-        phi_   = rng_distrib(rng_engine) * 2.*PI;
-        theta_ = rng_distrib(rng_engine) * PI;
+        phi   = rng_distrib(rng_engine) * 2.*PI;
+        theta = rng_distrib(rng_engine) * PI;
         
-        Axis  << sin(theta_)*cos(phi_),
-                 sin(theta_)*sin(phi_),
-                 cos(theta_);
+        Axis  << sin(theta)*cos(phi),
+                 sin(theta)*sin(phi),
+                 cos(theta);
 		
         // Assume the main particle axis of all base configurations is initially borne by ez
         Hull->Axis = Axis;
@@ -65,18 +67,18 @@ public:
     
     inline void SetRandomOrientation(std::mt19937_64& rng_engine, std::uniform_real_distribution<number>& rng_distrib)
     {
-        alpha_ = rng_distrib(rng_engine) * 2.*PI;
+        alpha = rng_distrib(rng_engine) * 2.*PI;
         
         // Euler rotation matrix - ZYZ convention
-        Orientation << cos(alpha_)*cos(theta_)*cos(phi_) - sin(alpha_)*sin(phi_),
-                      -sin(alpha_)*cos(theta_)*cos(phi_) - cos(alpha_)*sin(phi_),
-                       sin(theta_)*cos(phi_),
-                       cos(alpha_)*cos(theta_)*sin(phi_) + sin(alpha_)*cos(phi_),
-                      -sin(alpha_)*cos(theta_)*sin(phi_) + cos(alpha_)*cos(phi_),
-                       sin(theta_)*sin(phi_),
-                      -cos(alpha_)*sin(theta_),
-                       sin(alpha_)*sin(theta_),
-                       cos(theta_);
+        Orientation << cos(alpha)*cos(theta)*cos(phi) - sin(alpha)*sin(phi),
+                      -sin(alpha)*cos(theta)*cos(phi) - cos(alpha)*sin(phi),
+                       sin(theta)*cos(phi),
+                       cos(alpha)*cos(theta)*sin(phi) + sin(alpha)*cos(phi),
+                      -sin(alpha)*cos(theta)*sin(phi) + cos(alpha)*cos(phi),
+                       sin(theta)*sin(phi),
+                      -cos(alpha)*sin(theta),
+                       sin(alpha)*sin(theta),
+                       cos(theta);
 		
         Hull->Center      = Orientation * Hull->Center_p;
         Hull->Orientation = Orientation * Hull->Orientation_p;
@@ -87,11 +89,6 @@ public:
     
 protected:
     int id_;
-    
-private:
-    number phi_;
-    number alpha_;
-    number theta_;
 };
 
 #endif

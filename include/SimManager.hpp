@@ -26,6 +26,8 @@ private:
     int mpi_rank_;
     int mpi_size_;
     
+    void MPISave(const std::string&, const ArrayX<number>&);
+    
     OdfOptimiser<MESOGEN, number> SimHandler;
 
     std::string data_path_;
@@ -33,7 +35,7 @@ private:
     std::chrono::high_resolution_clock::time_point t_start_;
     std::chrono::high_resolution_clock::time_point t_end_;
     
-    std::chrono::duration<number> t_elapsed_;
+    std::chrono::duration<double> t_elapsed_;
     
     ArrayX<number>  V_r;
     ArrayX<number>  V_l;
@@ -70,8 +72,8 @@ private:
     
     ArrayXX<number> Psi_grd;
     
-    MatrixXX<number> E_ref;
-    MatrixXX<number> F_lnd;
+    ArrayX<number>  E_ref;
+    ArrayXX<number> F_lnd;
 };
 
 #endif

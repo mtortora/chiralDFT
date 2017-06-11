@@ -109,18 +109,18 @@ void PatchyRod<number>::Build(int mpi_rank)
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            number theta = Theta_grid(idx_theta);
+            number theta_ = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                number phi         = Phi_grid(idx_phi);
+                number phi_        = Phi_grid(idx_phi);
                 uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += this->SIGMA_R/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += this->SIGMA_R/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += this->SIGMA_R/2. * cos(theta);
+                Wireframe(0, idx) += this->SIGMA_R/2. * sin(theta_)*cos(phi_);
+                Wireframe(1, idx) += this->SIGMA_R/2. * sin(theta_)*sin(phi_);
+                Wireframe(2, idx) += this->SIGMA_R/2. * cos(theta_);
                 
                 file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }
@@ -137,18 +137,18 @@ void PatchyRod<number>::Build(int mpi_rank)
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            number theta = Theta_grid(idx_theta);
+            number theta_ = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                number phi         = Phi_grid(idx_phi);
+                number phi_        = Phi_grid(idx_phi);
                 uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += r_patch * sin(theta)*cos(phi);
-                Wireframe(1, idx) += r_patch * sin(theta)*sin(phi);
-                Wireframe(2, idx) += r_patch * cos(theta);
+                Wireframe(0, idx) += r_patch * sin(theta_)*cos(phi_);
+                Wireframe(1, idx) += r_patch * sin(theta_)*sin(phi_);
+                Wireframe(2, idx) += r_patch * cos(theta_);
                 
                 file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }

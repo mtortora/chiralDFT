@@ -10,24 +10,29 @@ class OdfOptimiser: public MCIntegrator<ParticleType, number>
 public:
     OdfOptimiser();
     
+    ArrayX<number> Alpha_grid;
     ArrayX<number> Theta_grid;
-    
-    void BinodalAnalysis(const MatrixXX<number>&);
-    void EnergyGrid(const MatrixXX<number>&, ArrayX<number>*);
-    void ODFGrid(const MatrixXX<number>&,
+    ArrayX<number> Phi_grid;
+
+    void BinodalAnalysis(const ArrayX<number>&);
+    void EnergyGrid(const ArrayX<number>&, ArrayX<number>*);
+    void ODFGrid(const ArrayX<number>&,
                  ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*,
                  ArrayXX<number>*);
     
 private:
     ArrayX<number> Psi_iso_;
     
-    number VirialCoeff(const ArrayX<number>&, const MatrixXX<number>&);
-    number FreeEnergy(number, const ArrayX<number>&, const MatrixXX<number>&);
+    number RotationalEnt(const ArrayX<number>&);
+    number OrderParam   (const ArrayX<number>&);
+    number VirialCoeff  (const ArrayX<number>&, const ArrayX<number>&);
+    
+    number FreeEnergy(number, const ArrayX<number>&, const ArrayX<number>&);
     
     ArrayX<number> LegendreCoeffs(const ArrayX<number>&);
-    ArrayX<number> SequentialOptimiser(number, const MatrixXX<number>&);
-    
-    Vector2<number> ODFThermo(number, const ArrayX<number>&, const MatrixXX<number>&);
+    ArrayX<number> SequentialOptimiser(number, const ArrayX<number>&);
+
+    Vector2<number> ODFThermo(number, const ArrayX<number>&, const ArrayX<number>&);
 };
 
 #endif

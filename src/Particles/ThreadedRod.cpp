@@ -108,18 +108,18 @@ void ThreadedRod<number>::Build(int mpi_rank)
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            number theta = Theta_grid(idx_theta);
+            number theta_ = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                number phi = Phi_grid(idx_phi);
-                uint   idx = idx_theta*N_RES_ + idx_phi;
+                number phi_        = Phi_grid(idx_phi);
+                uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += R_CUT_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += R_CUT_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += R_CUT_/2. * cos(theta);
+                Wireframe(0, idx) += R_CUT_/2. * sin(theta_)*cos(phi_);
+                Wireframe(1, idx) += R_CUT_/2. * sin(theta_)*sin(phi_);
+                Wireframe(2, idx) += R_CUT_/2. * cos(theta_);
                 
                 file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }
@@ -141,12 +141,12 @@ void ThreadedRod<number>::Build(int mpi_rank)
         
         for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
         {
-            number phi             = Phi_grid(idx_phi);
+            number phi_            = Phi_grid(idx_phi);
             
             Wireframe.col(idx_phi) = Center;
             
-            Wireframe(0, idx_phi) += D_HARD_/2. * cos(phi);
-            Wireframe(1, idx_phi) += D_HARD_/2. * sin(phi);
+            Wireframe(0, idx_phi) += D_HARD_/2. * cos(phi_);
+            Wireframe(1, idx_phi) += D_HARD_/2. * sin(phi_);
             
             file_wireframe        << Wireframe.col(idx_phi).adjoint() << std::endl;
         }
@@ -163,18 +163,18 @@ void ThreadedRod<number>::Build(int mpi_rank)
         
         for ( uint idx_theta = 0; idx_theta < N_RES_/2; ++idx_theta )
         {
-            number theta = Theta_grid(idx_theta);
+            number theta_ = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                number phi          = Phi_grid(idx_phi);
+                number phi_         = Phi_grid(idx_phi);
                 uint   idx          = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) << 0., 0., L_Z_/2. - idx_cap*L_Z_;
                 
-                Wireframe(0, idx)  += D_HARD_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx)  += D_HARD_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx)  += D_HARD_/2. * cos(theta);
+                Wireframe(0, idx)  += D_HARD_/2. * sin(theta_)*cos(phi_);
+                Wireframe(1, idx)  += D_HARD_/2. * sin(theta_)*sin(phi_);
+                Wireframe(2, idx)  += D_HARD_/2. * cos(theta_);
                 
                 file_wireframe     << Wireframe.col(idx).adjoint() << std::endl;
             }

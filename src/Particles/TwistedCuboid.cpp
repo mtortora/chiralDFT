@@ -31,7 +31,7 @@ TwistedCuboid<number>::TwistedCuboid()
     L_Y_            = 1.   * this->SIGMA_R;
     L_Z_            = 100. * this->SIGMA_R;
     
-    number alpha    = 0.5;
+    number alpha_   = 0.5;
     
     // Helical backbone parameters
     R_BCK_          = 0.  * this->SIGMA_R;
@@ -44,13 +44,13 @@ TwistedCuboid<number>::TwistedCuboid()
     this->V0        = L_X_*L_Y_*L_Z_;
     this->V_EFF     = this->V0;
     
-    R_THRESHOLD_    = (1.+alpha) * fmin(L_X_/((number)N_X_), fmin(L_Y_/((number)N_Y_), L_Z_/((number)N_Z_)));
+    R_THRESHOLD_    = (1.+alpha_) * fmin(L_X_/((number)N_X_), fmin(L_Y_/((number)N_Y_), L_Z_/((number)N_Z_)));
 
     #if (!USE_RAPID)
     // Rescale cuboid dimensions to account for finite HS radii
-    L_X_           *= (1. - (1.+alpha)/((number)N_X_));
-    L_Y_           *= (1. - (1.+alpha)/((number)N_Y_));
-    L_Z_           *= (1. - (1.+alpha)/((number)N_Z_));
+    L_X_           *= (1. - (1.+alpha_)/((number)N_X_));
+    L_Y_           *= (1. - (1.+alpha_)/((number)N_Y_));
+    L_Z_           *= (1. - (1.+alpha_)/((number)N_Z_));
     #endif
     
     this->R_INTEG   = sqrt(SQR(L_X_+R_BCK_) + SQR(L_Y_+R_BCK_) + SQR(L_Z_)) + R_THRESHOLD_;
@@ -102,10 +102,10 @@ void TwistedCuboid<number>::Build(int mpi_rank)
 
         for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
         {
-            number alpha              = Alpha_grid(idx_z);
+            number alpha_             = Alpha_grid(idx_z);
             
-            Matrix3X<number> R_edge_x = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge_x;
-            Matrix3X<number> R_edge_y = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge_y;
+            Matrix3X<number> R_edge_x = Eigen::AngleAxis<number>(alpha_, Z_axis).toRotationMatrix() * Edge_x;
+            Matrix3X<number> R_edge_y = Eigen::AngleAxis<number>(alpha_, Z_axis).toRotationMatrix() * Edge_y;
 
             R_edge_x.colwise() += Backbone.col(idx_z);
             R_edge_y.colwise() += Backbone.col(idx_z);

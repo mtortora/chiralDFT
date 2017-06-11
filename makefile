@@ -43,7 +43,7 @@ OBJEXT      := o
 # Flags, libraries and includes
 CXXFLAGS    := -Wno-logical-op-parentheses -O3
 CFLAGS      := -std=c++0x -Werror -Wshadow -Wall -Wextra -msse4 -fno-common -fomit-frame-pointer -O3
-FPATHS      := -D__DPATH__=$(CURDIR)/$(DATDIR)
+FPATHS      := -D__DPATH__=$(CURDIR)/$(DATDIR) -D__EIGSYM__=$(CURDIR)/$(INCDIR)/eigen_symmetrise.hpp
 FEXTRA      := -D__VERSION_MAJOR__=$(VSN_MAJ) -D__VERSION_MINOR__=$(VSN_MIN) -DNDEBUG
 INC         := -I$(INCDIR) -I$(LIBDIR) -isystem $(LOCAL_PTH)/include -isystem $(EIGEN_PTH)/include -isystem $(MPICC_PTH)/include
 LIB         := -L$(LIBDIR) -lRAPID

@@ -20,9 +20,8 @@ public:
     ArrayX<number> Eta_grid;
     
     void MCInit(int, int, int);
-    void FullIntegrator    (MatrixXX<number>*, ArrayX<number>*, ArrayX<number>*);
-    void LegendreIntegrator(MatrixXX<number>*, ArrayX<number>*, ArrayX<number>*);
-    void LegendreIntegrator(MatrixXX<number>*, number);
+    void VirialIntegrator(ArrayX<number>*, ArrayX<number>*, ArrayX<number>*);
+    void LegendreIntegrator(ArrayX<number>*, number);
     void FrankIntegrator(const ArrayXX<number>&,
                          ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*);
     
@@ -36,17 +35,16 @@ private:
     ullint ctr_ov_;
     
     number mayer_interaction_;
-    number t_start_;
-    number t_end_;
-    number t_elapsed_;
+    
+    double t_start_;
+    double t_end_;
+    double t_elapsed_;
 
     Vector3<number> R_cm_;
     
     ArrayX<number>  X_grid_;
     ArrayX<number>  Y_grid_;
     ArrayX<number>  Z_grid_;
-
-    ArrayX<number>  Theta_grid_;
     
     ArrayX<uint>    Exc_grid_;
 

@@ -47,7 +47,6 @@
 		9C0D085F1C3AA0BE0020EBAB /* TwistedCuboid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedCuboid.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C19E7F51CA1B8260006F51A /* landscape.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape.py; sourceTree = "<group>"; usesTabs = 1; };
 		9C19E7F61CA1B8260006F51A /* plot_landscape2d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape2d; sourceTree = "<group>"; };
-		9C19E7F71CA1B8260006F51A /* plot_landscape3d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape3d; sourceTree = "<group>"; };
 		9C19E7F91CA1B8300006F51A /* post_process.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = post_process.py; sourceTree = "<group>"; usesTabs = 1; wrapsLines = 1; };
 		9C19E7FA1CA1B8300006F51A /* pre_process.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = pre_process.py; sourceTree = "<group>"; usesTabs = 1; };
 		9C29FD8A1CB5A42600A2248A /* display_traj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_traj; sourceTree = "<group>"; };
@@ -89,10 +88,13 @@
 		B7BB8D781EAE568B00294673 /* savitsky_golay.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = savitsky_golay.py; sourceTree = "<group>"; };
 		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
 		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7E1FD561EEDBDE200590CC1 /* plot_landscape4d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape4d; sourceTree = "<group>"; };
+		B7E1FD571EEDC86600590CC1 /* plot_landscape3d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape3d; sourceTree = "<group>"; };
 		B7F693DE1D4715E7007E6CBD /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E01D4715F3007E6CBD /* Utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InteractionFactory.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InteractionFactory.cpp; sourceTree = "<group>"; usesTabs = 0; };
+		B7FABC031EEA0185002176E6 /* eigen_symmetrise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = eigen_symmetrise.hpp; sourceTree = "<group>"; };
 		B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchyRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PatchyRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 /* End PBXFileReference section */
@@ -157,7 +159,8 @@
 				9C19E7F51CA1B8260006F51A /* landscape.py */,
 				B7DD70461DB9271B00CF9EAC /* landscape_slice.py */,
 				9C19E7F61CA1B8260006F51A /* plot_landscape2d */,
-				9C19E7F71CA1B8260006F51A /* plot_landscape3d */,
+				B7E1FD571EEDC86600590CC1 /* plot_landscape3d */,
+				B7E1FD561EEDBDE200590CC1 /* plot_landscape4d */,
 			);
 			path = plots;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 				B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */,
 				B7379D3F1D4271B400AE6AC8 /* BNode.hpp */,
 				B733A8211D40C47A001575D7 /* BTree.hpp */,
+				B7FABC031EEA0185002176E6 /* eigen_symmetrise.hpp */,
 				9C512E041C22B91B0099AE31 /* globals.hpp */,
 				B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */,
 				9C512E051C22B91B0099AE31 /* Legendre.hpp */,
@@ -432,6 +436,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
+					"-D__EIGSYM__=$SRCROOT/include/eigen_symmetrise.hpp",
 					"-D__VERSION_MAJOR__=3",
 					"-D__VERSION_MINOR__=3",
 					"-D__XCODE__",
@@ -459,6 +464,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
+					"-D__EIGSYM__=$SRCROOT/include/eigen_symmetrise.hpp",
 					"-D__VERSION_MAJOR__=3",
 					"-D__VERSION_MINOR__=3",
 					"-D__XCODE__",

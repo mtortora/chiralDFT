@@ -13,7 +13,7 @@
  */
 // ===================================================================
 
-#include "params.hpp"
+#include "globals.hpp"
 
 
 template<typename number>

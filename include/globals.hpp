@@ -1,20 +1,28 @@
 #ifndef GLOBALS_HPP_
 #define GLOBALS_HPP_
 
-#include <eigen3/Eigen/Dense>
+#include <iostream>
+
+#include "params.hpp"
+
+
+// ============================
+/* Path & string handling */
+// ============================
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#define __DATA_PATH TOSTRING(__DPATH__)
+#define __MESOGEN TOSTRING(MESOGEN)
 
 
 // ============================
 /* Custom symbols */
 // ============================
 
-#define PI            3.1415926535897932
-
-#define D_THETA       (PI / (N_STEPS_THETA-1.))
-
 #define MPI_MASTER    0
 
-// Model options
 #define MODE_PERT     0
 #define MODE_FULL     1
 #define MODE_EXC      2
@@ -29,6 +37,19 @@
 
 #define TREE_OB       0
 #define TREE_SC       1
+
+#define PI            3.1415926535897932
+
+#define D_ALPHA       (2.*PI / N_ALPHA)
+#define D_THETA       (1.*PI / N_THETA)
+#define D_PHI         (2.*PI / N_PHI)
+
+#define IS_BIAXIAL    ((N_ALPHA > 1) || (N_PHI > 1))
+#define E_DIM         ((ODF_TYPE == ODF_FULL) ? N_ALPHA*N_THETA*N_PHI : N_L)
+
+
+#define SQR(x) ((x)*(x))
+#define CUB(x) ((x)*(x)*(x))
 
 
 // ============================
@@ -82,6 +103,13 @@
 /* Custom typedefs */
 // ============================
 
+// Eigen plugin for efficient symmetric storage and hypermatrix access
+#define __EIGSYM TOSTRING(__EIGSYM__)
+#define EIGEN_DENSEBASE_PLUGIN __EIGSYM
+
+#include <eigen3/Eigen/Dense>
+
+
 typedef unsigned int           uint;
 typedef unsigned long long int ullint;
 
@@ -97,21 +125,31 @@ template<typename T> using VectorX  = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 template<typename T> using ArrayX   = Eigen::Array<T, Eigen::Dynamic, 1>;
 template<typename T> using ArrayXX  = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
 
-template<typename T> using IndexX   = typename MatrixXX<T>::Index;
 
+// Symmetrise output stream
+template<typename T>
+class Symmetrise
+{
+public:
+    Symmetrise(ArrayX<T>* Data_in): Data_ptr(Data_in) {}
 
-#define SQR(x) ((x)*(x))
-#define CUB(x) ((x)*(x)*(x))
-
-
-// ============================
-/* Path & string handling */
-// ============================
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-
-#define __DATA_PATH TOSTRING(__DPATH__)
-#define __MESOGEN TOSTRING(MESOGEN)
+    friend std::ostream& operator<<(std::ostream& os, const Symmetrise& Array)
+    {
+        for ( uint idx1 = 0; idx1 < E_DIM; ++idx1 )
+        {
+            for ( uint idx2 = 0; idx2 < E_DIM; ++idx2 )
+            {
+                os << Array.Data_ptr->sym(idx1, idx2) << " ";
+            }
+            
+            os << std::endl;
+        }
+        
+        return os;
+    }
+    
+private:
+    ArrayX<T>* Data_ptr;
+};
 
 #endif

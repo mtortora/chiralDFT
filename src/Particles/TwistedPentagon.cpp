@@ -87,9 +87,9 @@ void TwistedPentagon<number>::Build(int mpi_rank)
 	{
 		for ( uint idx_z = 0; idx_z < N_Z_; ++idx_z )
 		{
-			number alpha      = Alpha_grid(idx_z);
+			number alpha_     = Alpha_grid(idx_z);
 			
-			Matrix3X<number> R_edge = Eigen::AngleAxis<number>(alpha, Z_axis).toRotationMatrix() * Edge;
+			Matrix3X<number> R_edge = Eigen::AngleAxis<number>(alpha_, Z_axis).toRotationMatrix() * Edge;
 			R_edge.colwise() += Backbone.col(idx_z);
 			
 			Face_r.block(0, idx_z * N_R_, 3, N_R_) = R_edge;

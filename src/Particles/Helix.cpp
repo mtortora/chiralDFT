@@ -23,14 +23,14 @@ Helix<number>::Helix()
     this->N_DELTA_L = 2;
 
     // Helix parameters
-    N_S_            = 500;
+    N_S_            = 15;
     N_RES_          = 20;
     
-    D_HARD_         = 6.6   * this->SIGMA_R;
-    L_CTR_          = 880.  * this->SIGMA_R;
+    D_HARD_         = 1.   * this->SIGMA_R;
+    L_CTR_          = 10.  * this->SIGMA_R;
     
-    R_HLX_          = 146.  * this->SIGMA_R;
-    P_HLX_          = 2800. * this->SIGMA_R;
+    R_HLX_          = 0.4  * this->SIGMA_R;
+    P_HLX_          = 8. * this->SIGMA_R;
     
     L_Z_            = L_CTR_ / sqrt(1. + SQR(2.*PI * R_HLX_/P_HLX_));
     
@@ -83,18 +83,18 @@ void Helix<number>::Build(int mpi_rank)
         // Draw spherical beads
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
-            number theta = Theta_grid(idx_theta);
+            number theta_ = Theta_grid(idx_theta);
             
             for ( uint idx_phi = 0; idx_phi < N_RES_; ++idx_phi )
             {
-                number phi         = Phi_grid(idx_phi);
+                number phi_        = Phi_grid(idx_phi);
                 uint   idx         = idx_theta*N_RES_ + idx_phi;
                 
                 Wireframe.col(idx) = Center;
                 
-                Wireframe(0, idx) += D_HARD_/2. * sin(theta)*cos(phi);
-                Wireframe(1, idx) += D_HARD_/2. * sin(theta)*sin(phi);
-                Wireframe(2, idx) += D_HARD_/2. * cos(theta);
+                Wireframe(0, idx) += D_HARD_/2. * sin(theta_)*cos(phi_);
+                Wireframe(1, idx) += D_HARD_/2. * sin(theta_)*sin(phi_);
+                Wireframe(2, idx) += D_HARD_/2. * cos(theta_);
                 
                 file_wireframe    << Wireframe.col(idx).adjoint() << std::endl;
             }

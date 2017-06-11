@@ -13,7 +13,7 @@ if sys.version_info < (3, 0):
 	sys.exit()
 
 if len(sys.argv) != 6:
-	print("\033[1;31mUsage is %s data_folder file_globals eta_min eta_max n_reduce\033[0m" % sys.argv[0])
+	print("\033[1;31mUsage is %s data_folder file_params eta_min eta_max n_reduce\033[0m" % sys.argv[0])
 	sys.exit()
 
 
@@ -25,20 +25,20 @@ n_steps_max   = 1000
 tol_odf       = 1e-6
 
 path_data     = sys.argv[1].rstrip("/")
-path_globals  = sys.argv[2]
+path_params   = sys.argv[2]
 
 eta_min       = float(sys.argv[3])
 eta_max       = float(sys.argv[4])
 
 n_reduce      = int(sys.argv[5])
 
-parameters    = ["Q_MIN","Q_MAX","N_STEPS_Q","N_L","N_STEPS_THETA","MODE"]
+parameters    = ["Q_MIN","Q_MAX","N_STEPS_Q","N_L","N_THETA","MODE_SIM","ODF_TYPE"]
 param_dict    = {}
 
-# Read parameters from globals.hpp
-if os.path.isfile(path_globals):
-	with open(path_globals, mode="r") as file_globals:
-		for line in file_globals:
+# Read parameters from params.hpp
+if os.path.isfile(path_params):
+	with open(path_params, mode="r") as file_params:
+		for line in file_params:
 			line_data = line.split()
 			
 			if len(line_data) == 3:
@@ -49,7 +49,7 @@ if os.path.isfile(path_globals):
 	for param in parameters[2:]: param_dict[param] = int  (param_dict[param])
 
 else:
-	print("\033[1;31mCouldn't read file %s - aborting\033[0m" % path_globals)
+	print("\033[1;31mCouldn't read file %s - aborting\033[0m" % path_params)
 	sys.exit()
 
 # Read simulation data
@@ -120,12 +120,6 @@ if os.path.isdir(path_data):
 			V0   = float(file_ref.readline().split()[2])
 			Veff = float(file_ref.readline().split()[2])
 		excluded_ref = np.genfromtxt(path_ref, skip_header=2)
-
-		if   len(excluded_ref) == param_dict["N_STEPS_THETA"]: mode = "odf_full"
-		elif len(excluded_ref) == param_dict["N_L"]:           mode = "odf_legendre"
-		else:
-			print("\033[1;31m%s is incompatible with ODF parameters - aborting\033[0m" % path_ref)
-			sys.exit()
 	
 	else:
 		print("\033[1;31mCouldn't read file %s - aborting\033[0m" % path_ref)
@@ -179,10 +173,10 @@ def LoadBinary(Q_MIN, Q_MAX, N_STEPS_Q, N_L, **kwargs):
 # ODF optimiser from angle-dependant excluded volume
 def ODFOnsagerOptimiser(E):
 	converged  = False
-	d_theta    = np.pi / (param_dict["N_STEPS_THETA"]-1.)
+	d_theta    = np.pi / (param_dict["N_THETA"]-1.)
 	
 	eta_grid   = np.linspace(eta_min, eta_max, n_steps_eta)
-	theta_grid = np.linspace(0., np.pi, param_dict["N_STEPS_THETA"])
+	theta_grid = np.linspace(0., np.pi, param_dict["N_THETA"])
 	
 	S_res      = np.zeros(n_steps_eta)
 	P_res      = np.zeros(n_steps_eta)
@@ -345,14 +339,14 @@ def ODFLegendreOptimiser(data_q, reference_run):
 # Preliminary run
 print("\033[1;34mAggregated reference run\033[0m")
 
-if mode == "odf_legendre":
+if param_dict["ODF_TYPE"] == 1:
 	data_ref = excluded_ref[np.newaxis,...]
 	F_ref    = ODFLegendreOptimiser(data_ref, True)
 
-if mode == "odf_full": F_ref = np.asarray(ODFOnsagerOptimiser(excluded_ref))
+if param_dict["ODF_TYPE"] == 0: F_ref = np.asarray(ODFOnsagerOptimiser(excluded_ref))
 
 # Chiral landscape sweeping run
-if param_dict["MODE"] == 0:
+if param_dict["MODE_SIM"] == 1:
 	data      = LoadBinary(**param_dict)
 
 	q_min     = param_dict["Q_MIN"]

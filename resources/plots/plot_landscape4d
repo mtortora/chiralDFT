@@ -7,30 +7,33 @@ if (ARGC != 1) {
 
 landscape_file = ARG1
 
-stats landscape_file index 0 u 1:2 nooutput
+stats landscape_file u 2:3 nooutput
 
-minX   = STATS_min_x
-minY   = STATS_min_y
-maxX   = STATS_max_x
-maxY   = STATS_max_y
+minX    = STATS_min_x
+minY    = STATS_min_y
+maxX    = STATS_max_x
+maxY    = STATS_max_y
 
-stats landscape_file index 0 u 3 nooutput
+stats landscape_file u 4 nooutput
 
-N_CONF = STATS_blocks - 1
+N_ALPHA = STATS_blocks - 1
 
-minZ   = STATS_min
-maxZ   = STATS_max
+minZ    = STATS_min
+maxZ    = STATS_max
 
 set xrange[minX:maxX]
 set yrange[minY:maxY]
 set zrange[minZ:maxZ]
 
-idx_c  = 0
+idx_alpha = 0
 
-splot landscape_file i idx_c u 2:3:4 w pm3d
+splot landscape_file i idx_alpha u 2:3:4 w pm3d
 
-while (idx_c < N_CONF) {
-	
+while (idx_alpha < N_ALPHA) {
+	set title sprintf("alpha=%ipi/%i", 2*idx_alpha, N_ALPHA)
+
+	replot
+	idx_alpha = idx_alpha+1
+
+	pause -1
 }
-
-pause -1

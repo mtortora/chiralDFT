@@ -33,6 +33,9 @@ SimManager<number>::SimManager(int mpi_rank, int mpi_size)
     if ( mpi_rank_ == MPI_MASTER ) setbuf(stdout, NULL);
     else                           fclose(stdout);
     
+    if ( (ODF_TYPE != ODF_LEGENDRE) && (ODF_TYPE != ODF_FULL) ) throw std::runtime_error("Unsupported ODF_TYPE");
+    if ( (ODF_TYPE == ODF_LEGENDRE) && IS_BIAXIAL ) throw std::runtime_error("Need N_ALPHA=N_PHI=1 for ODF_LEGENDRE run");
+
     LogTxt("*****************");
     LogPur("DFT calculations for chiral nematic LCs");
     LogTxt("Running compiled build %d.%d", __VERSION_MAJOR__, __VERSION_MINOR__);
@@ -103,14 +106,12 @@ void SimManager<number>::InitRun()
         LogTxt("************");
         LogBlu("Reference perturbative run");
         
-        // Work-out second-virial coefficients by distributed Monte-Carlo integration
-        if      ( ODF_TYPE == ODF_FULL  )    SimHandler.FullIntegrator    (&E_ref, &V_r, &V_l);
-        else if ( ODF_TYPE == ODF_LEGENDRE ) SimHandler.LegendreIntegrator(&E_ref, &V_r, &V_l);
-        
-        else throw std::runtime_error("Unrecognised ODF computation scheme");
-        
+        // Work-out second-virial coefficients by parallelised Monte-Carlo integration
+        SimHandler.VirialIntegrator(&E_ref, &V_r, &V_l);
+        E_ref.sym_normalise();
+
         // MPI average virial-type coefficients
-        MatrixXX<number> E_ref_ = E_ref / mpi_size_;
+        ArrayX<number> E_ref_ = E_ref / mpi_size_;
         MPI_Allreduce(E_ref_.data(), E_ref.data(), E_ref.size(), Utils<number>().MPI_type, MPI_SUM, MPI_COMM_WORLD);
 
         // Work-out ODFs and Frank elastic constants
@@ -118,44 +119,16 @@ void SimManager<number>::InitRun()
         SimHandler.ODFGrid(E_ref, &P_res, &Mu_res, &F_ref, &S_res, &Psi_grd);
         SimHandler.FrankIntegrator(Psi_grd, &K1, &K2, &K3, &Kt);
         
-        // Thread-safe data save in binary format
-        MPI_Status  status;
-
-        MPI_File    file_k1;
-        MPI_File    file_k2;
-        MPI_File    file_k3;
-        MPI_File    file_kt;
-        
+        // Save local thread data in binary format
         std::string filename_k1 = data_path_ + "/k1_threaded.out";
         std::string filename_k2 = data_path_ + "/k2_threaded.out";
         std::string filename_k3 = data_path_ + "/k3_threaded.out";
         std::string filename_kt = data_path_ + "/kt_threaded.out";
         
-        // Set thread write offsets
-        MPI_Offset  offset_k1   = sizeof(number)*K1.size() * mpi_rank_;
-        MPI_Offset  offset_k2   = sizeof(number)*K2.size() * mpi_rank_;
-        MPI_Offset  offset_k3   = sizeof(number)*K3.size() * mpi_rank_;
-        MPI_Offset  offset_kt   = sizeof(number)*Kt.size() * mpi_rank_;
-        
-        MPI_File_open(MPI_COMM_WORLD, filename_k1.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file_k1);
-        MPI_File_open(MPI_COMM_WORLD, filename_k2.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file_k2);
-        MPI_File_open(MPI_COMM_WORLD, filename_k3.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file_k3);
-        MPI_File_open(MPI_COMM_WORLD, filename_kt.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file_kt);
-
-        MPI_File_seek(file_k1, offset_k1, MPI_SEEK_SET);
-        MPI_File_seek(file_k2, offset_k2, MPI_SEEK_SET);
-        MPI_File_seek(file_k3, offset_k3, MPI_SEEK_SET);
-        MPI_File_seek(file_kt, offset_kt, MPI_SEEK_SET);
-
-        MPI_File_write(file_k1, K1.data(), K1.size(), Utils<number>().MPI_type, &status);
-        MPI_File_write(file_k2, K2.data(), K2.size(), Utils<number>().MPI_type, &status);
-        MPI_File_write(file_k3, K3.data(), K3.size(), Utils<number>().MPI_type, &status);
-        MPI_File_write(file_kt, Kt.data(), Kt.size(), Utils<number>().MPI_type, &status);
-
-        MPI_File_close(&file_k1);
-        MPI_File_close(&file_k2);
-        MPI_File_close(&file_k3);
-        MPI_File_close(&file_kt);
+        MPISave(filename_k1, K1);
+        MPISave(filename_k2, K2);
+        MPISave(filename_k3, K3);
+        MPISave(filename_kt, Kt);
     
         // Equilibrium pitch from perturbation theory
         Qp_min = Kt / K2;
@@ -183,10 +156,7 @@ void SimManager<number>::InitRun()
 template<typename number>
 void SimManager<number>::LandscapeRun()
 {
-    MatrixXX<number>   F_lnd_(N_STEPS_ETA, N_STEPS_Q);
-    
-    MPI_File   file_leg;
-    MPI_Status status;
+    F_lnd = ArrayXX<number>(N_STEPS_ETA, N_STEPS_Q);
 	
     // Iterate over q-grid
     for ( uint idx_q = 0; idx_q < N_STEPS_Q; ++idx_q )
@@ -194,30 +164,41 @@ void SimManager<number>::LandscapeRun()
         LogTxt("************");
         LogBlu("Iteration %u out of %u", idx_q+1, N_STEPS_Q);
         
-        ArrayX<number>  F_grd;
-        MatrixXX<number> E_loc;
+        ArrayX<number> F_grd;
+        ArrayX<number> E_loc;
         
         // q_resc is the chiral wavevector in simulation units
         number q_macro = SimHandler.Q_grid(idx_q);
         number q_resc  = q_macro / SimHandler.IManager.SIGMA_R;
         
         SimHandler.LegendreIntegrator(&E_loc, q_resc);
+        E_loc.sym_normalise();
+
         SimHandler.EnergyGrid(E_loc, &F_grd);
         
-        // Thread-safe data save in binary format - decoded by script resources/processing/post_process.py
+        // Save local thread data in binary format
         std::string filename = data_path_ + "/legendre_matrix_" + std::to_string(q_macro) + ".out";
+        MPISave(filename, E_loc);
         
-        MPI_Offset  offset   = sizeof(number)*E_loc.size() * mpi_rank_;
-
-        MPI_File_open (MPI_COMM_WORLD, filename.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file_leg);
-        MPI_File_seek (file_leg, offset, MPI_SEEK_SET);
-        MPI_File_write(file_leg, E_loc.data(), E_loc.size(), Utils<number>().MPI_type, &status);
-        MPI_File_close(&file_leg);
-        
-        F_lnd_.col(idx_q) = F_grd;
+        F_lnd.col(idx_q) = F_grd;
     }
+}
+
+// ============================
+/* Thread-safe MPI data save */
+// ============================
+template<typename number>
+void SimManager<number>::MPISave(const std::string& filename, const ArrayX<number>& Array)
+{
+    MPI_File   file;
+    MPI_Status status;
     
-    F_lnd = F_lnd_;
+    MPI_Offset offset = sizeof(number)*Array.size() * mpi_rank_;
+    
+    MPI_File_open (MPI_COMM_WORLD, filename.c_str(), MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &file);
+    MPI_File_seek (file, offset, MPI_SEEK_SET);
+    MPI_File_write(file, Array.data(), Array.size(), Utils<number>().MPI_type, &status);
+    MPI_File_close(&file);
 }
 
 // ============================
@@ -226,18 +207,16 @@ void SimManager<number>::LandscapeRun()
 template<typename number>
 void SimManager<number>::MinSurf()
 {
-    IndexX<number> min_q;
-    ArrayX<number> Q_min_(N_STEPS_ETA);
+    Q_min = ArrayX<number>(N_STEPS_ETA);
     
     for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
     {
-        F_lnd.row(idx_eta).minCoeff(&min_q);
-        Q_min_(idx_eta) = SimHandler.Q_grid(min_q);
+        uint min_q = F_lnd.row(idx_eta).minComponentId();
+        Q_min(idx_eta) = SimHandler.Q_grid(min_q);
     }
-        
-    Q_min = Q_min_;
-    Q_inf = Q_min_;
-    Q_sup = Q_min_;
+    
+    Q_inf = Q_min;
+    Q_sup = Q_min;
 }
 
 // ============================
@@ -280,7 +259,7 @@ void SimManager<number>::Gather()
     
     if ( MODE_SIM == MODE_FULL )
     {
-        MatrixXX<number> F_lnd_ = F_lnd / mpi_size_;
+        ArrayXX<number> F_lnd_ = F_lnd / mpi_size_;
 
         ArrayX<number>  Q_min_ = Q_min / mpi_size_;
         ArrayX<number>  Q_inf_ = Q_inf;
@@ -340,7 +319,7 @@ void SimManager<number>::Save()
         std::ofstream file_dv (data_path_ + "/delta_v.out");
         std::ofstream file_df (data_path_ + "/delta_f.out");
         std::ofstream file_per(data_path_ + "/q_pert.out");
-        std::ofstream file_psi(data_path_ + "/psi.out");
+        std::ofstream file_unx(data_path_ + "/psi.out");
         std::ofstream file_k1 (data_path_ + "/k1.out");
         std::ofstream file_k2 (data_path_ + "/k2.out");
         std::ofstream file_k3 (data_path_ + "/k3.out");
@@ -348,37 +327,20 @@ void SimManager<number>::Save()
         std::ofstream file_mu (data_path_ + "/mu.out");
         std::ofstream file_p  (data_path_ + "/p.out");
         
-        // Legendre reference matrix
+        // Azimuthally-averaged ODF
+        ArrayXX<number> Psi_ave = ArrayXX<number>::Zero(N_STEPS_ETA, N_THETA);
+
+        // Reference virial matrix
+        Symmetrise<number> Sym_stream(&E_ref);
+        
         file_exc << "Particle volume: "  << SimHandler.IManager.V0    << std::endl;
         file_exc << "Effective volume: " << SimHandler.IManager.V_EFF << std::endl;
 
-        file_exc << E_ref;
-        
-        // Angle-dependant excluded volume, assuming head-tail particle symmetry
-        ArrayX<number> V_chi  = V_r - V_l;
-        ArrayX<number> V_ave  = (V_chi - V_chi.reverse()) / 2.;
-
-        ArrayX<number> V_nrm  = V_ave / (V_r + V_l);
-        V_ave.tail(N_STEPS_THETA/2) = V_ave.head(N_STEPS_THETA/2).reverse();
-        
-        // Thermodynamically-averaged excluded volume
-        ArrayX<number> N_grid = SimHandler.Eta_grid * CUB(SimHandler.IManager.SIGMA_R)/SimHandler.IManager.V0;
-        ArrayX<number> F_chi  = (Psi_grd.rowwise() * (V_ave * sin(SimHandler.Theta_grid)).transpose()).rowwise().sum();
-        
-        F_chi         *= -N_grid * 4.*SQR(PI) * D_THETA;
-
-        for ( uint idx_theta = 0; idx_theta < N_STEPS_THETA; ++idx_theta )
-        {
-            number theta = SimHandler.Theta_grid(idx_theta);
-            
-            file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta) << std::endl;
-        }
+        file_exc << Sym_stream;
         
         for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
         {
             number eta = SimHandler.Eta_grid(idx_eta);
-            
-            file_df  << eta << ' ' << F_chi (idx_eta) << std::endl;
             
             // Torque field, elastic constants and equilibrium pitch from perturbation theory
             file_k1  << eta << ' ' << K1    (idx_eta) << ' ' << K1_inf(idx_eta) << ' ' << K1_sup(idx_eta) << std::endl;
@@ -394,27 +356,86 @@ void SimManager<number>::Save()
             file_p   << eta << ' ' << P_res (idx_eta) << std::endl;
             
             // Save ODFs
-            for ( uint idx_theta = 0; idx_theta < N_STEPS_THETA; ++idx_theta )
+            if ( IS_BIAXIAL )
+            {
+                std::ofstream file_psi(data_path_ + "/psi_" + std::to_string(eta) + ".out");
+
+                for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
+                {
+                    for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
+                    {
+                        for ( uint idx_phi = 0; idx_phi < N_PHI; ++idx_phi )
+                        {
+                            number alpha = SimHandler.Alpha_grid(idx_alpha);
+                            number theta = SimHandler.Theta_grid(idx_theta);
+                            number phi   = SimHandler.Phi_grid(idx_phi);
+                            
+                            file_psi << alpha << ' ' << theta << ' ' << phi << ' '
+                                     << Psi_grd.col_at(idx_alpha, idx_theta, idx_phi)(idx_eta) << std::endl;
+                            
+                            Psi_ave(idx_eta, idx_theta) += Psi_grd.col_at(idx_alpha, idx_theta, idx_phi)(idx_eta)
+                                                         * D_ALPHA*D_PHI / SQR(2.*PI);
+                        }
+                        
+                        file_psi << std::endl;
+                    }
+                    
+                    file_psi << std::endl;
+                }
+                
+                file_psi.close();
+            }
+        }
+        
+        if ( !IS_BIAXIAL ) Psi_ave = Psi_grd;
+        
+        // Angle-dependant excluded volume, assuming head-tail particle symmetry
+        ArrayX<number> V_chi  = V_r - V_l;
+        ArrayX<number> V_ave  = (V_chi - V_chi.reverse()) / 2.;
+        
+        ArrayX<number> V_nrm  = V_ave / (V_r + V_l);
+        V_ave.tail(N_THETA/2) = V_ave.head(N_THETA/2).reverse();
+        
+        // Thermodynamically-averaged excluded volume
+        ArrayX<number> N_grid = SimHandler.Eta_grid * CUB(SimHandler.IManager.SIGMA_R)/SimHandler.IManager.V0;
+        ArrayX<number> F_chi  = (Psi_ave.rowwise() * (V_ave * sin(SimHandler.Theta_grid)).transpose()).rowwise().sum();
+        
+        F_chi *= -N_grid * SQR(2.*PI)*D_THETA;
+        
+        for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
+        {
+            number theta = SimHandler.Theta_grid(idx_theta);
+            
+            file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta) << std::endl;
+        }
+        
+        for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
+        {
+            number eta = SimHandler.Eta_grid(idx_eta);
+            
+            file_df  << eta << ' ' << F_chi (idx_eta) << std::endl;
+            
+            for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
             {
                 number theta = SimHandler.Theta_grid(idx_theta);
                 
-                file_psi << eta << ' ' << theta << ' ' << Psi_grd(idx_eta, idx_theta) << std::endl;
+                file_unx << eta << ' ' << theta << ' ' << Psi_ave(idx_eta, idx_theta) << std::endl;
             }
             
-            file_psi << std::endl;
+            file_unx << std::endl;
         }
-        
+
+        // Energy landscape and full-run equilibrium pitch
         if ( MODE_SIM == MODE_FULL )
         {
             std::ofstream file_lnd(data_path_ + "/energy_landscape.out");
             std::ofstream file_min(data_path_ + "/q_full.out");
 
-            // Energy landscape and full-run equilibrium pitch
             for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
             {
                 number eta = SimHandler.Eta_grid(idx_eta);
                 
-                file_min  << eta << ' ' << Q_min(idx_eta) << ' ' << Q_inf(idx_eta) << ' '<< Q_sup(idx_eta) << std::endl;
+                file_min << eta << ' ' << Q_min(idx_eta) << ' ' << Q_inf(idx_eta) << ' '<< Q_sup(idx_eta) << std::endl;
 
                 for ( uint idx_q = 0; idx_q < N_STEPS_Q; ++idx_q )
                 {
@@ -436,7 +457,7 @@ void SimManager<number>::Save()
         file_dv .close();
         file_df .close();
         file_per.close();
-        file_psi.close();
+        file_unx.close();
         file_k1 .close();
         file_k2 .close();
         file_k3 .close();
