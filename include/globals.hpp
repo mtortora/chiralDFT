@@ -103,9 +103,8 @@
 /* Custom typedefs */
 // ============================
 
-// Eigen plugin for efficient symmetric storage and hypermatrix access
-#define __EIGSYM TOSTRING(__EIGSYM__)
-#define EIGEN_DENSEBASE_PLUGIN __EIGSYM
+#define __EIGDENSE TOSTRING(__EIGDENSE__)
+#define EIGEN_DENSEBASE_PLUGIN __EIGDENSE
 
 #include <eigen3/Eigen/Dense>
 
@@ -124,32 +123,5 @@ template<typename T> using VectorX  = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
 template<typename T> using ArrayX   = Eigen::Array<T, Eigen::Dynamic, 1>;
 template<typename T> using ArrayXX  = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
-
-
-// Symmetrise output stream
-template<typename T>
-class Symmetrise
-{
-public:
-    Symmetrise(ArrayX<T>* Data_in): Data_ptr(Data_in) {}
-
-    friend std::ostream& operator<<(std::ostream& os, const Symmetrise& Array)
-    {
-        for ( uint idx1 = 0; idx1 < E_DIM; ++idx1 )
-        {
-            for ( uint idx2 = 0; idx2 < E_DIM; ++idx2 )
-            {
-                os << Array.Data_ptr->sym(idx1, idx2) << " ";
-            }
-            
-            os << std::endl;
-        }
-        
-        return os;
-    }
-    
-private:
-    ArrayX<T>* Data_ptr;
-};
 
 #endif

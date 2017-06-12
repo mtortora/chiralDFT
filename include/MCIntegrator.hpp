@@ -20,8 +20,8 @@ public:
     ArrayX<number> Eta_grid;
     
     void MCInit(int, int, int);
-    void VirialIntegrator(ArrayX<number>*, ArrayX<number>*, ArrayX<number>*);
-    void LegendreIntegrator(ArrayX<number>*, number);
+    void VirialIntegrator(ArrayXX<number>*, ArrayX<number>*, ArrayX<number>*);
+    void LegendreIntegrator(ArrayXX<number>*, number);
     void FrankIntegrator(const ArrayXX<number>&,
                          ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*);
     

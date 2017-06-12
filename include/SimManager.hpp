@@ -72,7 +72,7 @@ private:
     
     ArrayXX<number> Psi_grd;
     
-    ArrayX<number>  E_ref;
+    ArrayXX<number> E_ref;
     ArrayXX<number> F_lnd;
 };
 

@@ -106,17 +106,17 @@ void SimManager<number>::InitRun()
         LogTxt("************");
         LogBlu("Reference perturbative run");
         
-        // Work-out second-virial coefficients by parallelised Monte-Carlo integration
+        // MPI-averaged second-virial coefficients
         SimHandler.VirialIntegrator(&E_ref, &V_r, &V_l);
-        E_ref.sym_normalise();
+        
+        E_ref.symmetrise();
+        E_ref /= mpi_size_;
 
-        // MPI average virial-type coefficients
-        ArrayX<number> E_ref_ = E_ref / mpi_size_;
-        MPI_Allreduce(E_ref_.data(), E_ref.data(), E_ref.size(), Utils<number>().MPI_type, MPI_SUM, MPI_COMM_WORLD);
-
+        MPI_Allreduce(MPI_IN_PLACE, E_ref.data(), E_ref.size(), Utils<number>().MPI_type, MPI_SUM, MPI_COMM_WORLD);
+        
         // Work-out ODFs and Frank elastic constants
-        SimHandler.BinodalAnalysis(E_ref);
-        SimHandler.ODFGrid(E_ref, &P_res, &Mu_res, &F_ref, &S_res, &Psi_grd);
+        SimHandler.BinodalAnalysis(E_ref, mpi_rank_, mpi_size_);
+        SimHandler.ODFGrid(E_ref, &P_res, &Mu_res, &F_ref, &S_res, &Psi_grd, mpi_rank_, mpi_size_);
         SimHandler.FrankIntegrator(Psi_grd, &K1, &K2, &K3, &Kt);
         
         // Save local thread data in binary format
@@ -164,17 +164,17 @@ void SimManager<number>::LandscapeRun()
         LogTxt("************");
         LogBlu("Iteration %u out of %u", idx_q+1, N_STEPS_Q);
         
-        ArrayX<number> F_grd;
-        ArrayX<number> E_loc;
+        ArrayX <number> F_grd;
+        ArrayXX<number> E_loc;
         
         // q_resc is the chiral wavevector in simulation units
         number q_macro = SimHandler.Q_grid(idx_q);
         number q_resc  = q_macro / SimHandler.IManager.SIGMA_R;
         
         SimHandler.LegendreIntegrator(&E_loc, q_resc);
-        E_loc.sym_normalise();
+        E_loc.symmetrise();
 
-        SimHandler.EnergyGrid(E_loc, &F_grd);
+        SimHandler.EnergyGrid(E_loc, &F_grd, mpi_rank_, mpi_size_);
         
         // Save local thread data in binary format
         std::string filename = data_path_ + "/legendre_matrix_" + std::to_string(q_macro) + ".out";
@@ -331,12 +331,10 @@ void SimManager<number>::Save()
         ArrayXX<number> Psi_ave = ArrayXX<number>::Zero(N_STEPS_ETA, N_THETA);
 
         // Reference virial matrix
-        Symmetrise<number> Sym_stream(&E_ref);
-        
         file_exc << "Particle volume: "  << SimHandler.IManager.V0    << std::endl;
         file_exc << "Effective volume: " << SimHandler.IManager.V_EFF << std::endl;
 
-        file_exc << Sym_stream;
+        file_exc << E_ref;
         
         for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
         {

@@ -291,15 +291,15 @@ void MCIntegrator<ParticleType, number>::ConfigGenerator()
 /* MC integration of virial coefficients */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
+void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
 {
     LogTxt("------------");
     LogTxt("Integrating angle-dependant second-virial coefficients");
     
-    *V_r   = ArrayX<number>::Zero(N_THETA);
-    *V_l   = ArrayX<number>::Zero(N_THETA);
+    V_r->setZero(N_THETA);
+    V_l->setZero(N_THETA);
     
-    *E_out = ArrayX<number>::Zero(E_out->get_sym_size(E_DIM));
+    E_out->setZero(E_DIM, E_DIM);
 
     MCReset();
 
@@ -349,8 +349,8 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayX<number>* E_out,
             idx_phi1        = fmin(idx_phi1,   N_PHI-1);
             idx_phi2        = fmin(idx_phi2,   N_PHI-1);
             
-            if ( ODF_TYPE == ODF_FULL ) (*E_out).sym(idx_alpha1, idx_theta1, idx_phi1,
-                                                     idx_alpha2, idx_theta2, idx_phi2) += mayer_interaction_;
+            if ( ODF_TYPE == ODF_FULL ) (*E_out).at(idx_alpha1, idx_theta1, idx_phi1,
+                                                    idx_alpha2, idx_theta2, idx_phi2) += mayer_interaction_;
             
             if ( ODF_TYPE == ODF_LEGENDRE )
             {
@@ -358,10 +358,10 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayX<number>* E_out,
                 {
                     for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
                     {
-                        (*E_out).sym(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                             * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
-                                             * Legendre<number>::Pn(l1, cos(theta2))
-                                             * Legendre<number>::Pn(l2, cos(theta1));
+                        (*E_out)(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
+                                         * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                         * Legendre<number>::Pn(l1, cos(theta2))
+                                         * Legendre<number>::Pn(l2, cos(theta1));
                     }
                 }
             }
@@ -380,14 +380,14 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayX<number>* E_out,
 /* MC integration of the cholesteric Legendre coefficients */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayX<number>* E_out, number q_macro)
+void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayXX<number>* E_out, number q_macro)
 {
     LogTxt("------------");
     LogTxt("Integrating Legendre-projected second-virial coefficients - q=%.5f", q_macro);
     
     Vector3<number> N_q;
     
-    *E_out = ArrayX<number>::Zero(E_out->get_sym_size(E_DIM));
+    E_out->setZero(E_DIM, E_DIM);
     
     MCReset();
 
@@ -408,10 +408,10 @@ void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayX<number>* E_ou
             {
                 for ( uint l2 = 0; l2 < N_L; l2 += IManager.N_DELTA_L )
                 {
-                    (*E_out).sym(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
-                                         * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
-                                         * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
-                                         * Legendre<number>::Pn(l2, cos(theta1));
+                    (*E_out)(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
+                                     * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
+                                     * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
+                                     * Legendre<number>::Pn(l2, cos(theta1));
                 }
             }
         }
@@ -438,10 +438,10 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
     ArrayX<number>  G_grid   = (1. - 3/4.*Eff_grid) / SQR(1. - Eff_grid);
     ArrayX<number>  N_grid   = Eta_grid * CUB(IManager.SIGMA_R)/IManager.V0;
     
-    *K1_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
-    *K2_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
-    *K3_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
-    *Kt_out                  = ArrayX<number>::Zero(N_STEPS_ETA);
+    K1_out->setZero(N_STEPS_ETA);
+    K2_out->setZero(N_STEPS_ETA);
+    K3_out->setZero(N_STEPS_ETA);
+    Kt_out->setZero(N_STEPS_ETA);
     
     // Work out Psi differentials
     for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )

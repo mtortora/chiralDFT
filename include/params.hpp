@@ -54,9 +54,9 @@
 #define N_L         20
 #define N_SYNC      50
 #define N_STEPS_Q   15
-#define N_STEPS_ETA 50
-#define N_STEPS_ODF 2500
-#define N_STEPS_NR  5000
+#define N_STEPS_ETA 100
+#define N_STEPS_ODF 5000
+#define N_STEPS_NR  1000
 
 #define N_ALPHA     1
 #define N_THETA     250

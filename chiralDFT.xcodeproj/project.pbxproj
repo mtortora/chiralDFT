@@ -10,16 +10,16 @@
 		9C512E1E1C22B91B0099AE31 /* OdfOptimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */; };
 		9C512E1F1C22B91B0099AE31 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E151C22B91B0099AE31 /* main.cpp */; };
 		9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */; };
-		9C512E2B1C22C1450099AE31 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C512E2A1C22C1450099AE31 /* libmpi.dylib */; };
 		9C53C3161C41809D002CE4D0 /* BentCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08561C3AA0B00020EBAB /* BentCore.cpp */; };
 		9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08571C3AA0B00020EBAB /* Helix.cpp */; };
 		9CA2FA571C3F7D6E00062002 /* TwistedCuboid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */; };
 		9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */; };
 		9CFA13201C25AFCE00FA22D1 /* SimManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */; };
-		B70E9E021CCA5DC4008A770B /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B70E9E011CCA5DC4008A770B /* libRAPID.a */; };
 		B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B714FE051E5C8809009C274C /* TwistedPentagon.cpp */; };
 		B733A8201D40C46C001575D7 /* BTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B733A81F1D40C46C001575D7 /* BTree.cpp */; };
 		B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */; };
+		B76070301EEE9E2C00847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B760702F1EEE9E2C00847679 /* libRAPID.a */; };
+		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
 		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
@@ -60,7 +60,6 @@
 		9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OdfOptimiser.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E151C22B91B0099AE31 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCIntegrator.cpp; sourceTree = "<group>"; usesTabs = 0; };
-		9C512E2A1C22C1450099AE31 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = /usr/local/lib/libmpi.dylib; sourceTree = "<absolute>"; };
 		9C8497061C22F06C000D61DC /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9C85585F1C4066E500FADF19 /* archer.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = archer.sh; sourceTree = "<group>"; };
 		9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = conf_generator.py; sourceTree = "<group>"; usesTabs = 1; };
@@ -71,7 +70,6 @@
 		9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimManager.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B70AD6D31EE8AFE50018DF3F /* params.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = params.hpp; sourceTree = "<group>"; };
 		B70E9E001CCA58F8008A770B /* display_wireframe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_wireframe; sourceTree = "<group>"; };
-		B70E9E011CCA5DC4008A770B /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
 		B714FE051E5C8809009C274C /* TwistedPentagon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedPentagon.cpp; sourceTree = "<group>"; };
 		B714FE071E5C8814009C274C /* TwistedPentagon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedPentagon.hpp; sourceTree = "<group>"; };
 		B733A81D1D3FB5D4001575D7 /* aggregate.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = aggregate.py; sourceTree = "<group>"; };
@@ -81,6 +79,9 @@
 		B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B760702A1EEE9C8900847679 /* EigenDensePlugin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EigenDensePlugin.hpp; path = lib/EigenDensePlugin.hpp; sourceTree = "<group>"; };
+		B760702F1EEE9E2C00847679 /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
+		B76070331EEE9E7300847679 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = ../../../../../../../usr/local/lib/libmpi.dylib; sourceTree = "<group>"; };
 		B76EEC141E9D24A90044E99B /* thomas.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = thomas.sh; sourceTree = "<group>"; };
 		B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BHierarchy.cpp; sourceTree = "<group>"; };
 		B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BHierarchy.hpp; sourceTree = "<group>"; };
@@ -94,7 +95,6 @@
 		B7F693E01D4715F3007E6CBD /* Utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InteractionFactory.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InteractionFactory.cpp; sourceTree = "<group>"; usesTabs = 0; };
-		B7FABC031EEA0185002176E6 /* eigen_symmetrise.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = eigen_symmetrise.hpp; sourceTree = "<group>"; };
 		B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchyRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PatchyRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 /* End PBXFileReference section */
@@ -104,8 +104,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9C512E2B1C22C1450099AE31 /* libmpi.dylib in Frameworks */,
-				B70E9E021CCA5DC4008A770B /* libRAPID.a in Frameworks */,
+				B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */,
+				B76070301EEE9E2C00847679 /* libRAPID.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,9 +182,10 @@
 				9C8497061C22F06C000D61DC /* makefile */,
 				9C512DFE1C22B91B0099AE31 /* include */,
 				9C512E111C22B91B0099AE31 /* src */,
+				B76070291EEE9C0300847679 /* lib */,
 				9C512E0C1C22B91B0099AE31 /* resources */,
 				9C512DF51C22B8090099AE31 /* Products */,
-				9C512E291C22BC0B0099AE31 /* lib */,
+				B760702C1EEE9E1A00847679 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -204,7 +205,6 @@
 				B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */,
 				B7379D3F1D4271B400AE6AC8 /* BNode.hpp */,
 				B733A8211D40C47A001575D7 /* BTree.hpp */,
-				B7FABC031EEA0185002176E6 /* eigen_symmetrise.hpp */,
 				9C512E041C22B91B0099AE31 /* globals.hpp */,
 				B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */,
 				9C512E051C22B91B0099AE31 /* Legendre.hpp */,
@@ -247,13 +247,21 @@
 			path = src;
 			sourceTree = "<group>";
 		};
-		9C512E291C22BC0B0099AE31 /* lib */ = {
+		B76070291EEE9C0300847679 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				9C512E2A1C22C1450099AE31 /* libmpi.dylib */,
-				B70E9E011CCA5DC4008A770B /* libRAPID.a */,
+				B760702A1EEE9C8900847679 /* EigenDensePlugin.hpp */,
 			);
 			name = lib;
+			sourceTree = "<group>";
+		};
+		B760702C1EEE9E1A00847679 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B76070331EEE9E7300847679 /* libmpi.dylib */,
+				B760702F1EEE9E2C00847679 /* libRAPID.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -436,11 +444,12 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
-					"-D__EIGSYM__=$SRCROOT/include/eigen_symmetrise.hpp",
-					"-D__VERSION_MAJOR__=3",
-					"-D__VERSION_MINOR__=3",
+					"-D__EIGDENSE__=$SRCROOT/lib/EigenDensePlugin.hpp",
+					"-D__VERSION_MAJOR__=4",
+					"-D__VERSION_MINOR__=0",
 					"-D__XCODE__",
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = chiralDFT;
 			};
 			name = Debug;
@@ -464,11 +473,12 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
-					"-D__EIGSYM__=$SRCROOT/include/eigen_symmetrise.hpp",
-					"-D__VERSION_MAJOR__=3",
-					"-D__VERSION_MINOR__=3",
+					"-D__EIGDENSE__=$SRCROOT/lib/EigenDensePlugin.hpp",
+					"-D__VERSION_MAJOR__=4",
+					"-D__VERSION_MINOR__=0",
 					"-D__XCODE__",
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = chiralDFT;
 			};
 			name = Release;
