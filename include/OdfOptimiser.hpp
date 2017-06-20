@@ -21,18 +21,18 @@ public:
                  ArrayXX<number>*, int, int);
     
 private:
-    ArrayX<number> Psi_iso_;
+    ArrayX<double> Psi_iso_;
     
-    number RotationalEnt(const ArrayX<number>&);
-    number OrderParam   (const ArrayX<number>&);
-    number VirialCoeff  (const ArrayX<number>&, const ArrayXX<number>&);
+    double RotationalEnt(const ArrayX<double>&);
+    double OrderParam   (const ArrayX<double>&);
+    double VirialCoeff  (const ArrayX<double>&, const ArrayXX<number>&);
     
-    number FreeEnergy(number, const ArrayX<number>&, const ArrayXX<number>&);
+    double FreeEnergy(number, const ArrayX<double>&, const ArrayXX<number>&);
     
-    ArrayX<number> LegendreCoeffs(const ArrayX<number>&);
-    ArrayX<number> SequentialOptimiser(number, const ArrayXX<number>&, int, int);
+    ArrayX<double> LegendreCoeffs(const ArrayX<double>&);
+    ArrayX<double> SequentialOptimiser(number, const ArrayXX<number>&, int, int);
 
-    Vector2<number> ODFThermo(number, const ArrayX<number>&, const ArrayXX<number>&);
+    Vector2<double> ODFThermo(number, const ArrayX<double>&, const ArrayXX<number>&);
 };
 
 #endif

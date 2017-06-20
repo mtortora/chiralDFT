@@ -18,8 +18,8 @@
 		B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B714FE051E5C8809009C274C /* TwistedPentagon.cpp */; };
 		B733A8201D40C46C001575D7 /* BTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B733A81F1D40C46C001575D7 /* BTree.cpp */; };
 		B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */; };
-		B76070301EEE9E2C00847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B760702F1EEE9E2C00847679 /* libRAPID.a */; };
 		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
+		B76070361EEF3B2600847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070351EEF3B2600847679 /* libRAPID.a */; };
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
 		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
@@ -80,8 +80,8 @@
 		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B760702A1EEE9C8900847679 /* EigenDensePlugin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EigenDensePlugin.hpp; path = lib/EigenDensePlugin.hpp; sourceTree = "<group>"; };
-		B760702F1EEE9E2C00847679 /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
 		B76070331EEE9E7300847679 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = ../../../../../../../usr/local/lib/libmpi.dylib; sourceTree = "<group>"; };
+		B76070351EEF3B2600847679 /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
 		B76EEC141E9D24A90044E99B /* thomas.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = thomas.sh; sourceTree = "<group>"; };
 		B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BHierarchy.cpp; sourceTree = "<group>"; };
 		B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BHierarchy.hpp; sourceTree = "<group>"; };
@@ -104,8 +104,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B76070361EEF3B2600847679 /* libRAPID.a in Frameworks */,
 				B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */,
-				B76070301EEE9E2C00847679 /* libRAPID.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,8 +258,8 @@
 		B760702C1EEE9E1A00847679 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B76070351EEF3B2600847679 /* libRAPID.a */,
 				B76070331EEE9E7300847679 /* libmpi.dylib */,
-				B760702F1EEE9E2C00847679 /* libRAPID.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

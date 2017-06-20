@@ -162,9 +162,6 @@ void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
 template<template<typename number> class ParticleType, typename number>
 number MCIntegrator<ParticleType, number>::ExcludedIntegrator(number r_hard)
 {
-    LogTxt("------------");
-    LogTxt("Integrating effective excluded volume...");
-    
     // Box spatial grid
     X_grid_   = ArrayX<number>::LinSpaced(NX, -Particle1_.Hull->l_xh, Particle1_.Hull->l_xh);
     Y_grid_   = ArrayX<number>::LinSpaced(NY, -Particle1_.Hull->l_yh, Particle1_.Hull->l_yh);
@@ -172,6 +169,9 @@ number MCIntegrator<ParticleType, number>::ExcludedIntegrator(number r_hard)
     
     Exc_grid_ = ArrayXi::Constant(NX*NY*NZ, 1);
 
+    LogTxt("------------");
+    LogTxt("Integrating effective excluded volume...");
+    
     MCReset();
 
     while ( ctr_mc_ < N_PER_PROC_ )
@@ -291,16 +291,19 @@ void MCIntegrator<ParticleType, number>::ConfigGenerator()
 /* MC integration of virial coefficients */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out, ArrayX<number>* V_r, ArrayX<number>* V_l)
+void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out, ArrayXX<number>* V_b,
+                                                          ArrayX<number>* V_r, ArrayX<number>* V_l)
 {
-    LogTxt("------------");
-    LogTxt("Integrating angle-dependant second-virial coefficients");
+    V_b->setZero(N_THETA, N_THETA);
     
     V_r->setZero(N_THETA);
     V_l->setZero(N_THETA);
     
     E_out->setZero(E_DIM, E_DIM);
 
+    LogTxt("------------");
+    LogTxt("Integrating angle-dependant second-virial coefficients");
+    
     MCReset();
 
     while ( ctr_mc_ < N_PER_PROC_ )
@@ -311,11 +314,33 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
         {
             ctr_ov_++;
             
-            number theta    = acos((Particle1_.Axis).dot(Particle2_.Axis));
-            number deter    = R_cm_.dot((Particle1_.Axis).cross(Particle2_.Axis));
+            Vector3<number> U1 = Particle1_.U;
+            Vector3<number> U2 = Particle2_.U;
             
+            Vector3<number> V1 = Particle1_.V;
+            Vector3<number> V2 = Particle2_.V;
+            
+            // Project V2 on the normal plane of U1
+            number nu;
+            number v2Eu1    = V2.dot(U1);
+            
+            V2             -= v2Eu1 * U1;
+            number norm2    = V2.norm();
+            
+            if ( norm2 < TOL_SC ) nu = PI/2.;
+            else                  nu = acos(V1.dot(V2) / norm2);
+            
+            number theta    = acos(U1.dot(U2));
+            number deter    = R_cm_.dot(U1.cross(U2));
+            
+            uint idx_nu     = floor(nu    /PI * (number)N_THETA);
             uint idx_theta  = floor(theta /PI * (number)N_THETA);
+            
+            idx_nu          = fmin(idx_nu,    N_THETA-1);
             idx_theta       = fmin(idx_theta, N_THETA-1);
+            
+            // Angular excluded volume integrals
+            (*V_b)(idx_theta, idx_nu) += mayer_interaction_;
             
             if ( deter > 0. ) (*V_r)(idx_theta) += mayer_interaction_;
             else              (*V_l)(idx_theta) += mayer_interaction_;
@@ -368,12 +393,14 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
         }
     }
     
-    number prefactor = ((ODF_TYPE == ODF_FULL) ? SQR(D_ALPHA*D_THETA*D_PHI) : 1.);
+    number prefactor = ((ODF_TYPE == ODF_FULL) ? 1./SQR(D_ALPHA*D_THETA*D_PHI) : 1.);
+    
+    *V_b   *= IManager.V_INTEG/N_PER_PROC_ / SQR(D_THETA);
     
     *V_r   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
     *V_l   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
 
-    *E_out *= IManager.V_INTEG/N_PER_PROC_ / prefactor;
+    *E_out *= IManager.V_INTEG/N_PER_PROC_ * prefactor;
 }
 
 // ============================
@@ -382,12 +409,12 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
 template<template<typename number> class ParticleType, typename number>
 void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayXX<number>* E_out, number q_macro)
 {
-    LogTxt("------------");
-    LogTxt("Integrating Legendre-projected second-virial coefficients - q=%.5f", q_macro);
-    
     Vector3<number> N_q;
     
     E_out->setZero(E_DIM, E_DIM);
+    
+    LogTxt("------------");
+    LogTxt("Integrating Legendre-projected second-virial coefficients - q=%.5f", q_macro);
     
     MCReset();
 
@@ -410,7 +437,7 @@ void MCIntegrator<ParticleType, number>::LegendreIntegrator(ArrayXX<number>* E_o
                 {
                     (*E_out)(l1,l2) += sin(theta1)*sin(theta2) * mayer_interaction_
                                      * sqrt((2.*(number)l1 + 1.)*(2.*(number)l2 + 1.)/4.)
-                                     * Legendre<number>::Pn(l1, Particle2_.Axis.dot(N_q))
+                                     * Legendre<number>::Pn(l1, Particle2_.U.dot(N_q))
                                      * Legendre<number>::Pn(l2, cos(theta1));
                 }
             }
@@ -428,9 +455,6 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
                                                          ArrayX<number>* K1_out, ArrayX<number>* K2_out, ArrayX<number>* K3_out,
                                                          ArrayX<number>* Kt_out)
 {
-    LogTxt("------------");
-    LogTxt("Starting preliminary chiral run...");
-    
     ArrayXX<number> Psi_dot(Psi_in.rows(), Psi_in.cols());
 
     ArrayX<number>  Eff_grid = Eta_grid * this->IManager.V_EFF/this->IManager.V0;
@@ -465,6 +489,9 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
     }
     
     Psi_dot /= D_THETA;
+    
+    LogTxt("------------");
+    LogTxt("Starting preliminary chiral run...");
     
     MCReset();
 
@@ -509,26 +536,26 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
             *K1_out -= mayer_interaction_
                      * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
-                     * Particle1_.Axis(0) * Particle2_.Axis(0)
+                     * Particle1_.U(0) * Particle2_.U(0)
                      * SQR(R_cm_(0));
 			
             *K2_out -= mayer_interaction_
                      * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
-                     * Particle1_.Axis(1) * Particle2_.Axis(1)
+                     * Particle1_.U(1) * Particle2_.U(1)
                      * SQR(R_cm_(0));
             
             *K3_out -= mayer_interaction_
                      * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
-                     * Particle1_.Axis(0) * Particle2_.Axis(0)
+                     * Particle1_.U(0) * Particle2_.U(0)
                      * SQR(R_cm_(2));
             
             // Update twist modulus
             *Kt_out -= mayer_interaction_ * sin(theta1)
                      * Psi_in. col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
-                     * Particle2_.Axis(1)
+                     * Particle2_.U(1)
                      * R_cm_(0);
         }
     }

@@ -4,7 +4,9 @@
 
 #$ -l h_rt=40:00:0
 #$ -N cDFT-DNA
+#$ -l mem=5G
 #$ -pe mpi 864
+#$ -P AllUsers
 
 #$ -wd TARGETPATH/../
 

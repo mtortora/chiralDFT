@@ -107,7 +107,7 @@ void SimManager<number>::InitRun()
         LogBlu("Reference perturbative run");
         
         // MPI-averaged second-virial coefficients
-        SimHandler.VirialIntegrator(&E_ref, &V_r, &V_l);
+        SimHandler.VirialIntegrator(&E_ref, &V_b, &V_r, &V_l);
         
         E_ref.symmetrise();
         E_ref /= mpi_size_;
@@ -232,6 +232,8 @@ void SimManager<number>::Gather()
     ArrayX<number>  F_ref_  = F_ref  / mpi_size_;
     ArrayX<number>  S_res_  = S_res  / mpi_size_;
     
+    ArrayXX<number> V_b_    = V_b    / mpi_size_;
+
     ArrayX<number>  V_r_    = V_r    / mpi_size_;
     ArrayX<number>  V_l_    = V_l    / mpi_size_;
     
@@ -272,6 +274,8 @@ void SimManager<number>::Gather()
         MPI_Reduce(Q_inf_.data(), Q_inf.data(), Q_inf.size(), Utils<number>().MPI_type, MPI_MIN, MPI_MASTER, MPI_COMM_WORLD);
         MPI_Reduce(Q_sup_.data(), Q_sup.data(), Q_sup.size(), Utils<number>().MPI_type, MPI_MAX, MPI_MASTER, MPI_COMM_WORLD);
     }
+
+    MPI_Reduce(V_b_   .data(), V_b   .data(), V_b   .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
 
     MPI_Reduce(V_r_   .data(), V_r   .data(), V_r   .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
     MPI_Reduce(V_l_   .data(), V_l   .data(), V_l   .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
@@ -314,7 +318,6 @@ void SimManager<number>::Save()
     if ( mpi_rank_ == MPI_MASTER )
     {
         // Output files
-        std::ofstream file_exc(data_path_ + "/excluded_matrix.out");
         std::ofstream file_ord(data_path_ + "/order_param.out");
         std::ofstream file_dv (data_path_ + "/delta_v.out");
         std::ofstream file_df (data_path_ + "/delta_f.out");
@@ -324,17 +327,12 @@ void SimManager<number>::Save()
         std::ofstream file_k2 (data_path_ + "/k2.out");
         std::ofstream file_k3 (data_path_ + "/k3.out");
         std::ofstream file_kt (data_path_ + "/kt.out");
+        std::ofstream file_vb (data_path_ + "/vb.out");
         std::ofstream file_mu (data_path_ + "/mu.out");
         std::ofstream file_p  (data_path_ + "/p.out");
         
         // Azimuthally-averaged ODF
         ArrayXX<number> Psi_ave = ArrayXX<number>::Zero(N_STEPS_ETA, N_THETA);
-
-        // Reference virial matrix
-        file_exc << "Particle volume: "  << SimHandler.IManager.V0    << std::endl;
-        file_exc << "Effective volume: " << SimHandler.IManager.V_EFF << std::endl;
-
-        file_exc << E_ref;
         
         for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
         {
@@ -385,7 +383,19 @@ void SimManager<number>::Save()
             }
         }
         
-        if ( !IS_BIAXIAL ) Psi_ave = Psi_grd;
+        if ( !IS_BIAXIAL )
+        {
+            Psi_ave = Psi_grd;
+
+            // Reference virial matrix
+            std::ofstream file_exc(data_path_ + "/excluded_matrix.out");
+
+            file_exc << "Particle volume: "  << SimHandler.IManager.V0    << std::endl;
+            file_exc << "Effective volume: " << SimHandler.IManager.V_EFF << std::endl;
+            
+            file_exc << E_ref;
+            file_exc.close();
+        }
         
         // Angle-dependant excluded volume, assuming head-tail particle symmetry
         ArrayX<number> V_chi  = V_r - V_l;
@@ -399,12 +409,22 @@ void SimManager<number>::Save()
         ArrayX<number> F_chi  = (Psi_ave.rowwise() * (V_ave * sin(SimHandler.Theta_grid)).transpose()).rowwise().sum();
         
         F_chi *= -N_grid * SQR(2.*PI)*D_THETA;
+        V_b    = V_b.colwise() / V_b.rowwise().maxCoeff();
         
         for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
         {
             number theta = SimHandler.Theta_grid(idx_theta);
             
             file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta) << std::endl;
+            
+            for ( uint idx_nu = 0; idx_nu < N_THETA; ++idx_nu )
+            {
+                number nu = SimHandler.Theta_grid(idx_nu);
+                
+                file_vb << theta << ' ' << ' ' << nu << ' ' << V_b(idx_theta, idx_nu) << std::endl;
+            }
+            
+            file_vb << std::endl;
         }
         
         for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
@@ -450,7 +470,6 @@ void SimManager<number>::Save()
             file_min.close();
         }
         
-        file_exc.close();
         file_ord.close();
         file_dv .close();
         file_df .close();
@@ -460,6 +479,7 @@ void SimManager<number>::Save()
         file_k2 .close();
         file_k3 .close();
         file_kt .close();
+        file_vb .close();
         file_mu .close();
         file_p  .close();
     }

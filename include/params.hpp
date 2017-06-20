@@ -15,7 +15,7 @@
 // Set to ODF_FULL for full functional minimisation or ODF_LEGENDRE for Legendre-projected run (only for preliminary run)
 #define ODF_TYPE    ODF_FULL
 
-// Type of soft interaction - 0: oxDNA-parametrised electrostatics, 1: Ferrarini, 2: Wensink, 3: Lagerwall
+// Type of soft interaction if relevant - 0: oxDNA-parametrised electrostatics, 1: Ferrarini, 2: Wensink, 3: Lagerwall
 #define MODE_DH     DH_OXDNA
 
 // Bounding tree hierarchy mode - set to TREE_OB for Oriented Bounding Box or TREE_SC for SpheroCylinder
@@ -55,7 +55,7 @@
 #define N_SYNC      50
 #define N_STEPS_Q   15
 #define N_STEPS_ETA 100
-#define N_STEPS_ODF 5000
+#define N_STEPS_ODF 10000
 #define N_STEPS_NR  1000
 
 #define N_ALPHA     1

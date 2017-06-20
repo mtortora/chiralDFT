@@ -70,6 +70,7 @@ private:
     ArrayX<number>  Kt_inf;
     ArrayX<number>  Kt_sup;
     
+    ArrayXX<number> V_b;
     ArrayXX<number> Psi_grd;
     
     ArrayXX<number> E_ref;
