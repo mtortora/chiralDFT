@@ -21,9 +21,10 @@ N_ALPHA = STATS_blocks - 1
 minZ    = STATS_min
 maxZ    = STATS_max
 
-set xrange[minX:maxX]
-set yrange[minY:maxY]
-set zrange[minZ:maxZ]
+set xrange [minX:maxX]
+set yrange [minY:maxY]
+set zrange [minZ:maxZ]
+set cbrange[minZ:maxZ]
 
 idx_alpha = 0
 

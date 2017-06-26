@@ -52,7 +52,6 @@ private:
     
     ArrayX<number>  P_res;
     ArrayX<number>  Mu_res;
-    ArrayX<number>  S_res;
     
     ArrayX<number>  K1;
     ArrayX<number>  K1_inf;
@@ -70,6 +69,8 @@ private:
     ArrayX<number>  Kt_inf;
     ArrayX<number>  Kt_sup;
     
+    ArrayXX<number> S_res;
+
     ArrayXX<number> V_b;
     ArrayXX<number> Psi_grd;
     

@@ -17,21 +17,21 @@ public:
     void BinodalAnalysis(const ArrayXX<number>&, int, int);
     void EnergyGrid(const ArrayXX<number>&, ArrayX<number>*, int, int);
     void ODFGrid(const ArrayXX<number>&,
-                 ArrayX<number>*, ArrayX<number>*, ArrayX<number>*, ArrayX<number>*,
-                 ArrayXX<number>*, int, int);
+                 ArrayX<number>*, ArrayX<number>*, ArrayX<number>*,
+                 ArrayXX<number>*, ArrayXX<number>*, int, int);
     
 private:
     ArrayX<double> Psi_iso_;
     
     double RotationalEnt(const ArrayX<double>&);
-    double OrderParam   (const ArrayX<double>&);
     double VirialCoeff  (const ArrayX<double>&, const ArrayXX<number>&);
     
     double FreeEnergy(number, const ArrayX<double>&, const ArrayXX<number>&);
-    
+
     ArrayX<double> LegendreCoeffs(const ArrayX<double>&);
     ArrayX<double> SequentialOptimiser(number, const ArrayXX<number>&, int, int);
 
+    Vector3<double> OrderParams(const ArrayX<double>&, Matrix33<double>*);
     Vector2<double> ODFThermo(number, const ArrayX<double>&, const ArrayXX<number>&);
 };
 

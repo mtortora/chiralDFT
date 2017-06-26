@@ -87,6 +87,7 @@
 		B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BHierarchy.hpp; sourceTree = "<group>"; };
 		B794CCF81E5F992500DEAE25 /* build_hierarchy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = build_hierarchy.py; sourceTree = "<group>"; };
 		B7BB8D781EAE568B00294673 /* savitsky_golay.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = savitsky_golay.py; sourceTree = "<group>"; };
+		B7C335E21EFEA48F00016777 /* wigner.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = wigner.py; sourceTree = "<group>"; };
 		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
 		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7E1FD561EEDBDE200590CC1 /* plot_landscape4d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape4d; sourceTree = "<group>"; };
@@ -121,6 +122,7 @@
 				9C29FD8A1CB5A42600A2248A /* display_traj */,
 				B70E9E001CCA58F8008A770B /* display_wireframe */,
 				9CF9AA671CB0AA260061836F /* prune_surfaces.py */,
+				B7C335E21EFEA48F00016777 /* wigner.py */,
 			);
 			path = utils;
 			sourceTree = "<group>";

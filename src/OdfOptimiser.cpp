@@ -1,7 +1,7 @@
 // ===================================================================
 /**
- * Orientation distribution function derived handler class - objects
- * and methods preceded by "this->" are inherited from MCIntegrator.
+ * Orientation distribution function convenience class - always uses
+ * double-precision ODF calculations for numerical stability.
  */
 // ===================================================================
 /*
@@ -20,9 +20,9 @@
 template<template<typename number> class ParticleType, typename number>
 OdfOptimiser<ParticleType, number>::OdfOptimiser()
 {
-    Alpha_grid = ArrayX<number>::LinSpaced(N_ALPHA, 0., 2.*PI);
-    Theta_grid = ArrayX<number>::LinSpaced(N_THETA, 0., 1.*PI);
-    Phi_grid   = ArrayX<number>::LinSpaced(N_PHI,   0., 2.*PI);
+    Alpha_grid = ArrayX<number>::LinSpaced(N_ALPHA, 0., 2.*PI * (N_ALPHA-1.)/(number)N_ALPHA);
+    Theta_grid = ArrayX<number>::LinSpaced(N_THETA, 0., 1.*PI * (N_THETA-1.)/(number)N_THETA);
+    Phi_grid   = ArrayX<number>::LinSpaced(N_PHI,   0., 2.*PI * (N_PHI  -1.)/(number)N_PHI);
 
     Psi_iso_   = ArrayX<double>::Constant(N_ALPHA*N_THETA*N_PHI, 1./(8.*SQR(PI)));
 }
@@ -57,11 +57,21 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
     {
         try
         {
+            ctr_nr++;
+
             double eta_iso1 = Binodals(0);
             double eta_nem1 = Binodals(1);
             
             double eta_iso2 = eta_iso1 + TOL_BIN;
             double eta_nem2 = eta_nem1 - TOL_BIN;
+            
+            // Enforce density bounds for NR convergence
+            if ( (Binodals.array() < 0.).any() || (Binodals.array() > eta_max).any() )
+            {
+                Binodals(0) = eta_min;
+                
+                throw std::runtime_error("Newton-Raphson method went out of bounds");
+            }
             
             ArrayX<double> Psi_nem1 = SequentialOptimiser(eta_nem1, E_in, mpi_rank, mpi_size);
             ArrayX<double> Psi_nem2 = SequentialOptimiser(eta_nem2, E_in, mpi_rank, mpi_size);
@@ -75,14 +85,6 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
             
             else
             {
-                // Enforce density bounds for NR convergence
-                if ( (Binodals.array() < 0.).any() || (Binodals.array() > eta_max).any() )
-                {
-                    Binodals(0) = eta_min;
-                    
-                    throw std::runtime_error("Newton-Raphson method went out of bounds");
-                }
-
                 // Thermo_Xi is the vector [p, mu] for phase X at density i
                 Vector2<double> Thermo_iso1 = ODFThermo(eta_iso1, Psi_iso_, E_in);
                 Vector2<double> Thermo_iso2 = ODFThermo(eta_iso2, Psi_iso_, E_in);
@@ -92,7 +94,7 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
                 
                 // Compute NR Jacobian through pressure/potential differentials
                 Matrix22<double> Jcb;
-                Vector2<double>  D_Thermo;
+                Vector2 <double> D_Thermo;
                 
                 Jcb.col(0)   = (Thermo_iso2 - Thermo_iso1) / TOL_BIN;
                 Jcb.col(1)   = (Thermo_nem2 - Thermo_nem1) / TOL_BIN;
@@ -107,8 +109,6 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
                 // Relaxed NR iteration - classical NR can be recovered by setting GAMMA_NR to 1
                 Binodals    += GAMMA_NR * D_Binodals;
                 converged    = ((max_b < TOL_BIN) && (max_t < TOL_BIN)) ;
-                
-                ctr_nr++;
             }
         }
         
@@ -312,13 +312,18 @@ double OdfOptimiser<ParticleType, number>::RotationalEnt(const ArrayX<double>& P
 }
 
 // ============================
-/* Nematic order parameter */
+/* Nematic order parameters */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-double OdfOptimiser<ParticleType, number>::OrderParam(const ArrayX<double>& Psi_in)
+Vector3<double> OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_in, Matrix33<double>* Frame)
 {
-    double s_nem(0.);
+    double s1(0.);
+    double s2(0.);
+    double s3(0.);
     
+    Matrix33<double> Q = Matrix33<double>::Zero();
+
+    // Averaged long-axis order parameter tensor Q
     for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
     {
         for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
@@ -326,15 +331,65 @@ double OdfOptimiser<ParticleType, number>::OrderParam(const ArrayX<double>& Psi_
             for ( uint idx_phi = 0; idx_phi < N_PHI; ++idx_phi )
             {
                 double theta = Theta_grid(idx_theta);
-                
-                s_nem += Psi_in.at(idx_alpha, idx_theta, idx_phi)
-                       * (3.*SQR(cos(theta)) - 1.) / 2.
-                       * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                double phi   = Phi_grid  (idx_phi);
+
+                this->IManager.SetU(theta, phi);
+                Vector3<double> U = this->IManager.U.template cast<double>();
+
+                Q(0,0) += U(0)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(1,0) += U(1)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(2,0) += U(2)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(0,1) += U(0)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(1,1) += U(1)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(2,1) += U(2)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(0,2) += U(0)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(1,2) += U(1)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Q(2,2) += U(2)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
             }
         }
     }
     
-    return s_nem;
+    // Normalise Q tensor
+    Q = 3/2.*Q - 1/2.*Matrix33<double>::Identity();
+    
+    // Q spectral analysis
+    Eigen::SelfAdjointEigenSolver<Matrix33<double> > S(Q);
+    
+    s1     = S.eigenvalues()(2);
+    *Frame = S.eigenvectors().rowwise().reverse();
+
+    if ( Frame->determinant() < 0. ) Frame->col(0) *= -1.;
+    
+    // Biaxial order parameters
+    for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
+    {
+        for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
+        {
+            for ( uint idx_phi = 0; idx_phi < N_PHI; ++idx_phi )
+            {
+                double alpha = Alpha_grid(idx_alpha);
+                double theta = Theta_grid(idx_theta);
+                double phi   = Phi_grid  (idx_phi);
+                
+                this->IManager.SetV(alpha, theta, phi);
+                this->IManager.SetW(alpha, theta, phi);
+                
+                Vector3<double> V = this->IManager.V.template cast<double>();
+                Vector3<double> W = this->IManager.W.template cast<double>();
+                
+                double v1 = V.dot(Frame->col(1));
+                double v2 = V.dot(Frame->col(2));
+                
+                double w1 = W.dot(Frame->col(1));
+                double w2 = W.dot(Frame->col(2));
+                
+                s2       += (SQR(v1) - SQR(v2)) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                s3       += (SQR(w2) - SQR(w1)) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+            }
+        }
+    }
+    
+    return Vector3<double>(s1, s2, s3);
 }
 
 // ============================
@@ -473,9 +528,8 @@ void OdfOptimiser<ParticleType, number>::EnergyGrid(const ArrayXX<number>& E_in,
 // ============================
 template<template<typename number> class ParticleType, typename number>
 void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
-                                                 ArrayX<number>* P_out, ArrayX<number>* Mu_out,
-                                                 ArrayX<number>* F_out, ArrayX<number>* S_out,
-                                                 ArrayXX<number>* Psi_out,
+                                                 ArrayX<number>* P_out, ArrayX<number>* Mu_out, ArrayX<number>* F_out,
+                                                 ArrayXX<number>* S_out, ArrayXX<number>* Psi_out,
                                                  int mpi_rank, int mpi_size)
 {
     LogTxt("------------");
@@ -484,25 +538,28 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
     *P_out   = ArrayX<number>(N_STEPS_ETA);
     *Mu_out  = ArrayX<number>(N_STEPS_ETA);
     *F_out   = ArrayX<number>(N_STEPS_ETA);
-    *S_out   = ArrayX<number>(N_STEPS_ETA);
     
+    *S_out   = ArrayXX<number>(N_STEPS_ETA, 3);
     *Psi_out = ArrayXX<number>(N_STEPS_ETA, N_ALPHA*N_THETA*N_PHI);
 
     for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
     {
-        number eta              = this->Eta_grid(idx_eta);
+        number eta             = this->Eta_grid(idx_eta);
         
-        ArrayX<double>  Psi     = SequentialOptimiser(eta, E_in, mpi_rank, mpi_size);
-        Vector2<double> Thermo  = ODFThermo(eta, Psi, E_in);
+        ArrayX <double> Psi    = SequentialOptimiser(eta, E_in, mpi_rank, mpi_size);
+        Vector2<double> Thermo = ODFThermo(eta, Psi, E_in);
+        
+        Matrix33<double> Frame;
+        Vector3 <double> S     = OrderParams(Psi, &Frame);
         
         // Equilibrium pressure, chemical potential & free energy
-        (*P_out) (idx_eta)      = Thermo(0);
-        (*Mu_out)(idx_eta)      = Thermo(1);
-        (*F_out) (idx_eta)      = FreeEnergy(eta, Psi, E_in);
+        (*P_out) (idx_eta)     = Thermo(0);
+        (*Mu_out)(idx_eta)     = Thermo(1);
+        (*F_out) (idx_eta)     = FreeEnergy(eta, Psi, E_in);
         
         // Nematic order parameter & density-dependent ODF
-        (*S_out)(idx_eta)       = OrderParam(Psi);
-        (*Psi_out).row(idx_eta) = Psi.cast<number>();
+        S_out  ->row(idx_eta)  = S  .cast<number>();
+        Psi_out->row(idx_eta)  = Psi.cast<number>();
     }
 }
 

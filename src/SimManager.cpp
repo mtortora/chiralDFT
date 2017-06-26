@@ -230,8 +230,8 @@ void SimManager<number>::Gather()
     ArrayX<number>  Mu_res_ = Mu_res / mpi_size_;
     
     ArrayX<number>  F_ref_  = F_ref  / mpi_size_;
-    ArrayX<number>  S_res_  = S_res  / mpi_size_;
     
+    ArrayXX<number> S_res_  = S_res  / mpi_size_;
     ArrayXX<number> V_b_    = V_b    / mpi_size_;
 
     ArrayX<number>  V_r_    = V_r    / mpi_size_;
@@ -317,7 +317,6 @@ void SimManager<number>::Save()
 {
     if ( mpi_rank_ == MPI_MASTER )
     {
-        // Output files
         std::ofstream file_ord(data_path_ + "/order_param.out");
         std::ofstream file_dv (data_path_ + "/delta_v.out");
         std::ofstream file_df (data_path_ + "/delta_f.out");
@@ -347,9 +346,10 @@ void SimManager<number>::Save()
             file_per << eta << ' ' << Qp_min(idx_eta) << ' ' << Qp_inf(idx_eta) << ' ' << Qp_sup(idx_eta) << std::endl;
             
             // Nematic order parameter, pressure and chemical potential
-            file_ord << eta << ' ' << S_res (idx_eta) << std::endl;
             file_mu  << eta << ' ' << Mu_res(idx_eta) << std::endl;
             file_p   << eta << ' ' << P_res (idx_eta) << std::endl;
+            
+            file_ord << eta << ' ' << S_res (idx_eta, 0) << ' ' << S_res(idx_eta, 1) << ' ' << S_res(idx_eta, 2) << std::endl;
             
             // Save ODFs
             if ( IS_BIAXIAL )

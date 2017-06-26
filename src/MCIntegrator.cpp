@@ -88,6 +88,7 @@ void MCIntegrator<ParticleType, number>::SyncCheck(bool prune)
         
         if ( prune )
         {
+            // Cull all points pruned by any thread
             MPI_Allreduce(MPI_IN_PLACE, Exc_grid_.data(), Exc_grid_.size(), Utils<uint>().MPI_type, MPI_BAND, MPI_COMM_WORLD);
             
             ullint ctr_ov = NX*NY*NZ - Exc_grid_.sum();
@@ -126,7 +127,7 @@ void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
     Matrix3X<number> Backbone = Particle2_.Orientation * Particle2_.Backbone;
     Backbone.colwise()       += R_cm_;
     
-    // Iterate over grid points
+    // Traverse grid points
     for ( uint idx_x = 0; idx_x < NX; ++idx_x )
     {
         for ( uint idx_y = 0; idx_y < NY; ++idx_y )
@@ -139,7 +140,7 @@ void MCIntegrator<ParticleType, number>::PruneGrid(number r_hard)
                 {
                     Grid_point << X_grid_(idx_x), Y_grid_(idx_y), Z_grid_(idx_z);
                     
-                    // Prune grid points located in non-overlapping particles pairs
+                    // Prune points located within non-overlapping bead pairs
                     for ( uint idx_vtx = 0; idx_vtx < Backbone.cols(); ++idx_vtx )
                     {
                         Vector3<number> R_sep = Backbone.col(idx_vtx) - Grid_point;
@@ -330,6 +331,7 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
             if ( norm2 < TOL_SC ) nu = PI/2.;
             else                  nu = acos(V1.dot(V2) / norm2);
             
+            // Work out configuration handedness
             number theta    = acos(U1.dot(U2));
             number deter    = R_cm_.dot(U1.cross(U2));
             
@@ -345,7 +347,7 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
             if ( deter > 0. ) (*V_r)(idx_theta) += mayer_interaction_;
             else              (*V_l)(idx_theta) += mayer_interaction_;
             
-            // Work out configuration angles
+            // Fetch configuration angles
             number alpha1   = Particle1_.alpha;
             number alpha2   = Particle2_.alpha;
             
@@ -364,7 +366,7 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
             uint idx_phi1   = floor(phi1/(2.*PI)   * (number)N_PHI);
             uint idx_phi2   = floor(phi2/(2.*PI)   * (number)N_PHI);
             
-            // Necessary for single-precision floats
+            // Avoid overflow for single-precision floats
             idx_alpha1      = fmin(idx_alpha1, N_ALPHA-1);
             idx_alpha2      = fmin(idx_alpha2, N_ALPHA-1);
             
@@ -480,10 +482,7 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
                                                                   - Psi_in.col_at(idx_alpha, idx_theta,   idx_phi);
                 }
                 
-                else
-                {
-                    Psi_dot.col_at(idx_alpha, idx_theta, idx_phi) = -Psi_dot.col_at(idx_alpha, 0, idx_phi);
-                }
+                else Psi_dot.col_at(idx_alpha, idx_theta, idx_phi) = -Psi_dot.col_at(idx_alpha, 0, idx_phi);
             }
         }
     }
@@ -503,7 +502,7 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
         {
             ctr_ov_++;
 
-            // Work out configuration angles
+            // Fetch configuration angles
             number alpha1   = Particle1_.alpha;
             number alpha2   = Particle2_.alpha;
             
@@ -522,7 +521,7 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
             uint idx_phi1   = floor(phi1/(2.*PI)   * (number)N_PHI);
             uint idx_phi2   = floor(phi2/(2.*PI)   * (number)N_PHI);
             
-            // Necessary for single-precision floats
+            // Avoid overflow for single-precision floats
             idx_alpha1      = fmin(idx_alpha1, N_ALPHA-1);
             idx_alpha2      = fmin(idx_alpha2, N_ALPHA-1);
             

@@ -41,18 +41,24 @@ DEPEXT      := d
 OBJEXT      := o
 
 # Flags, libraries and includes
-CXXFLAGS    := -Wno-logical-op-parentheses -O3
+CXXFLAGS    := -Wno-logical-op-parentheses -Wno-deprecated -O3
 CFLAGS      := -std=c++0x -Werror -Wshadow -Wall -Wextra -msse4 -fno-common -fomit-frame-pointer -O3
 FPATHS      := -D__DPATH__=$(CURDIR)/$(DATDIR) -D__EIGDENSE__=$(CURDIR)/$(LIBDIR)/EigenDensePlugin.hpp
 FEXTRA      := -D__VERSION_MAJOR__=$(VSN_MAJ) -D__VERSION_MINOR__=$(VSN_MIN) -DNDEBUG
 INC         := -I$(INCDIR) -I$(LIBDIR) -isystem $(LOCAL_PTH)/include -isystem $(EIGEN_PTH)/include -isystem $(MPICC_PTH)/include
-LIB         := -L$(LIBDIR) -lRAPID
+LIB         := -L$(LIBDIR) -lRAPID -lSphericalFunctions
 
 # Object files lists
 SOURCES     := $(shell find $(SRCDIR) -type f -iname "*.$(SRCEXT)")
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
+
+# RAPID files list
 RLOBJ       := $(LIBDIR)/rapid2/RAPID.o $(LIBDIR)/rapid2/build.o $(LIBDIR)/rapid2/collide.o $(LIBDIR)/rapid2/overlap.o
 RLCLEAN     := $(LIBDIR)/libRAPID.a $(RLOBJ) $(LIBDIR)/rapid2/*~
+
+# SphericalFunctions files list
+SFOBJ       := $(LIBDIR)/SphericalFunctions/Quaternions/Quaternions.o $(LIBDIR)/SphericalFunctions/Quaternions/QuaternionUtilities.o $(LIBDIR)/SphericalFunctions/Combinatorics.o $(LIBDIR)/SphericalFunctions/WignerDMatrices.o $(LIBDIR)/SphericalFunctions/SWSHs.o
+SFCLEAN     := $(LIBDIR)/libSphericalFunctions.a $(SFOBJ) $(LIBDIR)/SphericalFunctions/*~
 
 # Default make
 all: resources $(TARGET)
@@ -117,13 +123,15 @@ $(BUILDDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.$(DEPEXT).tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.$(DEPEXT)
 	@$(RM) -f $(BUILDDIR)/$*.$(DEPEXT).tmp
 
-# Build RAPID library
-librapid: cleanlib $(RLOBJ)
+# Make libraries
+libs: cleanlib $(RLOBJ) $(SFOBJ)
 	@ar ruv $(LIBDIR)/libRAPID.a $(RLOBJ)
+	@ar ruv $(LIBDIR)/libSphericalFunctions.a $(SFOBJ)
 
-# Clean library
+# Clean libraries
 cleanlib:
 	@$(RM) -f $(RLCLEAN)
+	@$(RM) -f $(SFCLEAN)
 
 # Force dependency - include for rules to be run at every call
 FORCE:

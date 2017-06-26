@@ -56,7 +56,7 @@
 #define N_STEPS_Q   15
 #define N_STEPS_ETA 100
 #define N_STEPS_ODF 10000
-#define N_STEPS_NR  1000
+#define N_STEPS_NR  100
 
 #define N_ALPHA     1
 #define N_THETA     250
