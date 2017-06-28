@@ -53,13 +53,9 @@ alpha_grid = np.linspace(0,2.*np.pi, num=n_alpha, endpoint=False)
 theta_grid = np.linspace(0,1.*np.pi, num=n_theta, endpoint=False)
 phi_grid   = np.linspace(0,2.*np.pi, num=n_phi,   endpoint=False)
 
-alpha_max  = alpha_grid[-1]
-theta_max  = theta_grid[-1]
-phi_max    = phi_grid  [-1]
-
-d_alpha    = alpha_max / n_alpha
-d_theta    = theta_max / n_theta
-d_phi      = phi_max   / n_phi
+d_alpha    = 2.*np.pi / n_alpha
+d_theta    = 1.*np.pi / n_theta
+d_phi      = 2.*np.pi / n_phi
 
 indices    = np.array([[l,mp,m] for l in range(n_l) for mp in range(-l,l+1) for m in range(-l,l+1)])
 nw         = len(indices)

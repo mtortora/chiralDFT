@@ -12,6 +12,7 @@
 
 #include "Legendre.hpp"
 #include "OdfOptimiser.hpp"
+#include "SphericalFunctions/WignerDMatrices.hpp"
 
 
 // ============================
@@ -315,52 +316,16 @@ double OdfOptimiser<ParticleType, number>::RotationalEnt(const ArrayX<double>& P
 /* Nematic order parameters */
 // ============================
 template<template<typename number> class ParticleType, typename number>
-Vector3<double> OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_in, Matrix33<double>* Frame)
+void OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_in,
+                                                     Matrix33<double>* Frame, ArrayX<std::complex<double> >* S)
 {
-    double s1(0.);
-    double s2(0.);
-    double s3(0.);
+    S->setZero(SIZE_L);
     
-    Matrix33<double> Q = Matrix33<double>::Zero();
+    Matrix33<double> Qu = Matrix33<double>::Zero();
+
+    SphericalFunctions::WignerDMatrix WMat;
 
     // Averaged long-axis order parameter tensor Q
-    for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
-    {
-        for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
-        {
-            for ( uint idx_phi = 0; idx_phi < N_PHI; ++idx_phi )
-            {
-                double theta = Theta_grid(idx_theta);
-                double phi   = Phi_grid  (idx_phi);
-
-                this->IManager.SetU(theta, phi);
-                Vector3<double> U = this->IManager.U.template cast<double>();
-
-                Q(0,0) += U(0)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(1,0) += U(1)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(2,0) += U(2)*U(0) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(0,1) += U(0)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(1,1) += U(1)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(2,1) += U(2)*U(1) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(0,2) += U(0)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(1,2) += U(1)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                Q(2,2) += U(2)*U(2) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-            }
-        }
-    }
-    
-    // Normalise Q tensor
-    Q = 3/2.*Q - 1/2.*Matrix33<double>::Identity();
-    
-    // Q spectral analysis
-    Eigen::SelfAdjointEigenSolver<Matrix33<double> > S(Q);
-    
-    s1     = S.eigenvalues()(2);
-    *Frame = S.eigenvectors().rowwise().reverse();
-
-    if ( Frame->determinant() < 0. ) Frame->col(0) *= -1.;
-    
-    // Biaxial order parameters
     for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
     {
         for ( uint idx_theta = 0; idx_theta < N_THETA; ++idx_theta )
@@ -370,26 +335,49 @@ Vector3<double> OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<dou
                 double alpha = Alpha_grid(idx_alpha);
                 double theta = Theta_grid(idx_theta);
                 double phi   = Phi_grid  (idx_phi);
+
+                this->IManager.SetU(theta, phi);
+                Vector3<double> U = this->IManager.U.template cast<double>();
                 
-                this->IManager.SetV(alpha, theta, phi);
-                this->IManager.SetW(alpha, theta, phi);
+                // Averaged Q-tensor
+                Qu(0,0) += U(0)*U(0) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(1,0) += U(1)*U(0) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(2,0) += U(2)*U(0) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(0,1) += U(0)*U(1) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(1,1) += U(1)*U(1) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(2,1) += U(2)*U(1) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(0,2) += U(0)*U(2) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(1,2) += U(1)*U(2) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                Qu(2,2) += U(2)*U(2) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
                 
-                Vector3<double> V = this->IManager.V.template cast<double>();
-                Vector3<double> W = this->IManager.W.template cast<double>();
+                // Order parameters
+                uint idx(0);
                 
-                double v1 = V.dot(Frame->col(1));
-                double v2 = V.dot(Frame->col(2));
-                
-                double w1 = W.dot(Frame->col(1));
-                double w2 = W.dot(Frame->col(2));
-                
-                s2       += (SQR(v1) - SQR(v2)) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
-                s3       += (SQR(w2) - SQR(w1)) * Psi_in.at(idx_alpha, idx_theta, idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                WMat.SetRotation(phi, theta, alpha);
+
+                for ( int idx_l = 0; idx_l < N_L+1; ++idx_l )
+                {
+                    for ( int idx_mp = -idx_l; idx_mp < idx_l+1; ++idx_mp )
+                    {
+                        for ( int idx_m = -idx_l; idx_m < idx_l+1; ++idx_m )
+                        {
+                            (*S)(idx++) += WMat(idx_l,idx_mp,idx_m) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                        }
+                        
+                    }
+                }
             }
         }
     }
     
-    return Vector3<double>(s1, s2, s3);
+    // Normalise Q tensor
+    Qu = 3/2.*Qu - 1/2.*Matrix33<double>::Identity();
+    
+    // Q spectral analysis
+    Eigen::SelfAdjointEigenSolver<Matrix33<double> > Su(Qu);
+    
+    *Frame = Su.eigenvectors().rowwise().reverse();
+    if ( Frame->determinant() < 0. ) Frame->col(0) *= -1.;
 }
 
 // ============================
@@ -529,17 +517,17 @@ void OdfOptimiser<ParticleType, number>::EnergyGrid(const ArrayXX<number>& E_in,
 template<template<typename number> class ParticleType, typename number>
 void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
                                                  ArrayX<number>* P_out, ArrayX<number>* Mu_out, ArrayX<number>* F_out,
-                                                 ArrayXX<number>* S_out, ArrayXX<number>* Psi_out,
+                                                 ArrayXX<std::complex<number> >* S_out, ArrayXX<number>* Psi_out,
                                                  int mpi_rank, int mpi_size)
 {
     LogTxt("------------");
-    LogGre("Computing equilibrium ODFs and nematic order parameters...");
+    LogGre("Computing equilibrium ODFs and %d Wigner order parameters...", SIZE_L);
 
     *P_out   = ArrayX<number>(N_STEPS_ETA);
     *Mu_out  = ArrayX<number>(N_STEPS_ETA);
     *F_out   = ArrayX<number>(N_STEPS_ETA);
     
-    *S_out   = ArrayXX<number>(N_STEPS_ETA, 3);
+    *S_out   = ArrayXX<number>(N_STEPS_ETA, SIZE_L);
     *Psi_out = ArrayXX<number>(N_STEPS_ETA, N_ALPHA*N_THETA*N_PHI);
 
     for ( uint idx_eta = 0; idx_eta < N_STEPS_ETA; ++idx_eta )
@@ -550,7 +538,9 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
         Vector2<double> Thermo = ODFThermo(eta, Psi, E_in);
         
         Matrix33<double> Frame;
-        Vector3 <double> S     = OrderParams(Psi, &Frame);
+        ArrayX<std::complex<double> > S;
+        
+        OrderParams(Psi, &Frame, &S);
         
         // Equilibrium pressure, chemical potential & free energy
         (*P_out) (idx_eta)     = Thermo(0);
@@ -558,7 +548,7 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
         (*F_out) (idx_eta)     = FreeEnergy(eta, Psi, E_in);
         
         // Nematic order parameter & density-dependent ODF
-        S_out  ->row(idx_eta)  = S  .cast<number>();
+        S_out  ->row(idx_eta)  = S  .cast<std::complex<number> >();
         Psi_out->row(idx_eta)  = Psi.cast<number>();
     }
 }

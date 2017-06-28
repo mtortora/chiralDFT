@@ -21,6 +21,7 @@
 		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
 		B76070361EEF3B2600847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070351EEF3B2600847679 /* libRAPID.a */; };
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
+		B798AAC31F0211FD00BE6692 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = B798AAC21F0211FD00BE6692 /* makefile */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
 		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
 		B7FE4D621DE84C98005AD9E2 /* PatchyRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */; };
@@ -60,7 +61,6 @@
 		9C512E141C22B91B0099AE31 /* OdfOptimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OdfOptimiser.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E151C22B91B0099AE31 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		9C512E161C22B91B0099AE31 /* MCIntegrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCIntegrator.cpp; sourceTree = "<group>"; usesTabs = 0; };
-		9C8497061C22F06C000D61DC /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; usesTabs = 1; };
 		9C85585F1C4066E500FADF19 /* archer.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = archer.sh; sourceTree = "<group>"; };
 		9CADC1981CAD2C9F00CE9E6A /* conf_generator.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = conf_generator.py; sourceTree = "<group>"; usesTabs = 1; };
 		9CB457EA1C27A0F500323F66 /* SimManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SimManager.hpp; sourceTree = "<group>"; usesTabs = 0; };
@@ -86,6 +86,7 @@
 		B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BHierarchy.cpp; sourceTree = "<group>"; };
 		B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BHierarchy.hpp; sourceTree = "<group>"; };
 		B794CCF81E5F992500DEAE25 /* build_hierarchy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = build_hierarchy.py; sourceTree = "<group>"; };
+		B798AAC21F0211FD00BE6692 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		B7BB8D781EAE568B00294673 /* savitsky_golay.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = savitsky_golay.py; sourceTree = "<group>"; };
 		B7C335E21EFEA48F00016777 /* wigner.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = wigner.py; sourceTree = "<group>"; };
 		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
@@ -181,7 +182,7 @@
 		9C512DEB1C22B8090099AE31 = {
 			isa = PBXGroup;
 			children = (
-				9C8497061C22F06C000D61DC /* makefile */,
+				B798AAC21F0211FD00BE6692 /* makefile */,
 				9C512DFE1C22B91B0099AE31 /* include */,
 				9C512E111C22B91B0099AE31 /* src */,
 				B76070291EEE9C0300847679 /* lib */,
@@ -328,6 +329,7 @@
 				9C53C3161C41809D002CE4D0 /* BentCore.cpp in Sources */,
 				9CA2FA571C3F7D6E00062002 /* TwistedCuboid.cpp in Sources */,
 				9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */,
+				B798AAC31F0211FD00BE6692 /* makefile in Sources */,
 				9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */,
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,

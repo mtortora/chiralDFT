@@ -47,6 +47,8 @@
 #define IS_BIAXIAL    ((N_ALPHA > 1) || (N_PHI > 1))
 #define E_DIM         ((ODF_TYPE == ODF_FULL) ? N_ALPHA*N_THETA*N_PHI : N_L)
 
+#define SIZE_L        ((N_L+1)*(2*N_L+1) + 2*N_L * (N_L+1)*(2*N_L+1)/3)
+
 
 #define SQR(x) ((x)*(x))
 #define CUB(x) ((x)*(x)*(x))

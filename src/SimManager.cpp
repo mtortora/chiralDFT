@@ -226,12 +226,6 @@ template<typename number>
 void SimManager<number>::Gather()
 {
     // Reduced variables for MPI sum
-    ArrayX<number>  P_res_  = P_res  / mpi_size_;
-    ArrayX<number>  Mu_res_ = Mu_res / mpi_size_;
-    
-    ArrayX<number>  F_ref_  = F_ref  / mpi_size_;
-    
-    ArrayXX<number> S_res_  = S_res  / mpi_size_;
     ArrayXX<number> V_b_    = V_b    / mpi_size_;
 
     ArrayX<number>  V_r_    = V_r    / mpi_size_;
@@ -279,12 +273,6 @@ void SimManager<number>::Gather()
 
     MPI_Reduce(V_r_   .data(), V_r   .data(), V_r   .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
     MPI_Reduce(V_l_   .data(), V_l   .data(), V_l   .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
-    
-    // Thermodynamic variables
-    MPI_Reduce(P_res_ .data(), P_res .data(), P_res .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
-    MPI_Reduce(Mu_res_.data(), Mu_res.data(), Mu_res.size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
-    MPI_Reduce(F_ref_ .data(), F_ref .data(), F_ref .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
-    MPI_Reduce(S_res_ .data(), S_res .data(), S_res .size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
 
     // Equilibrium pitch from perturbation theory
     MPI_Reduce(Qp_min_.data(), Qp_min.data(), Qp_min.size(), Utils<number>().MPI_type, MPI_SUM, MPI_MASTER, MPI_COMM_WORLD);
@@ -317,11 +305,11 @@ void SimManager<number>::Save()
 {
     if ( mpi_rank_ == MPI_MASTER )
     {
-        std::ofstream file_ord(data_path_ + "/order_param.out");
         std::ofstream file_dv (data_path_ + "/delta_v.out");
         std::ofstream file_df (data_path_ + "/delta_f.out");
         std::ofstream file_per(data_path_ + "/q_pert.out");
         std::ofstream file_unx(data_path_ + "/psi.out");
+        std::ofstream file_ops(data_path_ + "/ops.out");
         std::ofstream file_k1 (data_path_ + "/k1.out");
         std::ofstream file_k2 (data_path_ + "/k2.out");
         std::ofstream file_k3 (data_path_ + "/k3.out");
@@ -349,11 +337,11 @@ void SimManager<number>::Save()
             file_mu  << eta << ' ' << Mu_res(idx_eta) << std::endl;
             file_p   << eta << ' ' << P_res (idx_eta) << std::endl;
             
-            file_ord << eta << ' ' << S_res (idx_eta, 0) << ' ' << S_res(idx_eta, 1) << ' ' << S_res(idx_eta, 2) << std::endl;
-            
             // Save ODFs
             if ( IS_BIAXIAL )
             {
+                file_ops << eta << ' ' << S_res.row(idx_eta) << std::endl;
+
                 std::ofstream file_psi(data_path_ + "/psi_" + std::to_string(eta) + ".out");
 
                 for ( uint idx_alpha = 0; idx_alpha < N_ALPHA; ++idx_alpha )
@@ -381,6 +369,8 @@ void SimManager<number>::Save()
                 
                 file_psi.close();
             }
+            
+            else file_ops << eta << ' ' << std::real(S_res(idx_eta, 22)) << std::endl;
         }
         
         if ( !IS_BIAXIAL )
@@ -470,11 +460,11 @@ void SimManager<number>::Save()
             file_min.close();
         }
         
-        file_ord.close();
         file_dv .close();
         file_df .close();
         file_per.close();
         file_unx.close();
+        file_ops.close();
         file_k1 .close();
         file_k2 .close();
         file_k3 .close();

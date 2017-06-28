@@ -18,7 +18,7 @@ public:
     void EnergyGrid(const ArrayXX<number>&, ArrayX<number>*, int, int);
     void ODFGrid(const ArrayXX<number>&,
                  ArrayX<number>*, ArrayX<number>*, ArrayX<number>*,
-                 ArrayXX<number>*, ArrayXX<number>*, int, int);
+                 ArrayXX<std::complex<number> >*, ArrayXX<number>*, int, int);
     
 private:
     ArrayX<double> Psi_iso_;
@@ -31,7 +31,7 @@ private:
     ArrayX<double> LegendreCoeffs(const ArrayX<double>&);
     ArrayX<double> SequentialOptimiser(number, const ArrayXX<number>&, int, int);
 
-    Vector3<double> OrderParams(const ArrayX<double>&, Matrix33<double>*);
+    void OrderParams(const ArrayX<double>&, Matrix33<double>*, ArrayX<std::complex<double> >*);
     Vector2<double> ODFThermo(number, const ArrayX<double>&, const ArrayXX<number>&);
 };
 

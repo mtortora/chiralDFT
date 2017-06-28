@@ -11,3 +11,9 @@ lib/rapid2/RAPID.o
 lib/rapid2/build.o
 lib/rapid2/collide.o
 lib/rapid2/overlap.o
+lib/SphericalFunctions/Combinatorics.o
+lib/SphericalFunctions/Quaternions/QuaternionUtilities.o
+lib/SphericalFunctions/Quaternions/Quaternions.o
+lib/SphericalFunctions/SWSHs.o
+lib/SphericalFunctions/WignerDMatrices.o
+lib/libSphericalFunctions.a
