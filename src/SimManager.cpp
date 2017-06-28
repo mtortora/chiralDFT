@@ -340,7 +340,7 @@ void SimManager<number>::Save()
             // Save ODFs
             if ( IS_BIAXIAL )
             {
-                file_ops << eta << ' ' << S_res.row(idx_eta) << std::endl;
+                file_ops << std::complex<number>(eta) << ' ' << S_res.row(idx_eta) << std::endl;
 
                 std::ofstream file_psi(data_path_ + "/psi_" + std::to_string(eta) + ".out");
 
