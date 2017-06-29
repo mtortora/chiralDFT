@@ -12,7 +12,7 @@ It further contains an original bounding volume hierarchy based on principal com
 
 ## Requirements
 
-* The [**Eigen**](https://eigen.tuxfamily.org) high-performance linear algebra library
+* The [**Eigen**](https://eigen.tuxfamily.org) high-performance linear algebra library (>= 3.3)
 * `gcc` >= 4.9 with an associated `mpicc` wrapper, provided by:
 * a working MPI implementation, e.g. [**OpenMPI**](https://www.open-mpi.org)
 
