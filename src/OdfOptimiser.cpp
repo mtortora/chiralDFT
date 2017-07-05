@@ -21,9 +21,9 @@
 template<template<typename number> class ParticleType, typename number>
 OdfOptimiser<ParticleType, number>::OdfOptimiser()
 {
-    Alpha_grid = ArrayX<number>::LinSpaced(N_ALPHA, 0., 2.*PI * (N_ALPHA-1.)/(number)N_ALPHA);
-    Theta_grid = ArrayX<number>::LinSpaced(N_THETA, 0., 1.*PI * (N_THETA-1.)/(number)N_THETA);
-    Phi_grid   = ArrayX<number>::LinSpaced(N_PHI,   0., 2.*PI * (N_PHI  -1.)/(number)N_PHI);
+    Alpha_grid = ArrayX<number>::LinSpaced(N_ALPHA, D_ALPHA/2., 2.*PI-D_ALPHA/2.);
+    Theta_grid = ArrayX<number>::LinSpaced(N_THETA, D_THETA/2., 1.*PI-D_THETA/2.);
+    Phi_grid   = ArrayX<number>::LinSpaced(N_PHI,   D_PHI/2.,   2.*PI-D_PHI/2.);
 
     Psi_iso_   = ArrayX<double>::Constant(N_ALPHA*N_THETA*N_PHI, 1./(8.*SQR(PI)));
 }
@@ -317,7 +317,8 @@ double OdfOptimiser<ParticleType, number>::RotationalEnt(const ArrayX<double>& P
 // ============================
 template<template<typename number> class ParticleType, typename number>
 void OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_in,
-                                                     Matrix33<double>* Frame, ArrayX<std::complex<double> >* S)
+                                                     Matrix33<double>* Frame, ArrayX<std::complex<double> >* S,
+                                                     int mpi_rank, int mpi_size)
 {
     S->setZero(SIZE_L);
     
@@ -351,7 +352,7 @@ void OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_i
                 Qu(2,2) += U(2)*U(2) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
                 
                 // Order parameters
-                uint idx(0);
+                int idx(0);
                 
                 WMat.SetRotation(phi, theta, alpha);
 
@@ -361,7 +362,12 @@ void OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_i
                     {
                         for ( int idx_m = -idx_l; idx_m < idx_l+1; ++idx_m )
                         {
-                            (*S)(idx++) += WMat(idx_l,idx_mp,idx_m) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                            if ( idx % mpi_size == mpi_rank )
+                            {
+                                (*S)(idx) += WMat(idx_l,idx_mp,idx_m) * Psi_in.at(idx_alpha,idx_theta,idx_phi) * sin(theta) * D_ALPHA*D_THETA*D_PHI;
+                            }
+                            
+                            ++idx;
                         }
                         
                     }
@@ -370,13 +376,17 @@ void OdfOptimiser<ParticleType, number>::OrderParams(const ArrayX<double>& Psi_i
         }
     }
     
+    MPI_Allreduce(MPI_IN_PLACE, S->data(), S->size(), MPI_CXX_DOUBLE_COMPLEX, MPI_SUM, MPI_COMM_WORLD);
+
     // Normalise Q tensor
     Qu = 3/2.*Qu - 1/2.*Matrix33<double>::Identity();
     
     // Q spectral analysis
     Eigen::SelfAdjointEigenSolver<Matrix33<double> > Su(Qu);
     
+    // Work out nematic frame
     *Frame = Su.eigenvectors().rowwise().reverse();
+    
     if ( Frame->determinant() < 0. ) Frame->col(0) *= -1.;
 }
 
@@ -540,7 +550,7 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
         Matrix33<double> Frame;
         ArrayX<std::complex<double> > S;
         
-        OrderParams(Psi, &Frame, &S);
+        OrderParams(Psi, &Frame, &S, mpi_rank, mpi_size);
         
         // Equilibrium pressure, chemical potential & free energy
         (*P_out) (idx_eta)     = Thermo(0);

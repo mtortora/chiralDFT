@@ -31,7 +31,7 @@ private:
     ArrayX<double> LegendreCoeffs(const ArrayX<double>&);
     ArrayX<double> SequentialOptimiser(number, const ArrayXX<number>&, int, int);
 
-    void OrderParams(const ArrayX<double>&, Matrix33<double>*, ArrayX<std::complex<double> >*);
+    void OrderParams(const ArrayX<double>&, Matrix33<double>*, ArrayX<std::complex<double> >*, int ,int);
     Vector2<double> ODFThermo(number, const ArrayX<double>&, const ArrayXX<number>&);
 };
 
