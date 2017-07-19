@@ -18,6 +18,7 @@
 		B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B714FE051E5C8809009C274C /* TwistedPentagon.cpp */; };
 		B733A8201D40C46C001575D7 /* BTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B733A81F1D40C46C001575D7 /* BTree.cpp */; };
 		B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */; };
+		B75D74B41F1F99EA0034C4FD /* FlexibleHelix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */; };
 		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
 		B76070361EEF3B2600847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070351EEF3B2600847679 /* libRAPID.a */; };
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
@@ -79,6 +80,9 @@
 		B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlexibleHelix.cpp; sourceTree = "<group>"; };
+		B75D74B51F1F99F80034C4FD /* FlexibleHelix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FlexibleHelix.hpp; sourceTree = "<group>"; };
+		B75D74B61F1FA7B30034C4FD /* xyz_converter.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = xyz_converter.py; sourceTree = "<group>"; };
 		B760702A1EEE9C8900847679 /* EigenDensePlugin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EigenDensePlugin.hpp; path = lib/EigenDensePlugin.hpp; sourceTree = "<group>"; };
 		B76070331EEE9E7300847679 /* libmpi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpi.dylib; path = ../../../../../../../usr/local/lib/libmpi.dylib; sourceTree = "<group>"; };
 		B76070351EEF3B2600847679 /* libRAPID.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libRAPID.a; path = lib/libRAPID.a; sourceTree = "<group>"; };
@@ -137,6 +141,7 @@
 			children = (
 				9C0D08561C3AA0B00020EBAB /* BentCore.cpp */,
 				9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */,
+				B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */,
 				9C0D08571C3AA0B00020EBAB /* Helix.cpp */,
 				B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */,
 				B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */,
@@ -151,6 +156,7 @@
 			children = (
 				9C0D085D1C3AA0BE0020EBAB /* BentCore.hpp */,
 				9CC252C61C7DD0B6000A2685 /* DNADuplex.hpp */,
+				B75D74B51F1F99F80034C4FD /* FlexibleHelix.hpp */,
 				9C0D085E1C3AA0BE0020EBAB /* Helix.hpp */,
 				B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */,
 				B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */,
@@ -179,6 +185,7 @@
 				9C19E7F91CA1B8300006F51A /* post_process.py */,
 				9C19E7FA1CA1B8300006F51A /* pre_process.py */,
 				B7BB8D781EAE568B00294673 /* savitsky_golay.py */,
+				B75D74B61F1FA7B30034C4FD /* xyz_converter.py */,
 			);
 			path = processing;
 			sourceTree = "<group>";
@@ -335,6 +342,7 @@
 				9CA2FA571C3F7D6E00062002 /* TwistedCuboid.cpp in Sources */,
 				9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */,
 				9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */,
+				B75D74B41F1F99EA0034C4FD /* FlexibleHelix.cpp in Sources */,
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,
 				B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */,

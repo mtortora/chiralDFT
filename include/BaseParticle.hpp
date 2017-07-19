@@ -54,8 +54,8 @@ public:
     Matrix33<number> Orientation;
     
     // Bounding hull and hierarchy
-    BTree<number>*     Hull;
-    BHierarchy<number> BVH;
+    BTree     <number>* Hull;
+    BHierarchy<number>  BVH;
     
     // Axis setters - U, V, W are the respective long, medium, short axes
     inline void SetU(number theta_, number phi_)
@@ -87,7 +87,7 @@ public:
         
         SetU(theta, phi);
 		
-        // Assume the long particle axis of all base configurations is initially borne by ez
+        // Assume the long particle axis of all base configurations is initially borne by z
         Hull->Axis = U;
     }
     

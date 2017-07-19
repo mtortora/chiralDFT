@@ -118,6 +118,32 @@ number InteractionFactory<DNADuplex<number>, number>::MayerInteraction(const Vec
 
 
 /* ************************* */
+/* FlexibleHelix */
+/* ************************* */
+
+// ============================
+/* Mayer interaction function */
+// ============================
+template<typename number>
+number InteractionFactory<FlexibleHelix<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                           FlexibleHelix<number>* Particle1, FlexibleHelix<number>* Particle2)
+{
+    number energy(0.);
+    number mayer_interaction(0.);
+    
+    // In this case, energy counts the number of overlapping beads
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    
+    if ( energy > 0. ) mayer_interaction = 1.;
+    
+    return mayer_interaction;
+}
+
+
+// ============================
+
+
+/* ************************* */
 /* Helix */
 /* ************************* */
 

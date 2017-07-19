@@ -50,7 +50,7 @@ On most recent **Intel**® processors (Core™ i5 and later generations), settin
 
 ## Compile options
 
-Some very limited options to be set in the `include/globals.hpp` file:
+Some very limited options to be set in the `include/params.hpp` file:
 
 * set the `MESOGEN` symbol to whichever particle geometry you fancy (I might write a very short intro on how to modify each particle’s characteristics if anyone is interested for some reason)
 * set the `FULL_RUN` switch to either 0 for a preliminary perturbative run or 1 for a full sweep of the chiral free energy landscape. Bear in mind that the full run is VERY expensive (especially for the `DNADuplex` particle type), so don’t try it on your home computer.

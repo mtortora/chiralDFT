@@ -95,8 +95,8 @@ DNADuplex<number>::DNADuplex()
 template<typename number>
 void DNADuplex<number>::Build(int mpi_rank)
 {
-    uint      N_CONF;
-    uint      N_NUCL;
+    uint N_CONF;
+    uint N_NUCL;
     
     ArrayX<uint>     Sizes;
     Matrix3X<number> Backbones;

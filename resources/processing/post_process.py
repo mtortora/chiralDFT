@@ -24,7 +24,7 @@ n_steps_max   = 1000
 
 tol_odf       = 1e-6
 
-path_data     = sys.argv[1].rstrip("/")
+path_data     = os.path.dirname(os.path.realpath(sys.argv[1]))
 path_params   = sys.argv[2]
 
 eta_min       = float(sys.argv[3])
@@ -45,8 +45,8 @@ if os.path.isfile(path_params):
 				param = line_data[1]
 				if param in parameters: param_dict[param] = line_data[2]
 
-	for param in parameters[:2]: param_dict[param] = float(param_dict[param])
-	for param in parameters[2:]: param_dict[param] = int  (param_dict[param])
+	for param in parameters[:2]:   param_dict[param] = float(param_dict[param])
+	for param in parameters[2:-2]: param_dict[param] = int  (param_dict[param])
 
 else:
 	print("\033[1;31mCouldn't read file %s - aborting\033[0m" % path_params)
@@ -173,10 +173,10 @@ def LoadBinary(Q_MIN, Q_MAX, N_STEPS_Q, N_L, **kwargs):
 # ODF optimiser from angle-dependant excluded volume
 def ODFOnsagerOptimiser(E):
 	converged  = False
-	d_theta    = np.pi / (param_dict["N_THETA"]-1.)
+	d_theta    = np.pi / param_dict["N_THETA"]
 	
 	eta_grid   = np.linspace(eta_min, eta_max, n_steps_eta)
-	theta_grid = np.linspace(0., np.pi, param_dict["N_THETA"])
+	theta_grid = np.linspace(d_theta/2., np.pi-d_theta/2., param_dict["N_THETA"])
 	
 	S_res      = np.zeros(n_steps_eta)
 	P_res      = np.zeros(n_steps_eta)
@@ -198,7 +198,7 @@ def ODFOnsagerOptimiser(E):
 			for idx_iter in range(n_steps_max):
 				psi_dummy = psi.copy()
 				
-				psi       = np.exp(-g_pl * n_dens/(2*np.pi)**2 * ((E + E.T)/2. * np.sin(theta_grid) * psi_dummy).sum(axis=1) * d_theta)
+				psi       = np.exp(-g_pl * n_dens * ((E + E.T)/2. * np.sin(theta_grid) * psi_dummy).sum(axis=1) * (2*np.pi)**2 * d_theta)
 				psi      /= (2*np.pi)**2 * d_theta * (psi * np.sin(theta_grid)).sum()
 				
 				if np.max(np.abs(psi - psi_dummy)) < tol_odf:
@@ -211,7 +211,7 @@ def ODFOnsagerOptimiser(E):
 	
 			# Free energy
 			psi_p = psi*np.sin(theta_grid)
-			b2    = (np.outer(psi_p, psi_p) * E).sum() * d_theta**2/2.
+			b2    = (np.outer(psi_p, psi_p) * E).sum() * (2*np.pi)**4 * d_theta**2/2.
 					
 			f_id  = n_dens * (2*np.pi)**2 * d_theta * (np.sin(theta_grid) * psi * np.log(psi)).sum()
 			f_exc = b2/V0 * n_dens * eta*g_pl
@@ -339,14 +339,14 @@ def ODFLegendreOptimiser(data_q, reference_run):
 # Preliminary run
 print("\033[1;34mAggregated reference run\033[0m")
 
-if param_dict["ODF_TYPE"] == 1:
+if param_dict["ODF_TYPE"] == "ODF_LEGENDRE":
 	data_ref = excluded_ref[np.newaxis,...]
 	F_ref    = ODFLegendreOptimiser(data_ref, True)
 
-if param_dict["ODF_TYPE"] == 0: F_ref = np.asarray(ODFOnsagerOptimiser(excluded_ref))
+if param_dict["ODF_TYPE"] == "ODF_FULL": F_ref = np.asarray(ODFOnsagerOptimiser(excluded_ref))
 
 # Chiral landscape sweeping run
-if param_dict["MODE_SIM"] == 1:
+if param_dict["MODE_SIM"] == "MODE_FULL":
 	data      = LoadBinary(**param_dict)
 
 	q_min     = param_dict["Q_MIN"]

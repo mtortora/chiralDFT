@@ -40,9 +40,9 @@ thetas     = data[:,1]
 phis       = data[:,2]
 psi        = data[:,3]
 
-n_a0       = len(alphas[alphas==0.])
-n_t0       = len(thetas[thetas==0.])
-n_p0       = len(phis  [phis==0.])
+n_a0       = len(alphas[alphas==alphas[0]])
+n_t0       = len(thetas[thetas==thetas[0]])
+n_p0       = len(phis  [phis==phis[0]])
 
 n_alpha    = int(np.sqrt(n_p0*n_t0/n_a0))
 n_theta    = int(np.sqrt(n_p0*n_a0/n_t0))

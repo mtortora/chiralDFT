@@ -4,6 +4,7 @@
 #include "BaseInteraction.hpp"
 #include "Particles/BentCore.hpp"
 #include "Particles/DNADuplex.hpp"
+#include "Particles/FlexibleHelix.hpp"
 #include "Particles/Helix.hpp"
 #include "Particles/PatchyRod.hpp"
 #include "Particles/ThreadedRod.hpp"
@@ -45,6 +46,16 @@ struct InteractionFactory<DNADuplex<number>, number>: public BaseInteraction<Int
 private:
     number RepulsiveLJ_(number, number , number, number, number);
     number DebyeHuckel_(number);
+};
+
+
+// FlexibleHelix
+template<typename number>
+struct InteractionFactory<FlexibleHelix<number>, number>: public BaseInteraction<InteractionFactory<FlexibleHelix<number>, number>, number>, FlexibleHelix<number>
+{
+    number MayerInteraction(const Vector3<number>&, FlexibleHelix<number>*, FlexibleHelix<number>*);
+    
+    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
 };
 
 
