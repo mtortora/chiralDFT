@@ -2,7 +2,7 @@
 
 This package contains a massively-parallel hybrid Density Functional Theory/Monte-Carlo (DFT/MC) simulation code, designed to infer the chiral nematic behaviour of lyotropic liquid crystals from their microscopic mesogen properties.
 
-It includes a high-performance and versatile implementation of the algorithm introduced by [Dussi et al.](http://dx.doi.org/10.1103/PhysRevE.90.020503), with additional support for [Straley’s perturbative approach](http://dx.doi.org/10.1103/PhysRevA.14.1835).
+It includes a high-performance and versatile implementation of the algorithm introduced by [Belli *et al.*](http://dx.doi.org/10.1103/PhysRevE.90.020503), with additional support for [Straley’s perturbative approach](http://dx.doi.org/10.1103/PhysRevA.14.1835).
 
 An implementation of the [RAPID](http://dx.doi.org/10.1145/237170.237244) collision detection library, developed by Manocha et al., is also provided for efficient overlap queries between sets of complex triangle meshes in hard-body simulations.
 
