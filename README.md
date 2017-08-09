@@ -24,8 +24,8 @@ Checkout the source code from the repository through either `svn` or direct down
 
 ~~~shell
 cd distruc-chiraldft-code	# enter the project folder
-make libs					# build RAPID mesh collision and SphericalFunctions libraries
-make -j4					# compile chiralDFT in parallel using 4 threads
+make libs			# build RAPID mesh collision and SphericalFunctions libraries
+make -j4			# compile chiralDFT in parallel using 4 threads
 ~~~
 
 This will build the `chiraldft` executable into the newly created `bin` folder.
