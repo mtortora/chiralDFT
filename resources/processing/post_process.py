@@ -24,7 +24,7 @@ n_steps_max   = 1000
 
 tol_odf       = 1e-6
 
-path_data     = os.path.dirname(os.path.realpath(sys.argv[1]))
+path_data     = os.path.realpath(sys.argv[1])
 path_params   = sys.argv[2]
 
 eta_min       = float(sys.argv[3])

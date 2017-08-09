@@ -87,7 +87,7 @@ public:
         
         SetU(theta, phi);
 		
-        // Assume the long particle axis of all base configurations is initially borne by z
+        // Assume the long particle axis of all base configurations is initially borne by e_z
         Hull->Axis = U;
     }
     

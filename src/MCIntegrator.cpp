@@ -399,8 +399,8 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
     
     *V_b   *= IManager.V_INTEG/N_PER_PROC_ / SQR(D_THETA);
     
-    *V_r   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
-    *V_l   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / (4.*CUB(PI));
+    *V_r   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / 2.;
+    *V_l   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / 2.;
 
     *E_out *= IManager.V_INTEG/N_PER_PROC_ * prefactor;
 }

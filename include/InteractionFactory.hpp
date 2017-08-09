@@ -8,6 +8,7 @@
 #include "Particles/Helix.hpp"
 #include "Particles/PatchyRod.hpp"
 #include "Particles/ThreadedRod.hpp"
+#include "Particles/TriangularPrism.hpp"
 #include "Particles/TwistedCuboid.hpp"
 #include "Particles/TwistedPentagon.hpp"
 
@@ -93,6 +94,11 @@ struct InteractionFactory<ThreadedRod<number>, number>: public BaseInteraction<I
         return (( r < this->R_CUT_ ) ? exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r) : 0.);
     }
 };
+
+
+// TriangularPrism
+template<typename number>
+struct InteractionFactory<TriangularPrism<number>, number>: public TriangularPrism<number> {};
 
 
 // TwistedCuboid

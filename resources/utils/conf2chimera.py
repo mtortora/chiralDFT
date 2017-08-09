@@ -10,7 +10,7 @@ import sys
 if len(sys.argv) in [2,3,4]:
 	display_boxes = False
 	
-	path_ref      = sys.argv[1]
+	path_ref      = os.path.realpath(sys.argv[1])
 	wire_ref      = np.genfromtxt(path_ref)
 	
 	path_com      = os.path.dirname(path_ref) + '/chimera.com'
@@ -50,8 +50,8 @@ base_atom   = "H"
 atom_color  = "0.2734,0.5078,0.7031"
 atom_alpha  = 0.2
 
-vdw_radius  = 0.15
-ball_scale  = 0.5
+vdw_radius  = 0.5
+ball_scale  = 1
 atom_radius = vdw_radius*ball_scale
 
 n_atoms     = len(wire_ref)

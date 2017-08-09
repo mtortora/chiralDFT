@@ -57,7 +57,7 @@ TwistedCuboid<number>::TwistedCuboid()
     this->V_INTEG   = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
     
     // Allocate RAPID mesh
-    Mesh         = new RAPID_model;
+    Mesh            = new RAPID_model;
 }
 
 // ============================

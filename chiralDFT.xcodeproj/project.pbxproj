@@ -22,6 +22,7 @@
 		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
 		B76070361EEF3B2600847679 /* libRAPID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070351EEF3B2600847679 /* libRAPID.a */; };
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
+		B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */; };
 		B789E81E1F05440000A9AF83 /* libSphericalFunctions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B789E81D1F05440000A9AF83 /* libSphericalFunctions.a */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
 		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
@@ -89,6 +90,8 @@
 		B76EEC141E9D24A90044E99B /* thomas.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = thomas.sh; sourceTree = "<group>"; };
 		B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BHierarchy.cpp; sourceTree = "<group>"; };
 		B7769EC21EDF2F1600ACB534 /* BHierarchy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BHierarchy.hpp; sourceTree = "<group>"; };
+		B779B10E1F2F3A5F0052CA8E /* TriangularPrism.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TriangularPrism.hpp; sourceTree = "<group>"; };
+		B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TriangularPrism.cpp; sourceTree = "<group>"; };
 		B789E81C1F04F15C00A9AF83 /* order_param.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = order_param.py; sourceTree = "<group>"; };
 		B789E81D1F05440000A9AF83 /* libSphericalFunctions.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSphericalFunctions.a; path = lib/libSphericalFunctions.a; sourceTree = "<group>"; };
 		B794CCF81E5F992500DEAE25 /* build_hierarchy.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = build_hierarchy.py; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 				9C0D08571C3AA0B00020EBAB /* Helix.cpp */,
 				B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */,
 				B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */,
+				B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */,
 				9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */,
 				B714FE051E5C8809009C274C /* TwistedPentagon.cpp */,
 			);
@@ -160,6 +164,7 @@
 				9C0D085E1C3AA0BE0020EBAB /* Helix.hpp */,
 				B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */,
 				B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */,
+				B779B10E1F2F3A5F0052CA8E /* TriangularPrism.hpp */,
 				9C0D085F1C3AA0BE0020EBAB /* TwistedCuboid.hpp */,
 				B714FE071E5C8814009C274C /* TwistedPentagon.hpp */,
 			);
@@ -343,6 +348,7 @@
 				9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */,
 				9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */,
 				B75D74B41F1F99EA0034C4FD /* FlexibleHelix.cpp in Sources */,
+				B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */,
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,
 				B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */,

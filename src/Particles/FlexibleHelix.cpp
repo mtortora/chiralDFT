@@ -24,11 +24,11 @@ FlexibleHelix<number>::FlexibleHelix()
 	// Helix parameters
 	N_S_            = 15;
 	
-	D_HARD_         = 1.   * this->SIGMA_R;
-	L_CTR_          = 10.  * this->SIGMA_R;
+	D_HARD_         = 1.  * this->SIGMA_R;
+	L_CTR_          = 10. * this->SIGMA_R;
 	
-	R_HLX_          = 0.4  * this->SIGMA_R;
-	P_HLX_          = 8. * this->SIGMA_R;
+	R_HLX_          = 0.4 * this->SIGMA_R;
+	P_HLX_          = 8.  * this->SIGMA_R;
 	
 	L_Z_            = L_CTR_ / sqrt(1. + SQR(2.*PI * R_HLX_/P_HLX_));
 	

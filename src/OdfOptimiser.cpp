@@ -553,13 +553,13 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
         OrderParams(Psi, &Frame, &S, mpi_rank, mpi_size);
         
         // Equilibrium pressure, chemical potential & free energy
-        (*P_out) (idx_eta)     = Thermo(0);
-        (*Mu_out)(idx_eta)     = Thermo(1);
-        (*F_out) (idx_eta)     = FreeEnergy(eta, Psi, E_in);
+        (*P_out) (idx_eta)    = Thermo(0);
+        (*Mu_out)(idx_eta)    = Thermo(1);
+        (*F_out) (idx_eta)    = FreeEnergy(eta, Psi, E_in);
         
         // Nematic order parameter & density-dependent ODF
-        S_out  ->row(idx_eta)  = S  .cast<std::complex<number> >();
-        Psi_out->row(idx_eta)  = Psi.cast<number>();
+        S_out  ->row(idx_eta) = S  .cast<std::complex<number> >();
+        Psi_out->row(idx_eta) = Psi.cast<number>();
     }
 }
 

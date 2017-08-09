@@ -6,7 +6,7 @@ import os.path
 
 # Input/output
 if len(sys.argv) in [2,3]:
-	path_in  = os.path.realpath(sys.argv[1])
+	path_in = os.path.realpath(sys.argv[1])
 
 	if len(sys.argv) == 3: path_out = sys.argv[2]
 	else: path_out = os.path.dirname(path_in) + "/trajectory.in"

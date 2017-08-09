@@ -11,7 +11,7 @@ if len(sys.argv) != 3:
 	print("\033[1;31mUsage is %s data_folder n_reduce\033[0m" % sys.argv[0])
 	sys.exit()
 
-path_data = sys.argv[1].rstrip("/")
+path_data = os.path.dirname(os.path.realpath(sys.argv[1]))
 n_reduce  = int(sys.argv[2])
 
 if os.path.isdir(path_data):
