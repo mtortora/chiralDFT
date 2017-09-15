@@ -58,8 +58,6 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
     {
         try
         {
-            ctr_nr++;
-
             double eta_iso1 = Binodals(0);
             double eta_nem1 = Binodals(1);
             
@@ -77,6 +75,8 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
             ArrayX<double> Psi_nem1 = SequentialOptimiser(eta_nem1, E_in, mpi_rank, mpi_size);
             ArrayX<double> Psi_nem2 = SequentialOptimiser(eta_nem2, E_in, mpi_rank, mpi_size);
             
+            ctr_nr++;
+
             // Revert to higher density if upper binodal is not in the nematic range
             if ( (Psi_nem1 - Psi_iso_).abs().maxCoeff() < TOL_NEM )
             {
@@ -235,7 +235,9 @@ ArrayX<double> OdfOptimiser<ParticleType, number>::SequentialOptimiser(number et
             }
         }
         
-        // Renormalisation & convergence check
+        // Renormalisation & convergence check, enforcing head-tail symmetry if relevant
+        if ( !IS_BIAXIAL ) Psi = (Psi + Psi.reverse()) / 2.;
+        
         double norm = (Psi * SinT).sum() * D_ALPHA*D_THETA*D_PHI;
         
         Psi        /= norm;
@@ -544,6 +546,7 @@ void OdfOptimiser<ParticleType, number>::ODFGrid(const ArrayXX<number>& E_in,
     {
         number eta             = this->Eta_grid(idx_eta);
         
+        // Equilibrium ODF
         ArrayX <double> Psi    = SequentialOptimiser(eta, E_in, mpi_rank, mpi_size);
         Vector2<double> Thermo = ODFThermo(eta, Psi, E_in);
         

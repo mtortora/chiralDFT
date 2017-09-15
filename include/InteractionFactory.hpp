@@ -4,6 +4,7 @@
 #include "BaseInteraction.hpp"
 #include "Particles/BentCore.hpp"
 #include "Particles/DNADuplex.hpp"
+#include "Particles/FlexibleChain.hpp"
 #include "Particles/FlexibleHelix.hpp"
 #include "Particles/Helix.hpp"
 #include "Particles/PatchyRod.hpp"
@@ -50,6 +51,28 @@ private:
 };
 
 
+// FlexibleChain
+template<typename number>
+struct InteractionFactory<FlexibleChain<number>, number>: public BaseInteraction<InteractionFactory<FlexibleChain<number>, number>, number>, FlexibleChain<number>
+{
+    number MayerInteraction(const Vector3<number>&, FlexibleChain<number>*, FlexibleChain<number>*);
+    
+    // WCA with abrupt cutoff at r = R_CUT_
+    inline number PairInteraction(number r)
+    {
+        number energy(0.);
+        
+        if ( r < this->R_CUT_ )
+        {
+            number lj_part = pow(this->SIGMA_R/r, 6);
+            energy         = 4. * this->EPSILON_ * (SQR(lj_part) - lj_part) + this->EPSILON_;
+        }
+        
+        return energy;
+    }
+};
+
+
 // FlexibleHelix
 template<typename number>
 struct InteractionFactory<FlexibleHelix<number>, number>: public BaseInteraction<InteractionFactory<FlexibleHelix<number>, number>, number>, FlexibleHelix<number>
@@ -84,15 +107,12 @@ private:
 
 // ThreadedRod
 template<typename number>
-struct InteractionFactory<ThreadedRod<number>, number>: public BaseInteraction<InteractionFactory<ThreadedRod<number>, number>, number>, ThreadedRod<number>
+struct InteractionFactory<ThreadedRod<number>, number>: public ThreadedRod<number>
 {
     number MayerInteraction(const Vector3<number>&, ThreadedRod<number>*, ThreadedRod<number>*);
     
-    inline number PairInteraction(number r)
-    {
-        // Debye-Huckel with abrupt cutoff at r = R_CUT_
-        return (( r < this->R_CUT_ ) ? exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r) : 0.);
-    }
+private:
+    number DebyeHuckel_(number);
 };
 
 

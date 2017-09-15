@@ -24,6 +24,7 @@
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
 		B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */; };
 		B789E81E1F05440000A9AF83 /* libSphericalFunctions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B789E81D1F05440000A9AF83 /* libSphericalFunctions.a */; };
+		B7F0D4691F5F370E00EF9CEB /* FlexibleChain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F0D4681F5F370E00EF9CEB /* FlexibleChain.cpp */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
 		B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693E41D47AD1E007E6CBD /* InteractionFactory.cpp */; };
 		B7FE4D621DE84C98005AD9E2 /* PatchyRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */; };
@@ -102,6 +103,8 @@
 		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7E1FD561EEDBDE200590CC1 /* plot_landscape4d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape4d; sourceTree = "<group>"; };
 		B7E1FD571EEDC86600590CC1 /* plot_landscape3d */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = plot_landscape3d; sourceTree = "<group>"; };
+		B7F0D4671F5F36FD00EF9CEB /* FlexibleChain.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FlexibleChain.hpp; sourceTree = "<group>"; };
+		B7F0D4681F5F370E00EF9CEB /* FlexibleChain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlexibleChain.cpp; sourceTree = "<group>"; };
 		B7F693DE1D4715E7007E6CBD /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E01D4715F3007E6CBD /* Utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Utils.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7F693E11D47315F007E6CBD /* InteractionFactory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = InteractionFactory.hpp; sourceTree = "<group>"; usesTabs = 0; };
@@ -144,6 +147,7 @@
 			children = (
 				9C0D08561C3AA0B00020EBAB /* BentCore.cpp */,
 				9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */,
+				B7F0D4681F5F370E00EF9CEB /* FlexibleChain.cpp */,
 				B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */,
 				9C0D08571C3AA0B00020EBAB /* Helix.cpp */,
 				B7FE4D611DE84C98005AD9E2 /* PatchyRod.cpp */,
@@ -160,6 +164,7 @@
 			children = (
 				9C0D085D1C3AA0BE0020EBAB /* BentCore.hpp */,
 				9CC252C61C7DD0B6000A2685 /* DNADuplex.hpp */,
+				B7F0D4671F5F36FD00EF9CEB /* FlexibleChain.hpp */,
 				B75D74B51F1F99F80034C4FD /* FlexibleHelix.hpp */,
 				9C0D085E1C3AA0BE0020EBAB /* Helix.hpp */,
 				B7FE4D631DE84CA1005AD9E2 /* PatchyRod.hpp */,
@@ -348,6 +353,7 @@
 				9C512E201C22B91B0099AE31 /* MCIntegrator.cpp in Sources */,
 				9C53C3171C41809F002CE4D0 /* Helix.cpp in Sources */,
 				B75D74B41F1F99EA0034C4FD /* FlexibleHelix.cpp in Sources */,
+				B7F0D4691F5F370E00EF9CEB /* FlexibleChain.cpp in Sources */,
 				B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */,
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,

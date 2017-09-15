@@ -10,11 +10,10 @@ class ThreadedRod: public BaseParticle<number>
 public:
     ThreadedRod();
     
-    void Build(int) override;
-    
-#if (!USE_DH)
+    Matrix3X<number> Patches;
+
+    void Build(int) override;    
     void Parse(std::mt19937_64&) override {}
-#endif
     
 protected:
     number E_CUT_;

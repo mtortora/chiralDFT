@@ -56,7 +56,7 @@ number InteractionFactory<DNADuplex<number>, number>::RepulsiveLJ_(number r, num
     {
         if( r < r_star )
         {
-            number lj_part = SQR(CUB(sigma/r));
+            number lj_part = pow(sigma/r, 6);
             energy         = 4. * this->EXCL_EPS_ * (SQR(lj_part) - lj_part);
         }
         
@@ -111,6 +111,29 @@ number InteractionFactory<DNADuplex<number>, number>::MayerInteraction(const Vec
     this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
     
     return 1. - exp(-this->BETA_R_*energy);
+}
+
+
+// ============================
+
+
+/* ************************* */
+/* FlexibleChain */
+/* ************************* */
+
+// ============================
+/* Mayer interaction function */
+// ============================
+template<typename number>
+number InteractionFactory<FlexibleChain<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                           FlexibleChain<number>* Particle1, FlexibleChain<number>* Particle2)
+{
+    number energy(0.);
+    
+    // Work out pairwise interaction energies recursively
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
+    
+    return 1. - exp(-energy);
 }
 
 
@@ -183,7 +206,7 @@ number InteractionFactory<PatchyRod<number>, number>::RepulsiveWCA_(number r)
     
     if ( r < this->R_WCA_ )
     {
-        number lj_part = SQR(CUB(this->SIGMA_R/r));
+        number lj_part = pow(this->SIGMA_R/r, 6);
         energy         = 4. * this->EPSILON_WCA_ * (SQR(lj_part) - lj_part) + this->EPSILON_WCA_;
     }
     
@@ -196,11 +219,7 @@ number InteractionFactory<PatchyRod<number>, number>::RepulsiveWCA_(number r)
 template<typename number>
 number InteractionFactory<PatchyRod<number>, number>::DebyeHuckel_(number r)
 {
-    number energy(0.);
-    
-    if ( r < this->R_CUT_ ) energy = exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r);
-    
-    return energy;
+    return (( r < this->R_CUT_ ) ? exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r) : 0.);
 }
 
 // ============================
@@ -275,29 +294,41 @@ number InteractionFactory<PatchyRod<number>, number>::MayerInteraction(const Vec
 /* ************************* */
 
 // ============================
+/* Debye-Huckel interaction potential */
+// ============================
+template<typename number>
+number InteractionFactory<ThreadedRod<number>, number>::DebyeHuckel_(number r)
+{
+    return (( r < this->R_CUT_ ) ? exp(r * this->MINUS_KAPPA_) * (this->DH_PREFACTOR_ / r) : 0.);
+}
+
+// ============================
 /* Mayer interaction function */
 // ============================
 template<typename number>
 number InteractionFactory<ThreadedRod<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
                                                                          ThreadedRod<number>* Particle1, ThreadedRod<number>* Particle2)
 {
+    // Hard backbone checks are handled in MCIntegrator.cpp in the absence of DH interactions
     if ( !USE_DH ) return 1.;
     else
     {
-        BNode<number> Node1 = *Particle1->Hull;
-        BNode<number> Node2 = *Particle2->Hull;
-
-        Node1.l_ch = this->L_Z_    / 2.;
-        Node1.l_cr = this->D_HARD_ / 2.;
-        
-        Node2.l_ch = this->L_Z_    / 2.;
-        Node2.l_cr = this->D_HARD_ / 2.;
-        
-        // Hard SC backbone
-        if ( Utils<number>::OverlapBoundSC(R_cm, &Node1, &Node2) ) return 1.;
-        
         number energy(0.);
-        this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
+
+        Matrix3X<number> Patches1 = Particle1->Orientation * Particle1->Patches;
+        Matrix3X<number> Patches2 = Particle2->Orientation * Particle2->Patches;
+        
+        // Assume pairwise-additivity for site-site electrostatic interactions
+        for ( uint idx_vtx1 = 0; idx_vtx1 < Patches1.cols() && energy < this->E_CUT_; ++idx_vtx1 )
+        {
+            for ( uint idx_vtx2 = 0; idx_vtx2 < Patches2.cols() && energy < this->E_CUT_; ++idx_vtx2 )
+            {
+                Vector3<number> R_sep = R_cm + Patches2.col(idx_vtx2) - Patches1.col(idx_vtx1);
+                number          norm  = R_sep.norm();
+                
+                energy               += DebyeHuckel_(norm);
+            }
+        }
         
         return 1. - exp(-energy);
     }
@@ -354,7 +385,6 @@ number InteractionFactory<TwistedPentagon<number>, number>::MayerInteraction(con
     
     return mayer_interaction;
 }
-
 
 template struct InteractionFactory<MESOGEN<float>, float>;
 template struct InteractionFactory<MESOGEN<double>, double>;

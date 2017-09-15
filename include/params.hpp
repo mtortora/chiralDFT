@@ -6,7 +6,7 @@
 /* Simulation options */
 // ============================
 
-// Particle type to be used - implemented: BentCore, DNADuplex, FlexibleHelix, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedPentagon
+// Particle type to be used - implemented: BentCore, DNADuplex, FlexibleChain, FlexibleHelix, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedPentagon
 #define MESOGEN     DNADuplex
 
 // Full run switch - MODE_PERT for perturbative run, MODE_FULL for full run or MODE_EXC for excluded volume (BentCore, Helix)

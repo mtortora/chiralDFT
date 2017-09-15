@@ -18,19 +18,17 @@
 template<typename number>
 ThreadedRod<number>::ThreadedRod()
 {
-    // Bounding leaf parameter
-    this->BVH.SetLeafParameter(3);
-
     this->N_DELTA_L = 2;
+    this->Hull      = &this->BVH;
 
     // Rod parameters - if the Lagerwall Debye-Huckel potential is used, model lengths are reported in nanometers
-    N_PATCH_        = 17;
+    N_PATCH_        = 21;
     N_RES_          = 15;
     
     D_HARD_         = 1. * this->SIGMA_R;
 
-    L_Z_            = 12. * D_HARD_;
-    P_PATCH_        = 10. * D_HARD_;
+    L_Z_            = 25. * D_HARD_;
+    P_PATCH_        = 15. * D_HARD_;
     R_PATCH_        = 0.5 * D_HARD_;
     
     this->V0        = PI/4. * SQR(D_HARD_) * L_Z_ + PI/6. * CUB(D_HARD_);
@@ -49,21 +47,18 @@ ThreadedRod<number>::ThreadedRod()
         
         else if ( MODE_DH == DH_LAGERWALL )
         {
-            number z_s    = 15. * (number)N_PATCH_;
-            number eta_c  = 0.19;
-            number l_bjer = 0.07 * D_HARD_;
+            number z_s    = 430.;
+            number l_bjer = 0.05 * D_HARD_;
             
-            number rho_c  = eta_c / this->V0;
             number c_dens = z_s / (number)N_PATCH_;
             
             DH_PREFACTOR_ = l_bjer * SQR(c_dens);
-            MINUS_KAPPA_  = -sqrt(4*PI * l_bjer * (z_s*rho_c + 2*C_SALT));
+            MINUS_KAPPA_  = -1.32;
         }
         
         else throw std::runtime_error("Unsupported electrostatics model for threaded rods");
         
-        // Needs to fully include electrostatics + hard cylindrical backbone
-        R_CUT_ = fmax(5. / -MINUS_KAPPA_, D_HARD_+2.*R_PATCH_);
+        R_CUT_ = 5. / -MINUS_KAPPA_;
         E_CUT_ = 20.;
     }
     
@@ -79,10 +74,10 @@ ThreadedRod<number>::ThreadedRod()
 template<typename number>
 void ThreadedRod<number>::Build(int mpi_rank)
 {
-    Matrix3X<number> Patches  (3, N_PATCH_);
+    Matrix3X<number> Patches_ (3, N_PATCH_);
     Matrix3X<number> Wireframe(3, SQR(N_RES_));
     
-    ArrayX<number> Z_grid     = ArrayX<number>::LinSpaced(N_PATCH_, 0., L_Z_);
+    ArrayX<number> Z_grid     = ArrayX<number>::LinSpaced(N_PATCH_, -L_Z_/2., L_Z_/2.);
     ArrayX<number> Phi_grid   = ArrayX<number>::LinSpaced(N_RES_, 0., 2.*PI);
     ArrayX<number> Theta_grid = ArrayX<number>::LinSpaced(N_RES_, 0., PI);
 
@@ -93,18 +88,16 @@ void ThreadedRod<number>::Build(int mpi_rank)
     
     std::ofstream file_wireframe(DATA_PATH + "/wireframe.out");
     
-    Patches.row(0) = R_PATCH_ * cos(2.*PI/P_PATCH_ * Z_grid);
-    Patches.row(1) = R_PATCH_ * sin(2.*PI/P_PATCH_ * Z_grid);
-    Patches.row(2) = Z_grid;
+    Patches_.row(0) = R_PATCH_ * cos(2.*PI/P_PATCH_ * Z_grid);
+    Patches_.row(1) = R_PATCH_ * sin(2.*PI/P_PATCH_ * Z_grid);
+    Patches_.row(2) = Z_grid;
     
     Vector3<number> Center;
-    Vector3<number> Center_of_mass = Patches.rowwise().mean();
-    
+
     // Draw spherical beads in lieu of interaction patches
     for ( uint idx_center = 0; idx_center < N_PATCH_; ++idx_center )
     {
-        Patches.col(idx_center) -= Center_of_mass;
-        Center                   = Patches.col(idx_center);
+        Center = Patches_.col(idx_center);
         
         for ( uint idx_theta = 0; idx_theta < N_RES_; ++idx_theta )
         {
@@ -189,16 +182,18 @@ void ThreadedRod<number>::Build(int mpi_rank)
     
     if ( USE_DH )
     {
-        // Build bounding volume hierarchy
-        this->BVH.Build(Patches, R_CUT_);
+        this->Hull->l_xh = R_PATCH_ + R_CUT_/2.;
+        this->Hull->l_yh = R_PATCH_ + R_CUT_/2.;
+        this->Hull->l_zh = (L_Z_ + R_CUT_)/2.;
         
-        if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
+        this->Hull->l_ch = L_Z_/2.;
+        this->Hull->l_cr = R_PATCH_ + R_CUT_/2.;
+        
+        Patches = Patches_;
     }
     
     else
     {
-        this->Hull       = &this->BVH;
-        
         this->Hull->l_xh =  D_HARD_ / 2.;
         this->Hull->l_yh =  D_HARD_ / 2.;
         this->Hull->l_zh = (L_Z_+D_HARD_) / 2.;

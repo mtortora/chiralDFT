@@ -1,14 +1,14 @@
-#ifndef FLEXIBLE_HELIX_HPP_
-#define FLEXIBLE_HELIX_HPP_
+#ifndef FLEXIBLE_CHAIN_HPP_
+#define FLEXIBLE_CHAIN_HPP_
 
 #include "BaseParticle.hpp"
 
 
 template<typename number>
-class FlexibleHelix: public BaseParticle<number>
+class FlexibleChain: public BaseParticle<number>
 {
 public:
-	FlexibleHelix();
+	FlexibleChain();
 	
 	// Load random configuration from BHierarchy->Forest
 	void Parse(std::mt19937_64& rng_engine) override
@@ -20,7 +20,9 @@ public:
 	void Build(int) override;
 	
 protected:
-	number D_HARD_;
+	number E_CUT_;
+	number R_CUT_;
+	number EPSILON_;
 	
 private:
 	uint   N_CONF_;

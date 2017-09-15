@@ -9,7 +9,7 @@ LD          := mpic++
 # Library paths
 LOCAL_PTH   := /usr/local
 EIGEN_PTH   := /system/software/linux-x86_64/lib/eigen/3.2.0
-#EIGEN_PTH   :=/home/e280/e280/mtortora
+#EIGEN_PTH   := /home/e552/e552/mmct
 MPICC_PTH   := /system/software/arcus-b/lib/mpi/mvapich2/2.1.0/gcc-4.9.2
 
 # Append mpic++ directories to the PATH environment variable

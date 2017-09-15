@@ -1,40 +1,43 @@
 // ===================================================================
 /**
- * FlexibleHelix derived particle class.
+ * FlexibleChain derived particle class.
  */
 // ===================================================================
 /*
- * FlexibleHelix.cpp: Version 1.0
+ * FlexibleChain.cpp: Version 1.0
  * Created 19/07/2017 by Maxime Tortora
  */
 // ===================================================================
 
 #include "Utils.hpp"
-#include "Particles/FlexibleHelix.hpp"
+#include "Particles/FlexibleChain.hpp"
 
 
 template<typename number>
-FlexibleHelix<number>::FlexibleHelix()
+FlexibleChain<number>::FlexibleChain()
 {
 	// Bounding leaf parameter
 	this->BVH.SetLeafParameter(3);
 	
 	this->N_DELTA_L = 2;
 	
-	// Bead diameter
-	D_HARD_         = 1.  * this->SIGMA_R;
+	// Interaction parameters
+	EPSILON_        = 1.;
+	
+	E_CUT_          = 100.;
+	R_CUT_          = pow(2., 1./6) * this->SIGMA_R;
 }
 
 // ============================
 /* Build particle model */
 // ============================
 template<typename number>
-void FlexibleHelix<number>::Build(int mpi_rank)
+void FlexibleChain<number>::Build(int mpi_rank)
 {
 	uint N_S;
 	uint N_TOT;
 	uint N_CONF;
-	
+
 	ArrayX<uint>     Sizes;
 	Matrix3X<number> Backbones;
 	
@@ -49,7 +52,7 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 		if ( Backbones.size() == 0 ) throw std::runtime_error("Unreadable input trajectory file");
 		
 		N_S    = Sizes(0);
-		
+
 		N_TOT  = Sizes.sum();
 		N_CONF = Sizes.size();
 		
@@ -96,7 +99,7 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 	d_cc /= (number)(N_TOT-N_CONF);
 	
 	// Build bounding volume hierarchy
-	this->BVH.Build(Backbones, D_HARD_, Sizes);
+	this->BVH.Build(Backbones, R_CUT_, Sizes);
 	
 	// Print simulation parameters
 	if ( this->id_ == 1 )
@@ -108,12 +111,12 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 	
 	N_CONF_ = N_CONF;
 	
-	this->R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + D_HARD_;
+	this->R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
 	this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
 	
-	this->V0      = PI/6.*CUB(D_HARD_) * (1. + (N_S-1.)/2. * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)));
-	this->V_EFF   = PI/6.*CUB(D_HARD_) * (1. + (N_S-1.) * (3.*d_cc/D_HARD_ - CUB(d_cc/D_HARD_)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*D_HARD_))) * asin(d_cc/(2.*D_HARD_))));
+	this->V0      = PI/6.*CUB(this->SIGMA_R) * (1. + (N_S-1.)/2. * (3.*d_cc/this->SIGMA_R - CUB(d_cc/this->SIGMA_R)));
+	this->V_EFF   = PI/6.*CUB(this->SIGMA_R) * (1. + (N_S-1.) * (3.*d_cc/this->SIGMA_R - CUB(d_cc/this->SIGMA_R)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*this->SIGMA_R))) * asin(d_cc/(2.*this->SIGMA_R))));
 }
 
-template class FlexibleHelix<float>;
-template class FlexibleHelix<double>;
+template class FlexibleChain<float>;
+template class FlexibleChain<double>;
