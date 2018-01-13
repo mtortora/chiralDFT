@@ -6,6 +6,7 @@
 #include "Particles/DNADuplex.hpp"
 #include "Particles/FlexibleChain.hpp"
 #include "Particles/FlexibleHelix.hpp"
+#include "Particles/FlexiblePatchyRod.hpp"
 #include "Particles/Helix.hpp"
 #include "Particles/PatchyRod.hpp"
 #include "Particles/ThreadedRod.hpp"
@@ -92,6 +93,16 @@ struct InteractionFactory<Helix<number>, number>: public BaseInteraction<Interac
     inline number PairInteraction(number r) {return (r < this->D_HARD_);}
 };
 
+
+// FlexiblePatchyRod
+template<typename number>
+struct InteractionFactory<FlexiblePatchyRod<number>, number>: public FlexiblePatchyRod<number>
+{
+    number MayerInteraction(const Vector3<number>&, FlexiblePatchyRod<number>*, FlexiblePatchyRod<number>*);
+    
+private:
+    number RepulsiveLJ_(number, number, number);
+};
 
 // PatchyRod
 template<typename number>

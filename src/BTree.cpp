@@ -152,17 +152,17 @@ void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& 
     ArrayX<number> Vertex_y = Vertices_cm.row(1).array();
     ArrayX<number> Vertex_z = Vertices_cm.row(2).array();
 
-    number  x_min    = Vertex_x.minCoeff();
-    number  y_min    = Vertex_y.minCoeff();
-    number  z_min    = Vertex_z.minCoeff();
+    number  x_min           = Vertex_x.minCoeff();
+    number  y_min           = Vertex_y.minCoeff();
+    number  z_min           = Vertex_z.minCoeff();
 
-    number  x_max    = Vertex_x.maxCoeff();
-    number  y_max    = Vertex_y.maxCoeff();
-    number  z_max    = Vertex_z.maxCoeff();
+    number  x_max           = Vertex_x.maxCoeff();
+    number  y_max           = Vertex_y.maxCoeff();
+    number  z_max           = Vertex_z.maxCoeff();
 
-    Node->l_xh       = (x_max-x_min + range) / 2.;
-    Node->l_yh       = (y_max-y_min + range) / 2.;
-    Node->l_zh       = (z_max-z_min + range) / 2.;
+    Node->l_xh              = (x_max-x_min + range) / 2.;
+    Node->l_yh              = (y_max-y_min + range) / 2.;
+    Node->l_zh              = (z_max-z_min + range) / 2.;
 
     // Force root spherocylinder center to the vertex center of mass
     if ( !Node->is_root )
@@ -172,14 +172,14 @@ void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& 
     }
 
     // Bounding spherocylinder dimensions
-    number r_max          = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
+    number r_max   = Vertices_cm.block(0, 0, 2, Vertices_cm.cols()).colwise().norm().maxCoeff();
     
-    Node->l_cr            = r_max + range/2.;
-    Node->l_ch            = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min)/2.;
+    Node->l_cr     = r_max + range/2.;
+    Node->l_ch     = Node->is_root ? fmax(std::abs(z_min),std::abs(z_max)) : (z_max-z_min)/2.;
 
     // Box center expressed in parent frame
-    Node->Center_p       << (x_max+x_min)/2., (y_max+y_min)/2., (z_max+z_min)/2.;
-    Node->Center_p        = Node->Orientation_p * Node->Center_p + Center_of_mass;
+    Node->Center_p << (x_max+x_min)/2., (y_max+y_min)/2., (z_max+z_min)/2.;
+    Node->Center_p =  Node->Orientation_p * Node->Center_p + Center_of_mass;
     
     // Vertices expressed in child frame
     Matrix3X<number> Vertices_new = Node->Orientation_p.transpose() * Vertices_in;
@@ -197,11 +197,11 @@ void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& 
     ArrayX<bool> Vertex_inf = (Vertex_z <= (z_max+z_min)/2.);
     ArrayX<bool> Vertex_sup = (Vertex_z >  (z_max+z_min)/2.);
     
-    uint    num_inf    = Vertex_inf.cast<uint>().sum();
-    uint    num_sup    = Vertex_sup.cast<uint>().sum();
+    uint num_inf = Vertex_inf.cast<uint>().sum();
+    uint num_sup = Vertex_sup.cast<uint>().sum();
     
-    uint    ctr_inf    = 0;
-    uint    ctr_sup    = 0;
+    uint ctr_inf = 0;
+    uint ctr_sup = 0;
 
     Matrix3X<number> Vertices_inf(3, num_inf);
     Matrix3X<number> Vertices_sup(3, num_sup);

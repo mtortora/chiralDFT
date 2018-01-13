@@ -485,7 +485,7 @@ SimManager<number>::~SimManager()
     t_elapsed_ = t_end_ - t_start_;
     
     LogTxt("*****************");
-    LogBlu("Total runtime: %fh", t_elapsed_.count() / 3600.);
+    LogBlu("Total runtime: %f h", t_elapsed_.count() / 3600.);
 }
 
 template class SimManager<float>;

@@ -8,9 +8,9 @@ LD          := mpic++
 
 # Library paths
 LOCAL_PTH   := /usr/local
-EIGEN_PTH   := /system/software/linux-x86_64/lib/eigen/3.2.0
+EIGEN_PTH   := /home/cluster_thermo/ptch0350
 #EIGEN_PTH   := /home/e552/e552/mmct
-MPICC_PTH   := /system/software/arcus-b/lib/mpi/mvapich2/2.1.0/gcc-4.9.2
+MPICC_PTH   := /system/software/arcus-b/lib/mpi/mvapich2/2.1.0/gcc-5.4.0
 
 # Append mpic++ directories to the PATH environment variable
 export PATH := $(LOCAL_PTH)/bin:$(PATH)

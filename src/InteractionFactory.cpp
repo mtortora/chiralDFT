@@ -193,6 +193,108 @@ number InteractionFactory<Helix<number>, number>::MayerInteraction(const Vector3
 
 
 /* ************************* */
+/* FlexiblePatchyRod */
+/* ************************* */
+
+// ============================
+/* LJ interaction potential */
+// ============================
+template<typename number>
+number InteractionFactory<FlexiblePatchyRod<number>, number>::RepulsiveLJ_(number r, number d, number range)
+{
+    number energy(0.);
+    
+    if ( r < range )
+    {
+        number lj_part = pow(d/r, 6);
+        energy         = 4. * this->EPSILON_WCA_ * (SQR(lj_part) - lj_part) + this->EPSILON_WCA_;
+    }
+    
+    return energy;
+}
+
+// ============================
+/* Mayer interaction function */
+// ============================
+template<typename number>
+number InteractionFactory<FlexiblePatchyRod<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                               FlexiblePatchyRod<number>* Particle1, FlexiblePatchyRod<number>* Particle2)
+{
+    number energy(0.);
+    
+    uint idx_conf1 = Particle1->idx_conf;
+    uint idx_conf2 = Particle2->idx_conf;
+
+    Matrix3X<number> Backbone1 = Matrix3X<number>::Map(Particle1->Backbones.data() + 3 * idx_conf1*Particle1->N_BCK, 3, Particle1->N_BCK);
+    Matrix3X<number> Backbone2 = Matrix3X<number>::Map(Particle2->Backbones.data() + 3 * idx_conf2*Particle2->N_BCK, 3, Particle2->N_BCK);
+
+    Backbone1 = Particle1->Orientation * Backbone1;
+    Backbone2 = Particle2->Orientation * Backbone2;
+
+    // Backbone-backbone WCA repulsion
+    for ( uint idx_vtx1 = 0; idx_vtx1 < Particle1->N_BCK && energy < this->E_CUT_; ++idx_vtx1 )
+    {
+        for ( uint idx_vtx2 = 0; idx_vtx2 < Particle2->N_BCK && energy < this->E_CUT_; ++idx_vtx2 )
+        {
+            Vector3<number> R_sep = R_cm + Backbone2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
+            number          norm  = R_sep.norm();
+            
+            energy               += RepulsiveLJ_(norm, this->D_BACK_, this->R_BACK_);
+        }
+    }
+    
+    if ( energy < this->E_CUT_ )
+    {
+        Matrix3X<number> Patch1 = Matrix3X<number>::Map(Particle1->Patches.data() + 3 * idx_conf1*Particle1->N_BCK, 3, Particle1->N_BCK);
+        Matrix3X<number> Patch2 = Matrix3X<number>::Map(Particle2->Patches.data() + 3 * idx_conf2*Particle2->N_BCK, 3, Particle2->N_BCK);
+        
+        Patch1 = Particle1->Orientation * Patch1;
+        Patch2 = Particle2->Orientation * Patch2;
+        
+        // Lorentz-Berthelot patch-backbone repulsion
+        for ( uint idx_vtx1 = 0; idx_vtx1 < Particle1->N_BCK && energy < this->E_CUT_; ++idx_vtx1 )
+        {
+            for ( uint idx_vtx2 = 0; idx_vtx2 < Particle2->N_BCK && energy < this->E_CUT_; ++idx_vtx2 )
+            {
+                Vector3<number> R_sep = R_cm + Backbone2.col(idx_vtx2) - Patch1.col(idx_vtx1);
+                number          norm  = R_sep.norm();
+                
+                energy               += RepulsiveLJ_(norm, this->D_LB_, this->R_LB_);
+            }
+        }
+        
+        for ( uint idx_vtx1 = 0; idx_vtx1 < Particle1->N_BCK && energy < this->E_CUT_; ++idx_vtx1 )
+        {
+            for ( uint idx_vtx2 = 0; idx_vtx2 < Particle2->N_BCK && energy < this->E_CUT_; ++idx_vtx2 )
+            {
+                Vector3<number> R_sep = R_cm + Patch2.col(idx_vtx2) - Backbone1.col(idx_vtx1);
+                number          norm  = R_sep.norm();
+                
+                energy               += RepulsiveLJ_(norm, this->D_LB_, this->R_LB_);
+            }
+        }
+        
+        // Patch-patch LJ repulsion
+        for ( uint idx_vtx1 = 0; idx_vtx1 < Particle1->N_BCK && energy < this->E_CUT_; ++idx_vtx1 )
+        {
+            for ( uint idx_vtx2 = 0; idx_vtx2 < Particle2->N_BCK && energy < this->E_CUT_; ++idx_vtx2 )
+            {
+                Vector3<number> R_sep = R_cm + Patch2.col(idx_vtx2) - Patch1.col(idx_vtx1);
+                number          norm  = R_sep.norm();
+                
+                energy               += RepulsiveLJ_(norm, this->D_PATCH_, this->R_PATCH_);
+            }
+        }
+    }
+    
+    return 1. - exp(-energy);
+}
+
+
+// ============================
+
+
+/* ************************* */
 /* PatchyRod */
 /* ************************* */
 

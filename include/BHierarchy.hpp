@@ -30,7 +30,7 @@ public:
 	}
 	
 private:
-	// Forest properties
+	// Forest-only properties
 	uint trees_alloced;
 	
 	uint total_built;

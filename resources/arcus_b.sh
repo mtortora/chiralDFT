@@ -9,7 +9,7 @@
 #SBATCH --mail-user=maxime.tortora@icloud.com
 
 
-module load mvapich2/2.1.0__gcc-4.9.2
+module load mvapich2/2.1.0__gcc-5.4.0
 
 . enable_arcus-b_mpi.sh
 
