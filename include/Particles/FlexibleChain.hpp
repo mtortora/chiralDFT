@@ -22,6 +22,14 @@ public:
 protected:
 	number E_CUT_;
 	number R_CUT_;
+	
+	number RC_WCA_;
+	number RC_DH_;
+	
+	number DH_PREFACTOR_;
+	number MINUS_KAPPA_;
+
+	number TYS_;
 	number EPSILON_;
 	
 private:

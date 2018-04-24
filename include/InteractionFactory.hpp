@@ -12,6 +12,7 @@
 #include "Particles/ThreadedRod.hpp"
 #include "Particles/TriangularPrism.hpp"
 #include "Particles/TwistedCuboid.hpp"
+#include "Particles/TwistedHexagon.hpp"
 #include "Particles/TwistedPentagon.hpp"
 
 
@@ -58,19 +59,19 @@ struct InteractionFactory<FlexibleChain<number>, number>: public BaseInteraction
 {
     number MayerInteraction(const Vector3<number>&, FlexibleChain<number>*, FlexibleChain<number>*);
     
-    // WCA with abrupt cutoff at r = R_CUT_
     inline number PairInteraction(number r)
     {
-        number energy(0.);
-        
-        if ( r < this->R_CUT_ )
+        if ( USE_DH )
         {
-            number lj_part = pow(this->SIGMA_R/r, 6);
-            energy         = 4. * this->EPSILON_ * (SQR(lj_part) - lj_part) + this->EPSILON_;
+            return DebyeHuckel_(r) + RepulsiveWCA_(r);
         }
         
-        return energy;
+        return RepulsiveWCA_(r);
     }
+    
+private:
+    number RepulsiveWCA_(number);
+    number DebyeHuckel_(number);
 };
 
 
@@ -137,6 +138,16 @@ template<typename number>
 struct InteractionFactory<TwistedCuboid<number>, number>: public BaseInteraction<InteractionFactory<TwistedCuboid<number>, number>, number>, TwistedCuboid<number>
 {
     number MayerInteraction(const Vector3<number>&, TwistedCuboid<number>*, TwistedCuboid<number>*);
+    
+    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
+};
+
+
+// TwistedHexagon
+template<typename number>
+struct InteractionFactory<TwistedHexagon<number>, number>: public BaseInteraction<InteractionFactory<TwistedHexagon<number>, number>, number>, TwistedHexagon<number>
+{
+    number MayerInteraction(const Vector3<number>&, TwistedHexagon<number>*, TwistedHexagon<number>*);
     
     inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
 };

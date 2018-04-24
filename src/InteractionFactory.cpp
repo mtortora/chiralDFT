@@ -122,6 +122,46 @@ number InteractionFactory<DNADuplex<number>, number>::MayerInteraction(const Vec
 /* ************************* */
 
 // ============================
+/* WCA with abrupt cutoff */
+// ============================
+template<typename number>
+number InteractionFactory<FlexibleChain<number>, number>::RepulsiveWCA_(number r)
+{
+    number energy(0.);
+        
+    if ( r < this->RC_WCA_ )
+    {
+        number lj_part = SQR(CUB(this->SIGMA_R/r));
+        energy         = 4. * this->EPSILON_ * (SQR(lj_part) - lj_part) + this->EPSILON_;
+    }
+        
+    return energy;
+}
+
+// ============================
+/* Debye-Huckel interaction potential */
+// ============================
+template<typename number>
+number InteractionFactory<FlexibleChain<number>, number>::DebyeHuckel_(number r)
+{
+    number energy(0.);
+
+    if ( r > this->SIGMA_R )
+    {
+        number h = r - this->SIGMA_R;
+        
+        if ( h < this->RC_DH_ )
+        {
+            number y2h = exp(-this->MINUS_KAPPA_*h) * SQR(atanh(exp(this->MINUS_KAPPA_*h/2.)*this->TYS_));
+            energy     = this->DH_PREFACTOR_/r * y2h * log(1.+exp(this->MINUS_KAPPA_*h));
+            //energy = this->DH_PREFACTOR_/r * (2.*atanh(exp(this->MINUS_KAPPA_*h))+log(1.-exp(2.*this->MINUS_KAPPA_*h)));
+        }
+    }
+    
+    return energy;
+}
+
+// ============================
 /* Mayer interaction function */
 // ============================
 template<typename number>
@@ -457,6 +497,32 @@ number InteractionFactory<TwistedCuboid<number>, number>::MayerInteraction(const
     // In this case, energy counts the number of overlapping vertices
     this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
 
+    if ( energy > 0. ) mayer_interaction = 1.;
+    
+    return mayer_interaction;
+}
+
+
+// ============================
+
+
+/* ************************* */
+/* TwistedHexagon */
+/* ************************* */
+
+// ============================
+/* Mayer interaction function */
+// ============================
+template<typename number>
+number InteractionFactory<TwistedHexagon<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                            TwistedHexagon<number>* Particle1, TwistedHexagon<number>* Particle2)
+{
+    number energy(0.);
+    number mayer_interaction(0.);
+    
+    // In this case, energy counts the number of overlapping vertices
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, 0.);
+    
     if ( energy > 0. ) mayer_interaction = 1.;
     
     return mayer_interaction;

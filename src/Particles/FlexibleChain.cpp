@@ -23,9 +23,23 @@ FlexibleChain<number>::FlexibleChain()
 	
 	// Interaction parameters
 	EPSILON_        = 1.;
-	
 	E_CUT_          = 100.;
-	R_CUT_          = pow(2., 1./6) * this->SIGMA_R;
+	
+	number c_conv   = this->SIGMA_R/400.;
+	number lambda   = 10. * c_conv;
+	
+	RC_DH_          = 10. * lambda;
+	RC_WCA_         = pow(2., 1./6) * this->SIGMA_R;
+
+	MINUS_KAPPA_    = -1./lambda;
+	
+	DH_PREFACTOR_   = 897331.8188772588 * c_conv;
+	//DH_PREFACTOR_   = 68797.3820998497 * c_conv;
+
+	number ys       = 1.5663341312787333;
+	TYS_            = tanh(ys/4.);
+	
+	R_CUT_          = USE_DH ? fmax(RC_DH_+this->SIGMA_R, RC_WCA_) : RC_WCA_;
 }
 
 // ============================
@@ -109,7 +123,7 @@ void FlexibleChain<number>::Build(int mpi_rank)
 		this->BVH.PrintBuildInfo();
 	}
 	
-	N_CONF_ = N_CONF;
+	N_CONF_       = N_CONF;
 	
 	this->R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
 	this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);

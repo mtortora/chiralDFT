@@ -24,6 +24,7 @@
 		B7769EC11EDF2F0C00ACB534 /* BHierarchy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7769EC01EDF2F0C00ACB534 /* BHierarchy.cpp */; };
 		B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */; };
 		B789E81E1F05440000A9AF83 /* libSphericalFunctions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B789E81D1F05440000A9AF83 /* libSphericalFunctions.a */; };
+		B7CFC22420821BF500D1274F /* TwistedHexagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7CFC22320821BF500D1274F /* TwistedHexagon.cpp */; };
 		B7E020041FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7E020031FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp */; };
 		B7F0D4691F5F370E00EF9CEB /* FlexibleChain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F0D4681F5F370E00EF9CEB /* FlexibleChain.cpp */; };
 		B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7F693DE1D4715E7007E6CBD /* Utils.cpp */; };
@@ -100,6 +101,8 @@
 		B798AAC21F0211FD00BE6692 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		B7BB8D781EAE568B00294673 /* savitsky_golay.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = savitsky_golay.py; sourceTree = "<group>"; };
 		B7C335E21EFEA48F00016777 /* wigner.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = wigner.py; sourceTree = "<group>"; };
+		B7CFC22320821BF500D1274F /* TwistedHexagon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedHexagon.cpp; sourceTree = "<group>"; };
+		B7CFC22520821C0100D1274F /* TwistedHexagon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedHexagon.hpp; sourceTree = "<group>"; };
 		B7DD70461DB9271B00CF9EAC /* landscape_slice.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = landscape_slice.py; sourceTree = "<group>"; };
 		B7DFD8821D4BB78000D17A0F /* BaseInteraction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseInteraction.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7E020031FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlexiblePatchyRod.cpp; sourceTree = "<group>"; };
@@ -158,6 +161,7 @@
 				B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */,
 				B779B10F1F2F3A6C0052CA8E /* TriangularPrism.cpp */,
 				9C0D08581C3AA0B00020EBAB /* TwistedCuboid.cpp */,
+				B7CFC22320821BF500D1274F /* TwistedHexagon.cpp */,
 				B714FE051E5C8809009C274C /* TwistedPentagon.cpp */,
 			);
 			path = Particles;
@@ -176,6 +180,7 @@
 				B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */,
 				B779B10E1F2F3A5F0052CA8E /* TriangularPrism.hpp */,
 				9C0D085F1C3AA0BE0020EBAB /* TwistedCuboid.hpp */,
+				B7CFC22520821C0100D1274F /* TwistedHexagon.hpp */,
 				B714FE071E5C8814009C274C /* TwistedPentagon.hpp */,
 			);
 			path = Particles;
@@ -363,6 +368,7 @@
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B7E020041FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,
+				B7CFC22420821BF500D1274F /* TwistedHexagon.cpp in Sources */,
 				B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */,
 				B7F693E51D47AD1E007E6CBD /* InteractionFactory.cpp in Sources */,
 				9C512E1F1C22B91B0099AE31 /* main.cpp in Sources */,

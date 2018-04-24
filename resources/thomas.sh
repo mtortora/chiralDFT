@@ -6,7 +6,8 @@
 #$ -N cDFT-DNA
 #$ -l mem=5G
 #$ -pe mpi 864
-#$ -P AllUsers
+#$ -P Gold
+#$ -A Ox_Doye
 
 #$ -wd TARGETPATH/../
 

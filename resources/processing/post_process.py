@@ -244,7 +244,7 @@ def ODFOnsagerOptimiser(E):
 	
 	data_s       = np.zeros([n_steps_eta, 2])
 	data_s[:, 0] = eta_grid
-	data_s[:, 1] = S_res
+	data_s[:, 1] = np.abs(S_res)
 
 	np.savetxt(path_p, data_p)
 	np.savetxt(path_s, data_s)

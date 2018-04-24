@@ -109,7 +109,7 @@ void OdfOptimiser<ParticleType, number>::BinodalAnalysis(const ArrayXX<number>& 
                 
                 // Relaxed NR iteration - classical NR can be recovered by setting GAMMA_NR to 1
                 Binodals    += GAMMA_NR * D_Binodals;
-                converged    = ((max_b < TOL_BIN) && (max_t < TOL_BIN)) ;
+                converged    = ((max_b < TOL_BIN) && (max_t < TOL_BIN));
             }
         }
         
