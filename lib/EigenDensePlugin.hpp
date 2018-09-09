@@ -1,3 +1,16 @@
+// ===================================================================
+/**
+ * Custom Eigen DenseBase plugin for (pseudo) hyper-matrix support
+ * Included at compile-time in the include/globals.hpp header file
+ */
+// ===================================================================
+/*
+ * EigenDensePlugin.hpp: Version 1.0
+ * Created 17/02/2017 by Maxime Tortora
+ */
+// ===================================================================
+
+
 inline uint minComponentId(void) const {uint i; this->minCoeff(&i); return i;}
 inline uint maxComponentId(void) const {uint i; this->maxCoeff(&i); return i;}
 

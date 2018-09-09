@@ -1,13 +1,12 @@
 # chiralDFT
 
-This package contains a massively-parallel hybrid Density Functional Theory/Monte-Carlo (DFT/MC) simulation code, designed to infer the chiral nematic behaviour of lyotropic liquid crystals from their microscopic mesogen properties.
+This package contains a massively-parallel hybrid Density Functional Theory/Monte-Carlo (DFT/MC) simulation code, designed to work out the equilibrium cholesteric behaviour of lyotropic liquid crystals from their microscopic mesogen properties.
 
-It includes a high-performance and versatile implementation of the algorithm introduced by [Belli *et al.*](http://dx.doi.org/10.1103/PhysRevE.90.020503), with additional support for [Straley’s perturbative approach](http://dx.doi.org/10.1103/PhysRevA.14.1835).
+It includes a high-performance and versatile implementation of the algorithm introduced by [Belli *et al.*](http://dx.doi.org/10.1103/PhysRevE.90.020503), with additional support for [Straley’s perturbative approach](http://dx.doi.org/10.1103/PhysRevA.14.1835). The full details of the model and underlying theory can be found [here](http://dx.doi.org/10.1063/1.4982934), and its extension to flexible particle models is extensively discussed [here](http://dx.doi.org/10.1080/00268976.2018.1464226).
 
-An implementation of the [RAPID](http://dx.doi.org/10.1145/237170.237244) collision detection library, developed by Manocha *et al.*, is also provided for efficient overlap queries between sets of complex triangle meshes in hard-body simulations.
+It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex particle models. The details and performance of the procedure are presented [here](http://dx.doi.org/10.1063/1.5002666).
 
-It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex particle models.
-
+An implementation of the [RAPID](http://dx.doi.org/10.1145/237170.237244) collision detection library, developed by Manocha *et al.*, is also provided for efficient overlap queries between sets of complex triangle meshes in hard-body systems.
 
 
 ## Requirements
@@ -52,7 +51,7 @@ On most recent **Intel**® processors (Core™ i5 and later generations), settin
 
 Some very limited options to be set in the `include/params.hpp` file:
 
-* set the `MESOGEN` symbol to whichever particle geometry you fancy (I might write a very short intro on how to modify each particle’s characteristics if anyone is interested for some reason)
+* set the `MESOGEN` symbol to whichever particle geometry you fancy (the list of supported models is provided in the file)
 * set the `FULL_RUN` switch to either 0 for a purely perturbative run or 1 for a full sweep of the chiral free energy landscape. Bear in mind that the full run is VERY expensive (especially for the `DNADuplex` particle type), so don’t try it on your home computer.
 
 Don’t forget to recompile the code after modifying any of these flags.
@@ -63,9 +62,9 @@ Note that the `DNADuplex` particle type requires as input a DNA trajectory file 
 
 ## Utilities
 
-A couple plotting utilities to be found in the `resources` folder (requires `gnuplot` >= 5):
+A couple plotting utilities to be found in the `resources` folder (requires `gnuplot` >= 5.0):
 
-* `utils/display_wireframe` conjures up a 3d interactive viewer for the chosen particle
-* `plots/plot_landscape3d` plots the 3d free energy surface as a function of both particle density and macroscopic pitch.
+* `utils/display_wireframe` conjures up a 3d interactive viewer for the chosen particle (not supported for DNA, tesselated or flexible particle models)
+* `plots/plot_landscape3d` plots the 3d free energy surface as a function of both particle density and macroscopic pitch (only for `FULL_RUN=1`).
 
-Note the lists above are far from exhaustive - don’t hesitate to [contact me](mailto:maxime.tortora@chem.ox.ac.uk) for information about the more advanced options and functionalities.
+Note that the lists above are far from exhaustive - don’t hesitate to [contact me](mailto:maxime.tortora@chem.ox.ac.uk) for information about the more advanced options and functionalities.
