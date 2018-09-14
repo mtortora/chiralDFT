@@ -305,6 +305,7 @@ void SimManager<number>::Save()
 {
     if ( mpi_rank_ == MPI_MASTER )
     {
+        std::ofstream file_vm (data_path_ + "/mean_force.out");
         std::ofstream file_dv (data_path_ + "/delta_v.out");
         std::ofstream file_df (data_path_ + "/delta_f.out");
         std::ofstream file_per(data_path_ + "/q_pert.out");
@@ -394,7 +395,7 @@ void SimManager<number>::Save()
         ArrayX<number> V_nrm  = V_ave / (V_r + V_l);
         V_ave.tail(N_THETA/2) = V_ave.head(N_THETA/2).reverse();
         
-        // Thermodynamically-averaged excluded volume
+        // Thermodynamically-averaged excluded volume/potential of mean force
         ArrayX<number> N_grid = SimHandler.Eta_grid * CUB(SimHandler.IManager.SIGMA_R)/SimHandler.IManager.V0;
         ArrayX<number> F_chi  = (Psi_ave.rowwise() * (V_ave * sin(SimHandler.Theta_grid)).transpose()).rowwise().sum();
         
@@ -405,8 +406,9 @@ void SimManager<number>::Save()
         {
             number theta = SimHandler.Theta_grid(idx_theta);
             
-            file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta) << std::endl;
-            
+            file_dv << theta << ' ' << V_nrm(idx_theta) << ' ' << V_chi(idx_theta)  << std::endl;
+            file_vm << theta << ' ' << log((1.-V_r(idx_theta))/(1.-V_l(idx_theta))) << std::endl;
+
             for ( uint idx_nu = 0; idx_nu < N_THETA; ++idx_nu )
             {
                 number nu = SimHandler.Theta_grid(idx_nu);
@@ -460,6 +462,7 @@ void SimManager<number>::Save()
             file_min.close();
         }
         
+        file_vm .close();
         file_dv .close();
         file_df .close();
         file_per.close();

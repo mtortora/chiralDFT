@@ -6,22 +6,22 @@
 /* Simulation options */
 // ============================
 
-// Particle type to be used - implemented: BentCore, DNADuplex, FlexibleChain, FlexibleHelix, Helix, FlexiblePatchyRod, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedHexagon, TwistedPentagon
+// Particle type to be used - implemented: BentCore, DNADuplex, FlexibleChain, FlexibleHelix, Helix, FlexiblePatchyRod, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedPentagon, TwistedHexagon
 #define MESOGEN     DNADuplex
 
 // Full run switch - MODE_PERT for perturbative run, MODE_FULL for full run or MODE_EXC for excluded volume (BentCore, Helix)
 #define MODE_SIM    MODE_PERT
 
-// Set to ODF_FULL for full functional minimisation or ODF_LEGENDRE for Legendre-projected run (only for preliminary run)
+// Set to ODF_FULL for full functional minimisation or ODF_LEGENDRE for Legendre-projected ODFs (only for preliminary run)
 #define ODF_TYPE    ODF_FULL
 
-// Type of soft interaction if relevant - 0: oxDNA-parametrised electrostatics, 1: Ferrarini, 2: Wensink, 3: Lagerwall
+// Type of soft interaction if relevant - choose among DH_OXDNA, DH_FERRARINI, DH_WENSINK, DH_LAGERWALL
 #define MODE_DH     DH_OXDNA
 
 // Bounding tree hierarchy mode - set to TREE_OB for Oriented Bounding Box or TREE_SC for SpheroCylinder
 #define MODE_TREE   TREE_OB
 
-// Use RAPID library for collision queries - only implemented for the TwistedCuboid & TwistedPentagon particle templates
+// Use RAPID library for collision queries - only implemented for TriangularPrism, TwistedCuboid, TwistedPentagon and TwistedHexagon particle templates
 #define USE_RAPID   0
 
 // Set to 1 to enable Debye-Huckel interactions

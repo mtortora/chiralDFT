@@ -89,7 +89,7 @@
 
 #endif
 
-// Loggers through variadic macros
+// Variadic macros for logs
 #define LogRed(frmt, ...) fprintf(stdout, (COLORS_ESCAPE COLORS_RED frmt COLORS_RESET "\n"), ##__VA_ARGS__)
 #define LogGre(frmt, ...) fprintf(stdout, (COLORS_ESCAPE COLORS_GRE frmt COLORS_RESET "\n"), ##__VA_ARGS__)
 #define LogBlu(frmt, ...) fprintf(stdout, (COLORS_ESCAPE COLORS_BLU frmt COLORS_RESET "\n"), ##__VA_ARGS__)

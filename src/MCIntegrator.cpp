@@ -341,12 +341,6 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
             idx_nu          = fmin(idx_nu,    N_THETA-1);
             idx_theta       = fmin(idx_theta, N_THETA-1);
             
-            // Angular excluded volume integrals
-            (*V_b)(idx_theta, idx_nu) += mayer_interaction_;
-            
-            if ( deter > 0. ) (*V_r)(idx_theta) += mayer_interaction_;
-            else              (*V_l)(idx_theta) += mayer_interaction_;
-            
             // Fetch configuration angles
             number alpha1   = Particle1_.alpha;
             number alpha2   = Particle2_.alpha;
@@ -376,6 +370,12 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
             idx_phi1        = fmin(idx_phi1,   N_PHI-1);
             idx_phi2        = fmin(idx_phi2,   N_PHI-1);
             
+            // Angular excluded volume integrals
+            (*V_b)(idx_theta, idx_nu) += mayer_interaction_;
+            
+            if ( deter > 0. ) (*V_r)(idx_theta) += mayer_interaction_*sin(theta1)*sin(theta2);
+            else              (*V_l)(idx_theta) += mayer_interaction_*sin(theta1)*sin(theta2);
+            
             if ( ODF_TYPE == ODF_FULL ) (*E_out).at(idx_alpha1, idx_theta1, idx_phi1,
                                                     idx_alpha2, idx_theta2, idx_phi2) += mayer_interaction_;
             
@@ -399,9 +399,9 @@ void MCIntegrator<ParticleType, number>::VirialIntegrator(ArrayXX<number>* E_out
     
     *V_b   *= IManager.V_INTEG/N_PER_PROC_ / SQR(D_THETA);
     
-    *V_r   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / 2.;
-    *V_l   *= IManager.V_INTEG/N_PER_PROC_ / D_THETA / 2.;
-
+    *V_r   /= N_PER_PROC_ * D_THETA;
+    *V_l   /= N_PER_PROC_ * D_THETA;
+    
     *E_out *= IManager.V_INTEG/N_PER_PROC_ * prefactor;
 }
 
