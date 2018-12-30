@@ -156,6 +156,7 @@ ArrayX<double> OdfOptimiser<ParticleType, number>::SequentialOptimiser(number et
     
     double n_dens  = eta / this->IManager.V0;
     double eta_eff = eta * this->IManager.V_EFF/this->IManager.V0;
+    //double g_pl    = 1./(8.*eta_eff) * ((3.-eta_eff)/CUB(1.-eta_eff)-3.);
     double g_pl    = (1. - 3/4.*eta_eff) / SQR(1. - eta_eff);
     
     // Gaussian initial guess

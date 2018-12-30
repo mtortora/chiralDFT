@@ -119,7 +119,7 @@ if os.path.isdir(path_data):
 		with open(path_ref, mode="r") as file_ref:
 			V0   = float(file_ref.readline().split()[2])
 			Veff = float(file_ref.readline().split()[2])
-		excluded_ref = np.genfromtxt(path_ref, skip_header=2)
+		excluded_ref = np.genfromtxt(path_ref, skip_header=2, dtype=np.longdouble)
 	
 	else:
 		print("\033[1;31mCouldn't read file %s - aborting\033[0m" % path_ref)
@@ -175,12 +175,12 @@ def ODFOnsagerOptimiser(E):
 	converged  = False
 	d_theta    = np.pi / param_dict["N_THETA"]
 	
-	eta_grid   = np.linspace(eta_min, eta_max, n_steps_eta)
-	theta_grid = np.linspace(d_theta/2., np.pi-d_theta/2., param_dict["N_THETA"])
+	eta_grid   = np.linspace(eta_min, eta_max, n_steps_eta, dtype=np.longdouble)
+	theta_grid = np.linspace(d_theta/2., np.pi-d_theta/2., param_dict["N_THETA"], dtype=np.longdouble)
 	
-	S_res      = np.zeros(n_steps_eta)
-	P_res      = np.zeros(n_steps_eta)
-	F_tot      = np.zeros(n_steps_eta)
+	S_res      = np.zeros(n_steps_eta, dtype=np.longdouble)
+	P_res      = np.zeros(n_steps_eta, dtype=np.longdouble)
+	F_tot      = np.zeros(n_steps_eta, dtype=np.longdouble)
 
 	path_p     = path_data + '/p.res'
 	path_psi   = path_data + '/psi.res'
@@ -190,9 +190,10 @@ def ODFOnsagerOptimiser(E):
 		for idx_eta, eta in enumerate(eta_grid):
 			n_dens  = eta / V0
 			eta_eff = eta * Veff/V0
+			#g_pl    = 1/(8.*eta_eff)*((3-eta_eff)/(1-eta_eff)**3 - 3)
 			g_pl    = (1-0.75*eta_eff) / (1-eta_eff)**2
-			
-			psi     = np.exp(-theta_grid**2)
+
+			psi     = np.exp(-theta_grid**2, dtype=np.longdouble)
 			
 			# ODF self-consistent solver
 			for idx_iter in range(n_steps_max):

@@ -20,17 +20,17 @@ TriangularPrism<number>::TriangularPrism()
 	this->N_DELTA_L = 2;
 	
 	// Prism parameters
-	GAMMA_          = 60. * PI/180.;
-	TWIST_          = 0.  * PI/180.;
+	GAMMA_          = 1.;
+	TWIST_          = 0.8;
 	
 	L_X_            = 1.   * this->SIGMA_R;
 	
 	number w        = L_X_/PI * (1. + 1./cos(GAMMA_));
 
-	L_Z_            = 6.   * w;
+	L_Z_            = 5.   * w;
 	L_Y_            = L_X_ * tan(GAMMA_)/2.;
 	
-	this->V0        = L_X_*L_Y_*L_Z_/2.;
+	this->V0        = 0.852187;
 	this->V_EFF     = this->V0;
 	
 	this->R_INTEG   = sqrt(SQR(L_X_) + SQR(L_Z_) + SQR(2.*L_Y_/3.));
@@ -67,9 +67,6 @@ void TriangularPrism<number>::Build(int mpi_rank)
 	// Set center of mass to the origin and main axis to e_z
 	Vector3<number> Center_of_mass = Wireframe.rowwise().mean();
 	Wireframe                      = Wireframe.colwise() - Center_of_mass;
-	
-	Matrix33<number> Rot           = Utils<number>::PCA(Wireframe);
-	Wireframe                      = Rot.transpose() * Wireframe;
 	
 	// Build the RAPID_model mesh for RAPID collision detection
 	Tesselate(Wireframe);
@@ -131,12 +128,12 @@ void TriangularPrism<number>::Tesselate(const Matrix3X<number>& Wireframe)
 	
 	// Build mesh
 	Mesh->AddTri(p1, p2, p3, ctr_tri++);
-	Mesh->AddTri(p1, p2, p4, ctr_tri++);
+	Mesh->AddTri(p1, p2, p5, ctr_tri++);
 	Mesh->AddTri(p1, p3, p4, ctr_tri++);
-	Mesh->AddTri(p2, p3, p5, ctr_tri++);
-	Mesh->AddTri(p2, p4, p5, ctr_tri++);
+	Mesh->AddTri(p1, p4, p5, ctr_tri++);
+	Mesh->AddTri(p2, p3, p6, ctr_tri++);
+	Mesh->AddTri(p2, p5, p6, ctr_tri++);
 	Mesh->AddTri(p3, p4, p6, ctr_tri++);
-	Mesh->AddTri(p3, p5, p6, ctr_tri++);
 	Mesh->AddTri(p4, p5, p6, ctr_tri++);
 	
 	Mesh->EndModel();
@@ -170,12 +167,12 @@ void TriangularPrism<number>::SaveMesh(const Matrix3X<number>& Wireframe)
 	file_mesh << Wireframe.transpose() << std::endl;
 	
 	file_mesh << 3 << " " << 0 << " " << 1 << " " << 2 << std::endl;
-	file_mesh << 3 << " " << 0 << " " << 1 << " " << 3 << std::endl;
+	file_mesh << 3 << " " << 0 << " " << 1 << " " << 4 << std::endl;
 	file_mesh << 3 << " " << 0 << " " << 2 << " " << 3 << std::endl;
-	file_mesh << 3 << " " << 1 << " " << 2 << " " << 4 << std::endl;
-	file_mesh << 3 << " " << 1 << " " << 3 << " " << 4 << std::endl;
+	file_mesh << 3 << " " << 0 << " " << 3 << " " << 4 << std::endl;
+	file_mesh << 3 << " " << 1 << " " << 2 << " " << 5 << std::endl;
+	file_mesh << 3 << " " << 1 << " " << 4 << " " << 5 << std::endl;
 	file_mesh << 3 << " " << 2 << " " << 3 << " " << 5 << std::endl;
-	file_mesh << 3 << " " << 2 << " " << 4 << " " << 5 << std::endl;
 	file_mesh << 3 << " " << 3 << " " << 4 << " " << 5 << std::endl;
 
 	
