@@ -49,6 +49,10 @@ void MCIntegrator<ParticleType, number>::MCInit(int seed, int mpi_rank, int mpi_
     
     // Seed 64-bit Mersenne twister RNG engine
     rng_engine_.seed(engine_seed);
+    
+    // Build bootstrap index maps
+    Bootstrap_map1_ = Particle1_.BootstrapMap(rng_engine_);
+    Bootstrap_map2_ = Particle2_.BootstrapMap(rng_engine_);
 }
 
 // ============================
@@ -232,8 +236,8 @@ void MCIntegrator<ParticleType, number>::ConfigGenerator()
         SyncCheck(false);
         
         // Fetch random configurations if relevant
-        Particle1_.Parse(rng_engine_);
-        Particle2_.Parse(rng_engine_);
+        Particle1_.Parse(rng_engine_, Bootstrap_map1_);
+        Particle2_.Parse(rng_engine_, Bootstrap_map2_);
         
         // Random center-of-mass to center-of-mass separation vector
         R_cm_ = Vector3<number>::NullaryExpr([&](int) {return rng_distrib_(rng_engine_)-0.5;}) * 2.*IManager.R_INTEG;
@@ -531,7 +535,7 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
             idx_phi1        = fmin(idx_phi1,   N_PHI-1);
             idx_phi2        = fmin(idx_phi2,   N_PHI-1);
             
-            // Update Frank elastic constants
+            // Update Frank elastic moduli
             *K1_out -= mayer_interaction_
                      * Psi_dot.col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)
@@ -550,7 +554,7 @@ void MCIntegrator<ParticleType, number>::FrankIntegrator(const ArrayXX<number>& 
                      * Particle1_.U(0) * Particle2_.U(0)
                      * SQR(R_cm_(2));
             
-            // Update twist modulus
+            // Update chiral strength
             *Kt_out -= mayer_interaction_ * sin(theta1)
                      * Psi_in. col_at(idx_alpha1, idx_theta1, idx_phi1)
                      * Psi_dot.col_at(idx_alpha2, idx_theta2, idx_phi2)

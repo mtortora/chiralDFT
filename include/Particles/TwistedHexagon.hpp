@@ -18,7 +18,7 @@ public:
 	void Tesselate(const Matrix3X<number>&, uint*);
 	
 #if (USE_RAPID)
-	void Parse(std::mt19937_64&) override {}
+	void Parse(std::mt19937_64&, ArrayX<uint>&) override {}
 #endif
 	
 protected:

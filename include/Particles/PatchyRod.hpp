@@ -14,7 +14,7 @@ public:
     Matrix3X<number> Patches;
     
     void Build(int) override;
-    void Parse(std::mt19937_64&) override {}
+    void Parse(std::mt19937_64&, ArrayX<uint>&) override {}
     
 protected:
     number EPSILON_WCA_;

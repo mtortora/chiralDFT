@@ -17,7 +17,7 @@ public:
 	void Build(int) override;
 	void Tesselate(const Matrix3X<number>&);
 	
-	void Parse(std::mt19937_64&) override {}
+	void Parse(std::mt19937_64&, ArrayX<uint>&) override {}
 	
 private:
 	number L_X_;

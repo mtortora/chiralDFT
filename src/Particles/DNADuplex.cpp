@@ -154,7 +154,7 @@ void DNADuplex<number>::Build(int mpi_rank)
     this->R_INTEG = 2*Backbones.colwise().norm().maxCoeff() + R_CUT_;
     this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
     
-    this->V0      = ((float)N_NUCL) / ((float)N_CONF) * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
+    this->V0      = ((number)N_NUCL) / ((number)N_CONF) * (V_BCK_ + (V_CYT_+V_GUA_)/2.);
     this->V_EFF   = this->V0;
 }
 

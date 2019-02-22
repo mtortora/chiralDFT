@@ -16,10 +16,19 @@ public:
 	uint N_BCK;
 	uint idx_conf;
 
-	void Parse(std::mt19937_64& rng_engine) override
+	// Build bootstrap index map
+	ArrayX<uint> BootstrapMap(std::mt19937_64& rng_engine) override
 	{
-		idx_conf   = rng_engine() % N_CONF_;
-		this->Hull = &(this->BVH).Forest[idx_conf];
+		return ArrayX<uint>::NullaryExpr(N_CONF_, [&]() {return rng_engine() % N_CONF_;});
+	}
+	
+	// Load random configuration from BHierarchy->Forest
+	void Parse(std::mt19937_64& rng_engine, ArrayX<uint>& BMap) override
+	{
+		idx_conf = rng_engine() % N_CONF_;
+		idx_conf = BMap[idx_conf];
+		
+		this->Hull    = &(this->BVH).Forest[idx_conf];
 	}
 	
 	void Build(int) override;

@@ -42,11 +42,14 @@ private:
 
     Vector3<number> R_cm_;
     
-    ArrayX<number>  X_grid_;
-    ArrayX<number>  Y_grid_;
-    ArrayX<number>  Z_grid_;
+    ArrayX<number> X_grid_;
+    ArrayX<number> Y_grid_;
+    ArrayX<number> Z_grid_;
     
-    ArrayX<uint>    Exc_grid_;
+    ArrayX<uint> Exc_grid_;
+
+    ArrayX<uint> Bootstrap_map1_;
+    ArrayX<uint> Bootstrap_map2_;
 
     std::mt19937_64 rng_engine_;
     std::uniform_real_distribution<number> rng_distrib_{0., 1.};

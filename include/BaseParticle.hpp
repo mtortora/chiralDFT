@@ -107,8 +107,11 @@ public:
         Hull->Orientation  = Orientation * Hull->Orientation_p;
     }
 	
+    virtual ArrayX<uint> BootstrapMap(std::mt19937_64&) {return ArrayX<uint>::Zero(1);}
+
     virtual void Build(int) = 0;
-    virtual void Parse(std::mt19937_64&) {Hull = &BVH.Forest[0];}
+    virtual void Parse(std::mt19937_64&, ArrayX<uint>&) {Hull = &BVH.Forest[0];}
+    
     
 protected:
     int id_;
