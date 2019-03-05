@@ -30,9 +30,19 @@ MCIntegrator<ParticleType, number>::MCIntegrator()
 template<template<typename number> class ParticleType, typename number>
 void MCIntegrator<ParticleType, number>::MCInit(int seed, int mpi_rank, int mpi_size)
 {
+    // Generate independant seeds for each thread
+    std::mt19937_64::result_type engine_seed = seed + mpi_rank;
+    
+    // Seed 64-bit Mersenne twister RNG engine
+    rng_engine_.seed(engine_seed);
+    
     // Build particle models
     Particle1_.Build(mpi_rank);
     Particle2_.Build(mpi_rank);
+    
+    // Build bootstrap index maps
+    Bootstrap_map1_  = Particle1_.BootstrapMap(rng_engine_);
+    Bootstrap_map2_  = Particle2_.BootstrapMap(rng_engine_);
     
     // Number of MC steps to be performed by each thread
     N_PER_PROC_      = N_MC / mpi_size;
@@ -43,16 +53,6 @@ void MCIntegrator<ParticleType, number>::MCInit(int seed, int mpi_rank, int mpi_
     
     IManager.V0      = Particle1_.V0;
     IManager.V_EFF   = Particle1_.V_EFF;
-
-    // Generate independant seeds for each thread
-    std::mt19937_64::result_type engine_seed = seed + mpi_rank;
-    
-    // Seed 64-bit Mersenne twister RNG engine
-    rng_engine_.seed(engine_seed);
-    
-    // Build bootstrap index maps
-    Bootstrap_map1_ = Particle1_.BootstrapMap(rng_engine_);
-    Bootstrap_map2_ = Particle2_.BootstrapMap(rng_engine_);
 }
 
 // ============================

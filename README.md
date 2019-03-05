@@ -4,7 +4,7 @@ This package contains a massively-parallel hybrid Density Functional Theory/Mont
 
 It includes a high-performance and versatile implementation of the algorithm introduced by [Belli *et al.*](http://dx.doi.org/10.1103/PhysRevE.90.020503), with additional support for [Straley’s perturbative approach](http://dx.doi.org/10.1103/PhysRevA.14.1835). The full details of the model and underlying theory can be found [here](http://dx.doi.org/10.1063/1.4982934), and its extension to flexible particle models is extensively discussed [here](http://dx.doi.org/10.1080/00268976.2018.1464226).
 
-It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex particle models. The details and performance of the procedure are presented [here](http://dx.doi.org/10.1063/1.5002666).
+It further contains an original bounding volume hierarchy based on principal component analysis, efficiently generating and traversing binary trees of bounding structures to speed up energy calculations by several orders of magnitude for complex, highly-anisotropic particle models. The details and performance of the procedure are presented [here](http://dx.doi.org/10.1063/1.5002666).
 
 An implementation of the [RAPID](http://dx.doi.org/10.1145/237170.237244) collision detection library, developed by Manocha *et al.*, is also provided for efficient overlap queries between sets of complex triangle meshes in hard-body systems.
 
