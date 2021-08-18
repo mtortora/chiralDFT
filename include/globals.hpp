@@ -117,6 +117,7 @@ typedef unsigned long long int ullint;
 template<typename T> using Matrix22 = Eigen::Matrix<T, 2, 2>;
 template<typename T> using Matrix33 = Eigen::Matrix<T, 3, 3>;
 template<typename T> using Matrix3X = Eigen::Matrix<T, 3, Eigen::Dynamic>;
+template<typename T> using Matrix5X = Eigen::Matrix<T, 5, Eigen::Dynamic>;
 template<typename T> using MatrixXX = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 template<typename T> using Vector2  = Eigen::Matrix<T, 2, 1>;

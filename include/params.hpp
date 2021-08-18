@@ -6,8 +6,8 @@
 /* Simulation options */
 // ============================
 
-// Particle type to be used - implemented: BentCore, DNADuplex, FlexibleChain, FlexibleHelix, Helix, FlexiblePatchyRod, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedPentagon, TwistedHexagon
-#define MESOGEN     DNADuplex
+// Particle type to be used - implemented: BentCore, DNADuplex, FDGromos, FlexibleChain, FlexibleHelix, Helix, FlexiblePatchyRod, PatchyRod, ThreadedRod, TriangularPrism, TwistedCuboid, TwistedPentagon, TwistedHexagon
+#define MESOGEN     FDGromos
 
 // Full run switch - MODE_PERT for perturbative run, MODE_FULL for full run or MODE_EXC for excluded volume (BentCore, Helix)
 #define MODE_SIM    MODE_PERT
@@ -19,7 +19,7 @@
 #define MODE_DH     DH_OXDNA
 
 // Bounding tree hierarchy mode - set to TREE_OB for Oriented Bounding Box or TREE_SC for SpheroCylinder
-#define MODE_TREE   TREE_OB
+#define MODE_TREE   TREE_SC
 
 // Use RAPID library for collision queries - only implemented for TriangularPrism, TwistedCuboid, TwistedPentagon and TwistedHexagon particle templates
 #define USE_RAPID   0
@@ -33,15 +33,15 @@
 // ============================
 
 // Maximum number of Monte-Carlo steps for excluded volume integration
-#define N_MC        1E14
+#define N_MC        1E13
 
-// Soft interaction parameters - only relevant for the DNADuplex template
+// Soft interaction parameters - only relevant for the DNADuplex and FDGromos templates
 #define T_ABS       293.16
-#define C_SALT      0.26
+#define C_SALT      0.11
 
 // Set maximum range of concentrations to be simulated
 #define ETA_MIN     0.01
-#define ETA_MAX     0.27
+#define ETA_MAX     0.15
 
 // Set inverse pitch grid range
 #define Q_MIN      -0.0002

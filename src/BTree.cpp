@@ -66,13 +66,28 @@ void BTree<number>::RecursiveAllocate(BNode<number>* Node)
 template<typename number>
 void BTree<number>::RecursiveDeallocate(BNode<number>* Node)
 {
-    if ( Node->is_leaf ) delete Node->Vertices;
+    if ( Node->is_leaf )
+    {
+        delete Node->Vertices;
+        delete Node->Vtypes;
+    }
+    
     else
     {
-        if ( Node->NodeI->is_leaf ) delete Node->NodeI->Vertices;
+        if ( Node->NodeI->is_leaf )
+        {
+            delete Node->NodeI->Vertices;
+            delete Node->NodeI->Vtypes;
+        }
+        
         else RecursiveDeallocate(Node->NodeI);
 
-        if ( Node->NodeS->is_leaf ) delete Node->NodeS->Vertices;
+        if ( Node->NodeS->is_leaf )
+        {
+            delete Node->NodeS->Vertices;
+            delete Node->NodeS->Vtypes;
+        }
+        
         else RecursiveDeallocate(Node->NodeS);
     }
 }
@@ -100,27 +115,36 @@ void BTree<number>::Allocate(uint num_vert)
 /* Single-tree constructor */
 // ============================
 template<typename number>
-void BTree<number>::Build(const Matrix3X<number>& Vertices_, number range, uint m_)
+void BTree<number>::Build(const Matrix3X<number>& Vertices_, const ArrayX<number>& Charges_, const ArrayX<uint>& Types_, number range, uint m_)
 {
     this->m       = m_;
     uint num_vert = Vertices_.cols();
 
     Allocate(num_vert);
-    RecursiveBuild(this, Vertices_, range);
+    RecursiveBuild(this, Vertices_, Charges_, Types_, range);
 }
 
 // ============================
 /*  Specialised leaf constructor */
 // ============================
 template<typename number>
-void BTree<number>::BuildLeaf(BNode<number>* Node, const Matrix3X<number>& Vertices_)
+void BTree<number>::BuildLeaf(BNode<number>* Node, const Matrix3X<number>& Vertices_, const ArrayX<number>& Charges_, const ArrayX<uint>& Types_)
 {
     Node->is_leaf  = true;
+    
     Node->Vertices = new(std::nothrow) Matrix3X<number>;
     
-    if ( !Node->Vertices ) throw std::runtime_error("Vertex memory allocation failed");
+    Node->Vcharges = new(std::nothrow) ArrayX<number>;
+    Node->Vtypes = new(std::nothrow) ArrayX<uint>;
     
+    if ( !Node->Vertices ) throw std::runtime_error("Vertex memory allocation failed");
+    if ( !Node->Vtypes ) throw std::runtime_error("Type memory allocation failed");
+
     *Node->Vertices = Vertices_;
+    
+    *Node->Vcharges = Charges_;
+    *Node->Vtypes = Types_;
+    
     vert_alloced   += Vertices_.cols();
     
     leaves_built++;
@@ -130,7 +154,7 @@ void BTree<number>::BuildLeaf(BNode<number>* Node, const Matrix3X<number>& Verti
 /* Build bounding volume hierarchy */
 // ============================
 template<typename number>
-void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& Vertices_in, number range)
+void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& Vertices_in, const ArrayX<number>& Charges_in, const ArrayX<uint>& Types_in, number range)
 {
     // Vertices are expressed in the parent frame
     Vector3<number>  Center_of_mass = Vertices_in.rowwise().mean();
@@ -189,7 +213,7 @@ void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& 
     // Leaf nodes are allocated if maximum depth is reached, or if the number of enclosed vertices is < m
     if ( (Node->idx_depth == max_depth) || (Vertices_in.cols() < m) )
     {
-        BuildLeaf(Node, Vertices_new);
+        BuildLeaf(Node, Vertices_new, Charges_in, Types_in);
         return;
     }
 
@@ -206,14 +230,37 @@ void BTree<number>::RecursiveBuild(BNode<number>* Node, const Matrix3X<number>& 
     Matrix3X<number> Vertices_inf(3, num_inf);
     Matrix3X<number> Vertices_sup(3, num_sup);
 
+    ArrayX<number> Charges_inf(num_inf);
+    ArrayX<number> Charges_sup(num_sup);
+    
+    ArrayX<uint> Types_inf(num_inf);
+    ArrayX<uint> Types_sup(num_sup);
+    
     for ( uint idx_vtx = 0; idx_vtx < Vertices_in.cols(); ++idx_vtx )
     {
-        if ( Vertex_inf(idx_vtx) ) Vertices_inf.col(ctr_inf++) = Vertices_new.col(idx_vtx);
-        if ( Vertex_sup(idx_vtx) ) Vertices_sup.col(ctr_sup++) = Vertices_new.col(idx_vtx);
+        if ( Vertex_inf(idx_vtx) )
+        {
+            Vertices_inf.col(ctr_inf) = Vertices_new.col(idx_vtx);
+            
+            Charges_inf(ctr_inf) = Charges_in(idx_vtx);
+            Types_inf(ctr_inf) = Types_in(idx_vtx);
+
+            ++ctr_inf;
+        }
+        
+        if ( Vertex_sup(idx_vtx) )
+        {
+            Vertices_sup.col(ctr_sup) = Vertices_new.col(idx_vtx);
+            
+            Charges_sup(ctr_sup) = Charges_in(idx_vtx);
+            Types_sup(ctr_sup) = Types_in(idx_vtx);
+
+            ++ctr_sup;
+        }
     }
     
-    RecursiveBuild(Node->NodeI, Vertices_inf, range);
-    RecursiveBuild(Node->NodeS, Vertices_sup, range);
+    RecursiveBuild(Node->NodeI, Vertices_inf, Charges_inf, Types_inf, range);
+    RecursiveBuild(Node->NodeS, Vertices_sup, Charges_sup, Types_sup, range);
     
     return;
 }

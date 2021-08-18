@@ -57,6 +57,9 @@ struct BNode
     
     // Enclosed vertices - only allocated for leaf nodes
     Matrix3X<number>* Vertices;
+    
+    ArrayX<number>* Vcharges;
+    ArrayX<uint>* Vtypes;
 
     BNode<number>& operator=(const BNode<number>& Node)
     {

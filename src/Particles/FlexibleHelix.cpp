@@ -22,7 +22,7 @@ FlexibleHelix<number>::FlexibleHelix()
 	this->N_DELTA_L = 2;
 	
 	// Bead diameter
-	D_HARD_         = 1.  * this->SIGMA_R;
+	D_HARD_ = 1. * this->SIGMA_R;
 }
 
 // ============================
@@ -35,7 +35,9 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 	uint N_TOT;
 	uint N_CONF;
 	
-	ArrayX<uint>     Sizes;
+	ArrayX<uint>     Sizes, Types;
+	ArrayX<number>   Charges;
+
 	Matrix3X<number> Backbones;
 	
 	// Load configurations from trajectory files on master thread
@@ -44,7 +46,7 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 		std::string DATA_PATH   = __DATA_PATH;
 		std::string filename_in = DATA_PATH + "/trajectory.in";
 		
-		Utils<number>::Load(filename_in, &Backbones, &Sizes);
+		Utils<number>::Load(filename_in, &Backbones, &Charges, &Types, &Sizes);
 		
 		if ( Backbones.size() == 0 ) throw std::runtime_error("Unreadable input trajectory file");
 		
@@ -63,11 +65,17 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 	
 	if ( mpi_rank != MPI_MASTER )
 	{
-		Sizes.resize(N_CONF);
+		Types.resize(N_TOT);
+		Charges.resize(N_TOT);
 		Backbones.resize(3, N_TOT);
+
+		Sizes.resize(N_CONF);
 	}
 	
+	MPI_Bcast(Types.data(),     Types.size(),     Utils<uint>()  .MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	MPI_Bcast(Sizes.data(),     Sizes.size(),     Utils<uint>()  .MPI_type, MPI_MASTER, MPI_COMM_WORLD);
+	
+	MPI_Bcast(Charges.data(), Charges.size(), Utils<number>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	MPI_Bcast(Backbones.data(), Backbones.size(), Utils<number>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	
 	number d_cc = 0.;
@@ -96,7 +104,7 @@ void FlexibleHelix<number>::Build(int mpi_rank)
 	d_cc /= (number)(N_TOT-N_CONF);
 	
 	// Build bounding volume hierarchy
-	this->BVH.Build(Backbones, D_HARD_, Sizes);
+	this->BVH.Build(Backbones, Charges, Types, D_HARD_, Sizes);
 	
 	// Print simulation parameters
 	if ( this->id_ == 1 )

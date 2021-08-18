@@ -47,14 +47,17 @@ void FlexiblePatchyRod<number>::Build(int mpi_rank)
     {
         ArrayX<uint> Sizes_bck;
         ArrayX<uint> Sizes_ptc;
-        
+		ArrayX<uint> Types;
+		
+		ArrayX<number> Charges;
+
         std::string DATA_PATH = __DATA_PATH;
         
         std::string file_bck  = DATA_PATH + "/bck.in";
         std::string file_ptc  = DATA_PATH + "/ptc.in";
 
-        Utils<number>::Load(file_bck, &Backbones, &Sizes_bck);
-        Utils<number>::Load(file_ptc, &Patches,   &Sizes_ptc);
+        Utils<number>::Load(file_bck, &Backbones, &Charges, &Types, &Sizes_bck);
+        Utils<number>::Load(file_ptc, &Patches, &Charges, &Types, &Sizes_ptc);
 
         if ( (Backbones.size() == 0) || (Patches.size() == 0) ) throw std::runtime_error("Unreadable input file(s)");
         if ( (Sizes_bck != Sizes_ptc).all() ) throw std::runtime_error("Incompatible backbone/patch input files");

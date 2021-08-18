@@ -17,6 +17,7 @@
 		9CFA13201C25AFCE00FA22D1 /* SimManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */; };
 		B714FE061E5C8809009C274C /* TwistedPentagon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B714FE051E5C8809009C274C /* TwistedPentagon.cpp */; };
 		B733A8201D40C46C001575D7 /* BTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B733A81F1D40C46C001575D7 /* BTree.cpp */; };
+		B73B90EA266FB3CB00EE9FD2 /* FDGromos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B73B90E9266FB3CB00EE9FD2 /* FDGromos.cpp */; };
 		B74BF8681CE4CF0800B77484 /* ThreadedRod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */; };
 		B75D74B41F1F99EA0034C4FD /* FlexibleHelix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */; };
 		B76070341EEE9E7300847679 /* libmpi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B76070331EEE9E7300847679 /* libmpi.dylib */; };
@@ -81,6 +82,12 @@
 		B733A81F1D40C46C001575D7 /* BTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BTree.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B733A8211D40C47A001575D7 /* BTree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BTree.hpp; path = include/BTree.hpp; sourceTree = SOURCE_ROOT; usesTabs = 0; };
 		B7379D3F1D4271B400AE6AC8 /* BNode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BNode.hpp; sourceTree = "<group>"; usesTabs = 0; };
+		B73B90E8266FB3BC00EE9FD2 /* FDGromos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FDGromos.hpp; sourceTree = "<group>"; };
+		B73B90E9266FB3CB00EE9FD2 /* FDGromos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FDGromos.cpp; sourceTree = "<group>"; };
+		B73B90EB2670B8F200EE9FD2 /* psmn_32.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = psmn_32.sh; sourceTree = "<group>"; };
+		B73B90EC267205C400EE9FD2 /* psmn_8.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = psmn_8.sh; sourceTree = "<group>"; };
+		B73B90ED2672066400EE9FD2 /* psmn_16.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = psmn_16.sh; sourceTree = "<group>"; };
+		B73B90EE2672672B00EE9FD2 /* psmn_128.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = psmn_128.sh; sourceTree = "<group>"; };
 		B74BF8671CE4CF0800B77484 /* ThreadedRod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadedRod.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B74BF8691CE4CF1E00B77484 /* ThreadedRod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadedRod.hpp; sourceTree = "<group>"; usesTabs = 0; };
 		B7509DB61D1B0E4F00524986 /* BaseParticle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseParticle.hpp; sourceTree = "<group>"; usesTabs = 0; };
@@ -153,6 +160,7 @@
 			children = (
 				9C0D08561C3AA0B00020EBAB /* BentCore.cpp */,
 				9CC252C71C7DD15D000A2685 /* DNADuplex.cpp */,
+				B73B90E9266FB3CB00EE9FD2 /* FDGromos.cpp */,
 				B7F0D4681F5F370E00EF9CEB /* FlexibleChain.cpp */,
 				B75D74B31F1F99EA0034C4FD /* FlexibleHelix.cpp */,
 				B7E020031FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp */,
@@ -172,6 +180,7 @@
 			children = (
 				9C0D085D1C3AA0BE0020EBAB /* BentCore.hpp */,
 				9CC252C61C7DD0B6000A2685 /* DNADuplex.hpp */,
+				B73B90E8266FB3BC00EE9FD2 /* FDGromos.hpp */,
 				B7F0D4671F5F36FD00EF9CEB /* FlexibleChain.hpp */,
 				B75D74B51F1F99F80034C4FD /* FlexibleHelix.hpp */,
 				B7E020051FE7FC3600E4E768 /* FlexiblePatchyRod.hpp */,
@@ -257,6 +266,10 @@
 			children = (
 				9C85585F1C4066E500FADF19 /* archer.sh */,
 				9C512E0D1C22B91B0099AE31 /* arcus_b.sh */,
+				B73B90EC267205C400EE9FD2 /* psmn_8.sh */,
+				B73B90ED2672066400EE9FD2 /* psmn_16.sh */,
+				B73B90EB2670B8F200EE9FD2 /* psmn_32.sh */,
+				B73B90EE2672672B00EE9FD2 /* psmn_128.sh */,
 				B76EEC141E9D24A90044E99B /* thomas.sh */,
 				9C19E7F21CA1B8260006F51A /* plots */,
 				9C19E7F81CA1B8300006F51A /* processing */,
@@ -338,6 +351,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 9C512DEB1C22B8090099AE31;
@@ -367,6 +381,7 @@
 				B779B1101F2F3A6C0052CA8E /* TriangularPrism.cpp in Sources */,
 				9CC252C91C7DD500000A2685 /* DNADuplex.cpp in Sources */,
 				B7E020041FE7FC2A00E4E768 /* FlexiblePatchyRod.cpp in Sources */,
+				B73B90EA266FB3CB00EE9FD2 /* FDGromos.cpp in Sources */,
 				B733A8201D40C46C001575D7 /* BTree.cpp in Sources */,
 				B7CFC22420821BF500D1274F /* TwistedHexagon.cpp in Sources */,
 				B7F693DF1D4715E7007E6CBD /* Utils.cpp in Sources */,
@@ -476,11 +491,13 @@
 					/usr/local/include,
 					$SRCROOT/include,
 					$SRCROOT/lib,
+					/Users/mtortora/apps/homebrew/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					$SRCROOT/lib,
 					"$(PROJECT_DIR)/lib",
+					/Users/mtortora/apps/homebrew/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",
@@ -505,11 +522,13 @@
 					/usr/local/include,
 					$SRCROOT/include,
 					$SRCROOT/lib,
+					/Users/mtortora/apps/homebrew/include,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					$SRCROOT/lib,
 					"$(PROJECT_DIR)/lib",
+					/Users/mtortora/apps/homebrew/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D__DPATH__=$SRCROOT/data",

@@ -21,7 +21,7 @@ public:
     uint vert_alloced;
     uint nodes_alloced;
     
-    void Build(const Matrix3X<number>&, number, uint);
+    void Build(const Matrix3X<number>&, const ArrayX<number>&, const ArrayX<uint>&, number, uint);
     
 private:
     uint max_depth;
@@ -34,9 +34,9 @@ private:
     // Recursive allocators and constructors
 	void RecursiveAllocate(BNode<number>*);
 	void RecursiveDeallocate(BNode<number>*);
-    void RecursiveBuild(BNode<number>*, const Matrix3X<number>&, number);
+    void RecursiveBuild(BNode<number>*, const Matrix3X<number>&, const ArrayX<number>&, const ArrayX<uint>&, number);
 
-    void BuildLeaf(BNode<number>*, const Matrix3X<number>&);
+    void BuildLeaf(BNode<number>*, const Matrix3X<number>&, const ArrayX<number>&, const ArrayX<uint>&);
 };
 
 #endif

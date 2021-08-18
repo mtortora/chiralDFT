@@ -52,7 +52,9 @@ void FlexibleChain<number>::Build(int mpi_rank)
 	uint N_TOT;
 	uint N_CONF;
 
-	ArrayX<uint>     Sizes;
+	ArrayX<uint>     Sizes, Types;
+	ArrayX<number>   Charges;
+
 	Matrix3X<number> Backbones;
 	
 	// Load configurations from trajectory files on master thread
@@ -61,8 +63,8 @@ void FlexibleChain<number>::Build(int mpi_rank)
 		std::string DATA_PATH   = __DATA_PATH;
 		std::string filename_in = DATA_PATH + "/trajectory.in";
 		
-		Utils<number>::Load(filename_in, &Backbones, &Sizes);
-		
+		Utils<number>::Load(filename_in, &Backbones, &Charges, &Types, &Sizes);
+
 		if ( Backbones.size() == 0 ) throw std::runtime_error("Unreadable input trajectory file");
 		
 		N_S    = Sizes(0);
@@ -80,11 +82,17 @@ void FlexibleChain<number>::Build(int mpi_rank)
 	
 	if ( mpi_rank != MPI_MASTER )
 	{
-		Sizes.resize(N_CONF);
+		Types.resize(N_TOT);
+		Charges.resize(N_TOT);
 		Backbones.resize(3, N_TOT);
+
+		Sizes.resize(N_CONF);
 	}
 	
+	MPI_Bcast(Types.data(),     Types.size(),     Utils<uint>()  .MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	MPI_Bcast(Sizes.data(),     Sizes.size(),     Utils<uint>()  .MPI_type, MPI_MASTER, MPI_COMM_WORLD);
+	
+	MPI_Bcast(Charges.data(), Charges.size(), Utils<number>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	MPI_Bcast(Backbones.data(), Backbones.size(), Utils<number>().MPI_type, MPI_MASTER, MPI_COMM_WORLD);
 	
 	number d_cc = 0.;
@@ -113,7 +121,7 @@ void FlexibleChain<number>::Build(int mpi_rank)
 	d_cc /= (number)(N_TOT-N_CONF);
 	
 	// Build bounding volume hierarchy
-	this->BVH.Build(Backbones, R_CUT_, Sizes);
+	this->BVH.Build(Backbones, Charges, Types, R_CUT_, Sizes);
 	
 	// Print simulation parameters
 	if ( this->id_ == 1 )
@@ -129,7 +137,7 @@ void FlexibleChain<number>::Build(int mpi_rank)
 	this->V_INTEG = CUB(2.*this->R_INTEG) * 16.*pow(PI, 6);
 	
 	this->V0      = PI/6.*CUB(this->SIGMA_R) * (1. + (N_S-1.)/2. * (3.*d_cc/this->SIGMA_R - CUB(d_cc/this->SIGMA_R)));
-	this->V_EFF   = PI/6.*CUB(this->SIGMA_R) * (1. + (N_S-1.) * (3.*d_cc/this->SIGMA_R - CUB(d_cc/this->SIGMA_R)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*this->SIGMA_R))) * asin(d_cc/(2.*this->SIGMA_R))));
+	this->V_EFF   = PI/6.*CUB(this->SIGMA_R) * (1. + (N_S-1.) * (3.*d_cc/this->SIGMA_R - CUB(d_cc/this->SIGMA_R)/2. - 3.*sqrt(1.-SQR(d_cc/(2.*this->SIGMA_R))) * asin(d_cc/(2.*this->SIGMA_R))));	
 }
 
 template class FlexibleChain<float>;

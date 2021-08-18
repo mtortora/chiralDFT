@@ -239,7 +239,7 @@ Matrix33<number> Utils<number>::PCA(const Matrix3X<number>& Vertices_in)
 /* Configuration file parser with Eigen format conversion */
 // ============================
 template<typename number>
-void Utils<number>::Load(const std::string& filename, Matrix3X<number>* Vertices, ArrayX<uint>* Sizes)
+void Utils<number>::Load(const std::string& filename, Matrix3X<number>* Vertices, ArrayX<number>* Charges, ArrayX<uint>* Types, ArrayX<uint>* Sizes)
 {
     number coeff;
     
@@ -291,8 +291,14 @@ void Utils<number>::Load(const std::string& filename, Matrix3X<number>* Vertices
     
     if ( size_buffer.size() < 1 ) size_buffer.push_back(rows);
     
-    // Map std::vector to Matrix3X<number> in column-major default order
-    *Vertices = Matrix3X<number>::Map(&data_buffer[0], cols, rows);
+    // Map std::vector to Matrix3X<number> in column-major default order    
+    Matrix5X<number> Data = Matrix5X<number>::Map(&data_buffer[0], cols, rows);
+    
+    *Vertices = Data.block(1, 0, 3, rows);
+    
+    *Charges  = Data.block(4, 0, 1, rows).transpose();
+    *Types    = Data.block(0, 0, 1, rows).transpose().template cast<uint>();
+    
     *Sizes    = ArrayX<uint>::Map(&size_buffer[0], size_buffer.size());
 }
 

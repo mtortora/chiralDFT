@@ -5,6 +5,7 @@
 #include "Particles/BentCore.hpp"
 #include "Particles/DNADuplex.hpp"
 #include "Particles/FlexibleChain.hpp"
+#include "Particles/FDGromos.hpp"
 #include "Particles/FlexibleHelix.hpp"
 #include "Particles/FlexiblePatchyRod.hpp"
 #include "Particles/Helix.hpp"
@@ -27,7 +28,7 @@ struct InteractionFactory<BentCore<number>, number>: public BaseInteraction<Inte
 {
     number MayerInteraction(const Vector3<number>&, BentCore<number>*, BentCore<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->D_HARD_);}
 };
 
 
@@ -37,7 +38,7 @@ struct InteractionFactory<DNADuplex<number>, number>: public BaseInteraction<Int
 {
     number MayerInteraction(const Vector3<number>&, DNADuplex<number>*, DNADuplex<number>*);
     
-    inline number PairInteraction(number r)
+    inline number PairInteraction(number r, number, number, uint, uint)
     {
         if ( USE_DH )
         {
@@ -53,13 +54,41 @@ private:
 };
 
 
+// FDGromos
+template<typename number>
+struct InteractionFactory<FDGromos<number>, number>: public BaseInteraction<InteractionFactory<FDGromos<number>, number>, number>, FDGromos<number>
+{
+    number MayerInteraction(const Vector3<number>&, FDGromos<number>*, FDGromos<number>*);
+    
+    inline number PairInteraction(number r, number c1, number c2, uint i1, uint i2)
+    {
+        number energy(0.);
+        
+        if ( (i1 < 12) && (i2 < 12) )
+            energy += LJ126_(r, this->C6[i1][i2], this->C12[i1][i2]);
+        
+        if ( USE_DH )
+        {
+            if ( (c1 != 0.) && (c2 != 0.) )
+                energy += ReactionField_(r, c1, c2);
+        }
+        
+        return energy;
+    }
+    
+private:
+    number LJ126_(number, number, number);
+    number ReactionField_(number, number, number);
+};
+
+
 // FlexibleChain
 template<typename number>
 struct InteractionFactory<FlexibleChain<number>, number>: public BaseInteraction<InteractionFactory<FlexibleChain<number>, number>, number>, FlexibleChain<number>
 {
     number MayerInteraction(const Vector3<number>&, FlexibleChain<number>*, FlexibleChain<number>*);
     
-    inline number PairInteraction(number r)
+    inline number PairInteraction(number r, number, number, uint, uint)
     {
         if ( USE_DH )
         {
@@ -81,7 +110,7 @@ struct InteractionFactory<FlexibleHelix<number>, number>: public BaseInteraction
 {
     number MayerInteraction(const Vector3<number>&, FlexibleHelix<number>*, FlexibleHelix<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->D_HARD_);}
 };
 
 
@@ -91,7 +120,7 @@ struct InteractionFactory<Helix<number>, number>: public BaseInteraction<Interac
 {
     number MayerInteraction(const Vector3<number>&, Helix<number>*, Helix<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->D_HARD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->D_HARD_);}
 };
 
 
@@ -139,7 +168,7 @@ struct InteractionFactory<TwistedCuboid<number>, number>: public BaseInteraction
 {
     number MayerInteraction(const Vector3<number>&, TwistedCuboid<number>*, TwistedCuboid<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->R_THRESHOLD_);}
 };
 
 
@@ -149,7 +178,7 @@ struct InteractionFactory<TwistedHexagon<number>, number>: public BaseInteractio
 {
     number MayerInteraction(const Vector3<number>&, TwistedHexagon<number>*, TwistedHexagon<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->R_THRESHOLD_);}
 };
 
 
@@ -159,7 +188,7 @@ struct InteractionFactory<TwistedPentagon<number>, number>: public BaseInteracti
 {
     number MayerInteraction(const Vector3<number>&, TwistedPentagon<number>*, TwistedPentagon<number>*);
     
-    inline number PairInteraction(number r) {return (r < this->R_THRESHOLD_);}
+    inline number PairInteraction(number r, number, number, uint, uint) {return (r < this->R_THRESHOLD_);}
 };
 
 #endif

@@ -114,9 +114,12 @@ void BentCore<number>::Build(int mpi_rank)
     file_wireframe.close();
     
     Backbone = Backbone_;
+    
+    ArrayX<number> Charges = ArrayX<number>::Zero(Backbone.cols());
+    ArrayX<uint> Types = ArrayX<uint>::Zero(Backbone.cols());
 
     // Build bounding volume hierarchy
-    this->BVH.Build(Backbone, D_HARD_);
+    this->BVH.Build(Backbone, Charges, Types, D_HARD_);
     
     if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
 }

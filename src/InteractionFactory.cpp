@@ -118,6 +118,68 @@ number InteractionFactory<DNADuplex<number>, number>::MayerInteraction(const Vec
 
 
 /* ************************* */
+/* FDGromos */
+/* ************************* */
+
+// ============================
+/* LJ with abrupt cutoff */
+// ============================
+
+template<typename number>
+number InteractionFactory<FDGromos<number>, number>::LJ126_(number r, number c6_, number c12_)
+{
+    number energy(0.);
+        
+    if ( r < this->R_CUT_ )
+    {
+        number r6 = SQR(CUB(r));
+        energy    = c12_/SQR(r6) - c6_/r6;
+    }
+        
+    return energy;
+}
+
+// ============================
+/* Reaction field electrostatic potential */
+// ============================
+template<typename number>
+number InteractionFactory<FDGromos<number>, number>::ReactionField_(number r, number q1, number q2)
+{
+    number energy(0.);
+    
+    if ( r < this->R_CUT_ )
+    {
+        number e_coulomb = 1./r;
+        number e_rf = -0.5 * this->C_RF_ * SQR(r) / CUB(this->R_CUT_);
+        number e_bound = (0.5 * this->C_RF_-1) / this->R_CUT_;
+        
+        energy = this->DH_PREFACTOR_ * q1*q2 * (e_coulomb+e_rf+e_bound);
+    }
+    
+    return energy;
+}
+
+// ============================
+/* Mayer interaction function */
+// ============================
+template<typename number>
+number InteractionFactory<FDGromos<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
+                                                                      FDGromos<number>* Particle1,
+                                                                      FDGromos<number>* Particle2)
+{
+    number energy(0.);
+    
+    // Work out pairwise interaction energies recursively
+    this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
+    
+    return energy > 0. ? 1. - exp(-energy) : 0.;
+}
+
+
+// ============================
+
+
+/* ************************* */
 /* FlexibleChain */
 /* ************************* */
 
@@ -166,7 +228,8 @@ number InteractionFactory<FlexibleChain<number>, number>::DebyeHuckel_(number r)
 // ============================
 template<typename number>
 number InteractionFactory<FlexibleChain<number>, number>::MayerInteraction(const Vector3<number>& R_cm,
-                                                                           FlexibleChain<number>* Particle1, FlexibleChain<number>* Particle2)
+                                                                           FlexibleChain<number>* Particle1,
+                                                                           FlexibleChain<number>* Particle2)
 {
     number energy(0.);
     

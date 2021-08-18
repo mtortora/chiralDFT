@@ -19,7 +19,7 @@ struct Utils
     
     static Matrix33<number> PCA(const Matrix3X<number>&);
 
-    static void Load(const std::string&, Matrix3X<number>*, ArrayX<uint>*);
+    static void Load(const std::string&, Matrix3X<number>*, ArrayX<number>*, ArrayX<uint>*, ArrayX<uint>*);
 };
 
 #endif

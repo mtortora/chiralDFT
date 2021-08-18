@@ -172,8 +172,11 @@ void TwistedCuboid<number>::Build(int mpi_rank)
     // Build bounding volume hierarchy
     else
     {
+        ArrayX<uint> Types = ArrayX<uint>::Zero(Wireframe.cols());
+        ArrayX<number> Charges = ArrayX<number>::Zero(Backbone.cols());
+
         // Build bounding volume hierarchy
-        this->BVH.Build(Wireframe, R_THRESHOLD_);
+        this->BVH.Build(Wireframe, Charges, Types, R_THRESHOLD_);
         
         if ( this->id_ == 1 ) this->BVH.PrintBuildInfo();
     }

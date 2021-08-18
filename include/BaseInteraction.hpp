@@ -87,13 +87,19 @@ struct BaseInteraction
         
         for ( uint idx_vtx1 = 0; idx_vtx1 < Voxel1.cols() && energy_ <= cutoff-energy; ++idx_vtx1 )
         {
+            number charge1 = (*Node1->Vcharges)(idx_vtx1);
+            uint type1 = (*Node1->Vtypes)(idx_vtx1);
+            
             for ( uint idx_vtx2 = 0; idx_vtx2 < Voxel2.cols() && energy_ <= cutoff-energy; ++idx_vtx2 )
             {
+                number charge2 = (*Node2->Vcharges)(idx_vtx2);
+                uint type2 = (*Node2->Vtypes)(idx_vtx2);
+
                 Vector3<number> R_sep = R_cm + Voxel2.col(idx_vtx2) - Voxel1.col(idx_vtx1);
                 number norm           = R_sep.norm();
                 
                 // Significantly faster than a direct virtual function call
-                energy_ += static_cast<Interaction*>(this)->PairInteraction(norm);
+                energy_ += static_cast<Interaction*>(this)->PairInteraction(norm, charge1, charge2, type1, type2);
             }
         }
         

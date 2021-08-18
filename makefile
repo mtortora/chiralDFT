@@ -10,7 +10,7 @@ LD          := mpic++
 LOCAL_PTH   := /usr/local
 EIGEN_PTH   := /home/cluster_thermo/ptch0350
 #EIGEN_PTH   := /home/e552/e552/mmct
-MPICC_PTH   := /system/software/arcus-b/lib/mpi/mvapich2/2.1.0/gcc-5.4.0
+MPICC_PTH   := /Users/mtortora/apps/homebrew
 
 # Append mpic++ directories to the PATH environment variable
 export PATH := $(LOCAL_PTH)/bin:$(PATH)
@@ -21,7 +21,7 @@ TARGET      := chiraldft
 
 # Version control
 VSN_MAJ     := 4
-VSN_MIN     := 0
+VSN_MIN     := 1
 
 # Directories - sources, includes, objects, binaries, data and resources
 SRCDIR      := src
@@ -42,7 +42,7 @@ OBJEXT      := o
 
 # Flags, libraries and includes
 CXXFLAGS    := -Wno-logical-op-parentheses -Wno-deprecated -O3
-CFLAGS      := -std=c++0x -Werror -Wshadow -Wall -Wextra -msse4 -fno-common -fomit-frame-pointer -O3
+CFLAGS      := -std=c++0x -Werror -Wshadow -Wall -Wextra -msse4 -fno-common -fomit-frame-pointer -O3 -flto
 FPATHS      := -D__DPATH__=$(CURDIR)/$(DATDIR) -D__EIGDENSE__=$(CURDIR)/$(LIBDIR)/EigenDensePlugin.hpp
 FEXTRA      := -D__VERSION_MAJOR__=$(VSN_MAJ) -D__VERSION_MINOR__=$(VSN_MIN) -DNDEBUG
 INC         := -I$(INCDIR) -I$(LIBDIR) -isystem $(LOCAL_PTH)/include -isystem $(EIGEN_PTH)/include -isystem $(MPICC_PTH)/include
@@ -67,11 +67,11 @@ all: resources $(TARGET)
 
 # Local run
 run: cleandat all
-	@mpirun -np 8 $(TARGETDIR)/$(TARGET)
+	@mpirun -np 4 $(TARGETDIR)/$(TARGET)
 
 # Background run
 nrun: cleandat all
-	@nohup mpirun -np 8 $(TARGETDIR)/$(TARGET) > $(DATDIR)/log.$(DATEXT)&
+	@nohup mpirun -np 4 $(TARGETDIR)/$(TARGET) > $(DATDIR)/log.$(DATEXT)&
 
 # Distributed run
 submit: cleandat all

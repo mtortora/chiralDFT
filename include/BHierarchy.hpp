@@ -14,8 +14,8 @@ public:
 	std::vector<BTree<number> > Forest;
 	
 	// Hierarchy constructors
-	void Build(const Matrix3X<number>&, number);
-	void Build(const Matrix3X<number>&, number, const ArrayX<uint>&);
+	void Build(const Matrix3X<number>&, const ArrayX<number>&, const ArrayX<uint>&, number);
+	void Build(const Matrix3X<number>&, const ArrayX<number>&, const ArrayX<uint>&, number, const ArrayX<uint>&);
 	
 	// Performance can be optimised by fine-tuning m
 	inline void SetLeafParameter(uint m_=3) {this->m = fmax(3, m_);}
