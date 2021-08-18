@@ -21,7 +21,7 @@ TARGET      := chiraldft
 
 # Version control
 VSN_MAJ     := 4
-VSN_MIN     := 1
+VSN_MIN     := 2
 
 # Directories - sources, includes, objects, binaries, data and resources
 SRCDIR      := src
