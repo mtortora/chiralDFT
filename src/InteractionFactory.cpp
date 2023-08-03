@@ -132,8 +132,26 @@ number InteractionFactory<FDGromos<number>, number>::LJ126_(number r, number c6_
         
     if ( r < this->R_CUT_ )
     {
-        number r6 = SQR(CUB(r));
-        energy    = c12_/SQR(r6) - c6_/r6;
+        number ir6 = pow(1/r, 6);
+        energy    = c12_*SQR(ir6) - c6_*ir6;
+    }
+        
+    return energy;
+}
+
+// ============================
+/* WCA hard body potential */
+// ============================
+template<typename number>
+number InteractionFactory<FDGromos<number>, number>::WCA_(number r, number c6_, number c12_)
+{
+    number energy(0.);
+    number r_cut6 = 2*c12_/c6_;
+    
+    if ( r < pow(r_cut6, 1./6) )
+    {
+        number ir6 = pow(1/r, 6);
+        energy     = c12_ * (SQR(ir6) + 1/SQR(r_cut6)) - c6_*ir6;
     }
         
     return energy;
@@ -172,7 +190,7 @@ number InteractionFactory<FDGromos<number>, number>::MayerInteraction(const Vect
     // Work out pairwise interaction energies recursively
     this->RecursiveInteraction(R_cm, Particle1->Hull, Particle2->Hull, &energy, this->E_CUT_);
     
-    return energy > 0. ? 1. - exp(-energy) : 0.;
+    return energy > 0. ? (energy < this->E_CUT_ ? 1. - exp(-energy) : 1.) : 0.;
 }
 
 
@@ -193,7 +211,7 @@ number InteractionFactory<FlexibleChain<number>, number>::RepulsiveWCA_(number r
         
     if ( r < this->RC_WCA_ )
     {
-        number lj_part = SQR(CUB(this->SIGMA_R/r));
+        number lj_part = pow(this->SIGMA_R/r, 6);
         energy         = 4. * this->EPSILON_ * (SQR(lj_part) - lj_part) + this->EPSILON_;
     }
         

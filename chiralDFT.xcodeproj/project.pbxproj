@@ -76,6 +76,8 @@
 		9CFA131E1C25AFCE00FA22D1 /* SimManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SimManager.cpp; sourceTree = "<group>"; usesTabs = 0; };
 		B70AD6D31EE8AFE50018DF3F /* params.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = params.hpp; sourceTree = "<group>"; };
 		B70E9E001CCA58F8008A770B /* display_wireframe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = display_wireframe; sourceTree = "<group>"; };
+		B70EFE8B2A7C1B8E004100F4 /* BuildFromPQR.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = BuildFromPQR.py; sourceTree = "<group>"; };
+		B70EFE8C2A7C1B8E004100F4 /* BuildFromXYZ.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = BuildFromXYZ.py; sourceTree = "<group>"; };
 		B714FE051E5C8809009C274C /* TwistedPentagon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TwistedPentagon.cpp; sourceTree = "<group>"; };
 		B714FE071E5C8814009C274C /* TwistedPentagon.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TwistedPentagon.hpp; sourceTree = "<group>"; };
 		B733A81D1D3FB5D4001575D7 /* aggregate.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = aggregate.py; sourceTree = "<group>"; };
@@ -210,6 +212,8 @@
 		9C19E7F81CA1B8300006F51A /* processing */ = {
 			isa = PBXGroup;
 			children = (
+				B70EFE8B2A7C1B8E004100F4 /* BuildFromPQR.py */,
+				B70EFE8C2A7C1B8E004100F4 /* BuildFromXYZ.py */,
 				B733A81D1D3FB5D4001575D7 /* aggregate.py */,
 				9C19E7F91CA1B8300006F51A /* post_process.py */,
 				9C19E7FA1CA1B8300006F51A /* pre_process.py */,

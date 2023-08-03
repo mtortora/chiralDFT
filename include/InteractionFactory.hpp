@@ -65,7 +65,7 @@ struct InteractionFactory<FDGromos<number>, number>: public BaseInteraction<Inte
         number energy(0.);
         
         if ( (i1 < 12) && (i2 < 12) )
-            energy += LJ126_(r, this->C6[i1][i2], this->C12[i1][i2]);
+            energy += USE_DH ? LJ126_(r, this->C6[i1][i2], this->C12[i1][i2]) : WCA_(r, this->C6[i1][i2], this->C12[i1][i2]);
         
         if ( USE_DH )
         {
@@ -77,7 +77,9 @@ struct InteractionFactory<FDGromos<number>, number>: public BaseInteraction<Inte
     }
     
 private:
+    number WCA_(number, number, number);
     number LJ126_(number, number, number);
+    
     number ReactionField_(number, number, number);
 };
 

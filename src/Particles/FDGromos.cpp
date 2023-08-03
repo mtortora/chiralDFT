@@ -22,8 +22,8 @@ FDGromos<number>::FDGromos()
 	this->N_DELTA_L = 2;
 	
 	// Cutoff distance (in Angstroms)
-	R_CUT_  = 35.;
-	
+	R_CUT_  = USE_DH ? 35. : 0.;
+
 	// Cutoff energy (in units kT)
 	E_CUT_  = 20.;
 
@@ -236,6 +236,14 @@ FDGromos<number>::FDGromos()
 		{
 			C6[i][j] = SQR(C6[i][j]) * e_conv;
 			C12[i][j] = SQR(C12[i][j]) * e_conv;
+			
+			if ( !USE_DH )
+			{
+				number r_cut = pow(2*C12[i][j]/C6[i][j], 1./6);
+				
+				if ( r_cut > R_CUT_ )
+					R_CUT_ = r_cut;
+			}
 		}
 	}
 }
